@@ -21,6 +21,7 @@ import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.GithubOrganisation;
 import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.model.Projects;
+import io.fabric8.updatebot.support.Commands;
 import io.fabric8.utils.Filter;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHRepository;
@@ -42,13 +43,33 @@ public class Repositories {
 
 
     public static List<LocalRepository> cloneOrPullRepositories(Updater updater, Projects projects) throws IOException {
+        List<LocalRepository> repositories = findRepositories(updater, projects);
+        for (LocalRepository repository : repositories) {
+            cloneOrPull(repository);
+        }
+        return repositories;
+    }
 
+    private static void cloneOrPull(LocalRepository repository) {
+        File dir = repository.getDir();
+        File gitDir = new File(dir, ".git");
+        if (gitDir.exists()) {
+            LOG.info("Pulling: " + dir + " repo: " + repository.getCloneUrl());
+            Commands.runCommand(dir, "git", "pull");
+        } else {
+            File parentDir = dir.getParentFile();
+            parentDir.mkdirs();
+
+            LOG.info("Cloning: " + dir + " repo: " + repository.getCloneUrl());
+            Commands.runCommand(parentDir, "git", "clone", repository.getCloneUrl(), dir.getName());
+        }
+    }
+
+    protected static List<LocalRepository> findRepositories(Updater updater, Projects projects) throws IOException {
         File workDir = new File(updater.getWorkDir());
         workDir.mkdirs();
 
         Map<String, LocalRepository> map = new LinkedHashMap<>();
-        LOG.info("Cloning git repos to " + workDir);
-
         File gitHubDir = new File(workDir, "github");
         File gitDir = new File(workDir, "git");
 

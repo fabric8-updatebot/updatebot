@@ -73,7 +73,7 @@ public class Updater {
         File dir = repository.getDir();
         dir.getParentFile().mkdirs();
 
-        LOG.info("Cloning " + repository.getCloneUrl() + " to " + dir);
+        LOG.info("Updating: " + dir + " repo: " + repository.getCloneUrl());
     }
 
     public GitHub getGithub() throws IOException {
