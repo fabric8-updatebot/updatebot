@@ -13,18 +13,16 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot;
+package io.fabric8.updatebot.task;
+
+import io.fabric8.updatebot.repository.LocalRepository;
 
 /**
+ * An interface to represent some kind of update operation
  */
-public class EnvironmentVariables {
-    public static final String CONFIG_FILE = "UPDATEBOT_CONFIG_FILE";
-    public static final String WORK_DIR = "UPDATEBOT_WORK_DIR";
-
-    public static final String GITHUB_USER = "UPDATEBOT_GITHUB_USER";
-    public static final String GITHUB_PASSWORD = "UPDATEBOT_GITHUB_PASSWORD";
-    public static final String GITHUB_TOKEN = "UPDATEBOT_GITHUB_TOKEN";
-
-    public static final String PROJECT_URI = "UPDATEBOT_PROJECT_URI";
-    public static final String PROJECT_VERSION= "UPDATEBOT_PROJECT_VERSION";
+public interface Operation {
+    /**
+     * Applies a task to the local repository
+     */
+    void apply(LocalRepository repository);
 }

@@ -20,6 +20,8 @@ import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.updatebot.support.Systems;
+import io.fabric8.updatebot.task.Operation;
+import io.fabric8.updatebot.task.UpgradeVersion;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.slf4j.Logger;
@@ -43,6 +45,8 @@ public class Updater {
     private String githubUsername;
     private String githubPassword;
     private String githubToken;
+    private String updateProjectURI;
+    private String updateProjectVersion;
 
     public static void main(String[] args) {
         Updater updater = new Updater();
@@ -61,19 +65,23 @@ public class Updater {
     }
 
     public void run() throws IOException {
+        Operation operation = createOperation();
+
         Projects projects = loadProjects();
 
         List<LocalRepository> repositories = Repositories.cloneOrPullRepositories(this, projects);
         for (LocalRepository repository : repositories) {
-            updateRepository(repository);
+            updateRepository(repository, operation);
         }
     }
 
-    public void updateRepository(LocalRepository repository) {
+    public void updateRepository(LocalRepository repository, Operation operation) {
         File dir = repository.getDir();
         dir.getParentFile().mkdirs();
 
-        LOG.info("Updating: " + dir + " repo: " + repository.getCloneUrl());
+        LOG.info("Updating: " + dir + " repo: " + repository.getCloneUrl() + " with " + operation);
+
+        operation.apply(repository);
     }
 
     public GitHub getGithub() throws IOException {
@@ -154,11 +162,33 @@ public class Updater {
         this.githubToken = githubToken;
     }
 
+    public String getUpdateProjectURI() {
+        if (updateProjectURI == null) {
+            updateProjectURI = Systems.getConfigValue(EnvironmentVariables.PROJECT_URI);
+        }
+        return updateProjectURI;
+    }
+
+    public void setUpdateProjectURI(String updateProjectURI) {
+        this.updateProjectURI = updateProjectURI;
+    }
+
+    public String getUpdateProjectVersion() {
+        if (updateProjectVersion == null) {
+            updateProjectVersion = Systems.getConfigValue(EnvironmentVariables.PROJECT_VERSION);
+        }
+        return updateProjectVersion;
+    }
+
+    public void setUpdateProjectVersion(String updateProjectVersion) {
+        this.updateProjectVersion = updateProjectVersion;
+    }
+
 
     // Implementation
     //-------------------------------------------------------------------------
 
-    private Projects loadProjects() throws IOException {
+    protected Projects loadProjects() throws IOException {
         String configFile = getConfigFile();
         File file = new File(configFile);
         if (!file.isFile() || !file.exists()) {
@@ -166,5 +196,23 @@ public class Updater {
         }
         return loadYaml(file, Projects.class);
     }
+
+
+    protected Operation createOperation() {
+        String projectURI = getUpdateProjectURI();
+        String projectVersion = getUpdateProjectVersion();
+        if (Strings.notEmpty(projectURI) && Strings.notEmpty(projectVersion) ) {
+            return new UpgradeVersion(this, projectURI, projectVersion);
+        }
+        if (Strings.notEmpty(projectURI)) {
+            throw new IllegalArgumentException("No environment variable for: " + EnvironmentVariables.PROJECT_VERSION);
+        }
+        if (Strings.notEmpty(projectVersion)) {
+            throw new IllegalArgumentException("No environment variable for: " + EnvironmentVariables.PROJECT_URI);
+        }
+        throw new IllegalArgumentException("No Operation supported!");
+        // TODO return the update all dependencies operation?
+    }
+
 
 }

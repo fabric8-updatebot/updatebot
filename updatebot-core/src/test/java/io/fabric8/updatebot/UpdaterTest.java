@@ -31,6 +31,11 @@ public class UpdaterTest {
         String basedir = System.getProperty("basedir", ".");
         File testClasses = new File(basedir, "src/test/resources/updatebot.yml");
         updater.setConfigFile(testClasses.getPath());
+
+
+        // simuate updating a single version
+        updater.setUpdateProjectURI("mvn:io.fabric8:kubernetes-client");
+        updater.setUpdateProjectVersion("2.6.3");
     }
     @Test
     public void testUpdater() throws Exception {
