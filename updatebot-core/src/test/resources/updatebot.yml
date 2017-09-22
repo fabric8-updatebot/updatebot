@@ -1,0 +1,8 @@
+git:
+- name: fabric8-quickstarts/spring-boot-webmvc
+  cloneUrl: git@github.com:fabric8-quickstarts/spring-boot-webmvc.git
+github:
+  organisations:
+  - name: fabric8-quickstarts
+    includes:
+    - spring-boot-camel-xml*
