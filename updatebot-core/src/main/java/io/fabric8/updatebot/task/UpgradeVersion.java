@@ -16,9 +16,13 @@
 package io.fabric8.updatebot.task;
 
 import io.fabric8.updatebot.UpdateBot;
+import io.fabric8.updatebot.UpdateVersionContext;
+import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.repository.LocalRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  * Upgrades a single version of a single dependency in downstream projects
@@ -27,17 +31,26 @@ public class UpgradeVersion implements Operation {
     private static final transient Logger LOG = LoggerFactory.getLogger(UpgradeVersion.class);
 
     private final UpdateBot updateBot;
-    private final String projectURI;
-    private final String projectVersion;
+    private final Updater updater;
+    private final String propertyName;
+    private final String version;
 
-    public UpgradeVersion(UpdateBot updateBot, String projectURI, String projectVersion) {
+    public UpgradeVersion(UpdateBot updateBot, Updater updater, String propertyName, String version) {
         this.updateBot = updateBot;
-        this.projectURI = projectURI;
-        this.projectVersion = projectVersion;
+        this.updater = updater;
+        this.propertyName = propertyName;
+        this.version = version;
     }
 
     @Override
-    public void apply(LocalRepository repository) {
-        LOG.info("Updating version of " + projectURI + " to " + projectVersion + " in " + repository.getDir());
+    public boolean apply(LocalRepository repository) throws IOException {
+        LOG.info("Updating version of " + propertyName + " to " + version + " in " + repository.getDir());
+
+        UpdateVersionContext context = new UpdateVersionContext(repository, propertyName, version);
+
+        if (updater.isApplicable(context)) {
+            return updater.updateVersion(context);
+        }
+        return false;
     }
 }

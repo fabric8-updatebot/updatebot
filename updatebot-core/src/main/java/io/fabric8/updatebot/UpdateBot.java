@@ -15,12 +15,15 @@
  */
 package io.fabric8.updatebot;
 
+import io.fabric8.updatebot.kind.Kinds;
+import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.model.Projects;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.updatebot.support.Systems;
 import io.fabric8.updatebot.task.Operation;
+import io.fabric8.updatebot.task.UpgradeAllVersions;
 import io.fabric8.updatebot.task.UpgradeVersion;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
@@ -45,13 +48,19 @@ public class UpdateBot {
     private String githubUsername;
     private String githubPassword;
     private String githubToken;
-    private String updateProjectURI;
-    private String updateProjectVersion;
+
+    private Updater updater;
+    private Operation operation;
 
     public static void main(String[] args) {
         UpdateBot updateBot = new UpdateBot();
         try {
+            updateBot.arguments(args);
             updateBot.run();
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error: " + e);
+            System.err.println("Usage:  updatebot <kind> <propertyName> <version>");
+            System.exit(1);
         } catch (IOException e) {
             System.err.println("Failed to update repositories: " + e);
             e.printStackTrace();
@@ -64,8 +73,32 @@ public class UpdateBot {
         }
     }
 
+    /**
+     * Process command line arguments
+     */
+    public void arguments(String... args) {
+        if (args.length > 0) {
+            String kind = args[0];
+            this.updater = Kinds.createUpdater(kind);
+            if (this.updater == null ){
+                throw new IllegalArgumentException("Unknown kind: " + kind);
+            }
+            if (args.length < 2) {
+                throw new IllegalArgumentException("Missing argument: version");
+            }
+            if (args.length < 3) {
+                throw new IllegalArgumentException("Missing argument: propertyName");
+            }
+
+            String propertyName = args[1];
+            String version = args[2];
+            this.operation = new UpgradeVersion(this, updater, propertyName, version);
+        }
+    }
+
+
     public void run() throws IOException {
-        Operation operation = createOperation();
+        Operation operation = getOperation();
 
         Projects projects = loadProjects();
 
@@ -75,13 +108,13 @@ public class UpdateBot {
         }
     }
 
-    public void updateRepository(LocalRepository repository, Operation operation) {
+    public boolean updateRepository(LocalRepository repository, Operation operation) throws IOException {
         File dir = repository.getDir();
         dir.getParentFile().mkdirs();
 
         LOG.info("Updating: " + dir + " repo: " + repository.getCloneUrl() + " with " + operation);
 
-        operation.apply(repository);
+        return operation.apply(repository);
     }
 
     public GitHub getGithub() throws IOException {
@@ -162,27 +195,6 @@ public class UpdateBot {
         this.githubToken = githubToken;
     }
 
-    public String getUpdateProjectURI() {
-        if (updateProjectURI == null) {
-            updateProjectURI = Systems.getConfigValue(EnvironmentVariables.PROJECT_URI);
-        }
-        return updateProjectURI;
-    }
-
-    public void setUpdateProjectURI(String updateProjectURI) {
-        this.updateProjectURI = updateProjectURI;
-    }
-
-    public String getUpdateProjectVersion() {
-        if (updateProjectVersion == null) {
-            updateProjectVersion = Systems.getConfigValue(EnvironmentVariables.PROJECT_VERSION);
-        }
-        return updateProjectVersion;
-    }
-
-    public void setUpdateProjectVersion(String updateProjectVersion) {
-        this.updateProjectVersion = updateProjectVersion;
-    }
 
 
     // Implementation
@@ -198,20 +210,11 @@ public class UpdateBot {
     }
 
 
-    protected Operation createOperation() {
-        String projectURI = getUpdateProjectURI();
-        String projectVersion = getUpdateProjectVersion();
-        if (Strings.notEmpty(projectURI) && Strings.notEmpty(projectVersion) ) {
-            return new UpgradeVersion(this, projectURI, projectVersion);
+    protected Operation getOperation() {
+        if (operation == null) {
+            operation = new UpgradeAllVersions();
         }
-        if (Strings.notEmpty(projectURI)) {
-            throw new IllegalArgumentException("No environment variable for: " + EnvironmentVariables.PROJECT_VERSION);
-        }
-        if (Strings.notEmpty(projectVersion)) {
-            throw new IllegalArgumentException("No environment variable for: " + EnvironmentVariables.PROJECT_URI);
-        }
-        throw new IllegalArgumentException("No Operation supported!");
-        // TODO return the update all dependencies operation?
+        return operation;
     }
 
 

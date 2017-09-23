@@ -13,20 +13,12 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot.task;
-
-import io.fabric8.updatebot.repository.LocalRepository;
-
-import java.io.IOException;
+package io.fabric8.updatebot.kind;
 
 /**
- * An interface to represent some kind of update operation
  */
-public interface Operation {
-    /**
-     * Applies a task to the local repository.
-     *
-     * @returns true if the operation modified the source
-     */
-    boolean apply(LocalRepository repository) throws IOException;
+public class KindNames {
+    public static final String NPM = "npm";
+    public static final String MAVEN = "maven";
+    public static final String DOCKER = "docker";
 }

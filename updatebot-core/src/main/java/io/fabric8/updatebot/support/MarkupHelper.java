@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.fabric8.utils.Files;
+import io.fabric8.utils.IOHelpers;
 
 import javax.tools.FileObject;
 import java.io.File;
@@ -104,7 +105,7 @@ public class MarkupHelper {
         mapper.writeValue(file, data);
     }
 
-    public static void saveYaml(Object data, FileObject fileObject) throws IOException{
+    public static void saveYaml(Object data, FileObject fileObject) throws IOException {
         ObjectMapper mapper = createYamlObjectMapper();
         try (Writer writer = fileObject.openWriter()) {
             mapper.writeValue(writer, data);
@@ -121,6 +122,14 @@ public class MarkupHelper {
     }
 
     public static void savePrettyJson(File file, Object value) throws IOException {
-        createPrettyJsonObjectMapper().writeValue(file, value);
+        // lets use the node layout
+        NpmJsonPrettyPrinter printer = new NpmJsonPrettyPrinter();
+
+        ObjectMapper objectMapper = createPrettyJsonObjectMapper();
+        objectMapper.setDefaultPrettyPrinter(printer);
+        String json = objectMapper.writer().writeValueAsString(value);
+
+        IOHelpers.writeFully(file, json + System.lineSeparator());
     }
+
 }

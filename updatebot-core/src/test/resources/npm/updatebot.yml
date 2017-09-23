@@ -1,0 +1,5 @@
+github:
+  organisations:
+  - name: fabric8-ui
+    includes:
+    - ngx*

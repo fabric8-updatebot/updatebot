@@ -18,6 +18,7 @@ package io.fabric8.updatebot.kind.npm;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.fabric8.updatebot.UpdateVersionContext;
+import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.support.MarkupHelper;
 import io.fabric8.utils.Objects;
@@ -27,15 +28,17 @@ import java.io.IOException;
 
 /**
  */
-public class PackageJsonUpdater {
+public class PackageJsonUpdater implements Updater {
     private String[] dependencyKeys = {
             "dependencies", "devDependencies", "peerDependencies"
     };
 
+    @Override
     public boolean isApplicable(UpdateVersionContext context) {
         return FileHelper.isFile(context.file("package.json"));
     }
 
+    @Override
     public boolean updateVersion(UpdateVersionContext context) throws IOException {
         File file = context.file("package.json");
         JsonNode tree = MarkupHelper.loadJson(file);

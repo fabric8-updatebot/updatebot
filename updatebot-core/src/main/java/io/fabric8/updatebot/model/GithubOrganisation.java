@@ -71,6 +71,9 @@ public class GithubOrganisation {
     public Filter<String> createFilter() {
         Filter<String> includeFilter = Filters.createStringFilters(includes);
         if (excludes.isEmpty()) {
+            if (includes.isEmpty()) {
+                return Filters.trueFilter();
+            }
             return includeFilter;
         }
         Filter<String> excludeFilter = Filters.createStringFilters(excludes);

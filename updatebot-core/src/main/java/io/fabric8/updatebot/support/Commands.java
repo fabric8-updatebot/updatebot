@@ -26,7 +26,7 @@ import java.io.IOException;
 public class Commands {
     private static final transient Logger LOG = LoggerFactory.getLogger(Commands.class);
 
-    public static void runCommand(File dir, String... commands) {
+    public static int runCommand(File dir, String... commands) {
         String line = String.join(" ", commands);
         ProcessBuilder builder = new ProcessBuilder(commands);
         builder.directory(dir);
@@ -37,11 +37,12 @@ public class Commands {
             if (exitCode != 0) {
                 LOG.warn("Failed to run command " + line + " : exit " + exitCode);
             }
+            return exitCode;
         } catch (IOException e) {
             LOG.warn("Failed to run command " + line + " : error " + e);
         } catch (InterruptedException e) {
             // ignore
         }
-
+        return 1;
     }
 }

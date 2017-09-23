@@ -25,6 +25,4 @@ public class EnvironmentVariables {
     public static final String GITHUB_PASSWORD = "UPDATEBOT_GITHUB_PASSWORD";
     public static final String GITHUB_TOKEN = "UPDATEBOT_GITHUB_TOKEN";
 
-    public static final String PROJECT_URI = "UPDATEBOT_PROJECT_URI";
-    public static final String PROJECT_VERSION= "UPDATEBOT_PROJECT_VERSION";
 }

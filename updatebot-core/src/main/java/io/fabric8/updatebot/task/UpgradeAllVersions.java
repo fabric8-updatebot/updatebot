@@ -16,17 +16,18 @@
 package io.fabric8.updatebot.task;
 
 import io.fabric8.updatebot.repository.LocalRepository;
-
-import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * An interface to represent some kind of update operation
  */
-public interface Operation {
-    /**
-     * Applies a task to the local repository.
-     *
-     * @returns true if the operation modified the source
-     */
-    boolean apply(LocalRepository repository) throws IOException;
+public class UpgradeAllVersions implements Operation {
+    private static final transient Logger LOG = LoggerFactory.getLogger(UpgradeAllVersions.class);
+
+    @Override
+    public boolean apply(LocalRepository repository) {
+        LOG.info("Upgrading all versions in " + repository.getDir());
+
+        return false;
+    }
 }
