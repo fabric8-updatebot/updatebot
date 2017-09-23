@@ -25,7 +25,7 @@
     <version>9</version>
   </parent>
 
-    <groupId>io.fabric8.updatebot</groupId>
+  <groupId>io.fabric8.updatebot</groupId>
   <artifactId>parent</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
@@ -76,6 +76,14 @@
     <aether.version>1.0.2.v20150114</aether.version>
     <fabric8.version>2.2.95</fabric8.version>
 
+
+    <kohsuke.github-api.version>1.84</kohsuke.github-api.version>
+    <jackson-dataformat-yaml.version>2.8.6</jackson-dataformat-yaml.version>
+    <jackson-annotations.version>2.8.6</jackson-annotations.version>
+    <slf4j-api.version>1.7.25</slf4j-api.version>
+    <slf4j-log4j12.version>1.7.21</slf4j-log4j12.version>
+    <fabric8-utils.version>2.3.2</fabric8-utils.version>
+
     <junit.version>4.12</junit.version>
     <!-- maven plugins -->
     <buildnumber.plugin.version>1.3</buildnumber.plugin.version>
@@ -88,6 +96,7 @@
     <maven.require.version>3.1.1</maven.require.version>
     <maven.surefire.plugin.version>2.17</maven.surefire.plugin.version>
     <maven.plugin.plugin.version>3.4</maven.plugin.plugin.version>
+
   </properties>
 
   <distributionManagement>
@@ -161,9 +170,7 @@
 
   <modules>
     <module>updatebot-core</module>
-<!--
-    <module>updatebot-tests</module>
--->
+    <module>updatebot</module>
   </modules>
 
 
@@ -173,288 +180,29 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.5</version>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${maven.javadoc.plugin.version}</version>
-        <configuration>
-          <additionalparam>${javadoc.opts}</additionalparam>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.6</version>
-        <configuration>
-          <nonFilteredFileExtensions>
-            <nonFilteredFileExtension>zip</nonFilteredFileExtension>
-            <nonFilteredFileExtension>gz</nonFilteredFileExtension>
-            <nonFilteredFileExtension>jar</nonFilteredFileExtension>
-          </nonFilteredFileExtensions>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <version>${maven.enforcer.plugin.version}</version>
-        <executions>
-          <execution>
-            <id>enforce-versions</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireMavenVersion>
-                  <version>${maven.require.version}</version>
-                </requireMavenVersion>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>2.5</version>
-        <configuration>
-          <releaseProfiles>docker-push,docker-public</releaseProfiles>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>${maven.jar.plugin.version}</version>
-        <configuration>
-          <archive>
-            <index>true</index>
-            <manifest>
-              <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-            </manifest>
-            <manifestEntries>
-              <Implementation-URL>${project.url}</Implementation-URL>
-              <Java-Version>${java.version}</Java-Version>
-              <Java-Vendor>${java.vendor}</Java-Vendor>
-              <Os-Name>${os.name}</Os-Name>
-              <Os-Arch>${os.arch}</Os-Arch>
-              <Os-Version>${os.version}</Os-Version>
-              <Scm-Url>${project.scm.url}</Scm-Url>
-              <Scm-Connection>${project.scm.connection}</Scm-Connection>
-              <Scm-Revision>${buildNumber}</Scm-Revision>
-              <Build-Timestamp>${build.datetime}</Build-Timestamp>
-            </manifestEntries>
-          </archive>
-        </configuration>
-      </plugin>
-      <!-- Set properties containing the scm revision and build timestamp -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>buildnumber-maven-plugin</artifactId>
-        <version>${buildnumber.plugin.version}</version>
-        <executions>
-          <execution>
-            <id>get-build-timestamp</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>create-timestamp</goal>
-            </goals>
-            <configuration>
-              <!-- Example date: Wed, 4 Jul 2001 12:08:56 -0700 -->
-              <timestampFormat>EEE, d MMM yyyy HH:mm:ss Z</timestampFormat>
-              <timestampPropertyName>build.datetime</timestampPropertyName>
-            </configuration>
-          </execution>
-          <execution>
-            <id>get-scm-revision</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>create</goal>
-            </goals>
-            <configuration>
-              <doCheck>false</doCheck>
-              <doUpdate>false</doUpdate>
-              <revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
-              <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>2.4.1</version>
+        <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
             <phase>package</phase>
             <goals>
-              <goal>shade</goal>
+              <goal>single</goal>
             </goals>
             <configuration>
-              <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                  <manifestEntries>
-                    <Main-Class>io.updatebot.resolver.Main</Main-Class>
-                  </manifestEntries>
-                </transformer>
-              </transformers>
+              <archive>
+                <manifest>
+                  <mainClass>
+                    org.baeldung.executable.ExecutableMavenJar
+                  </mainClass>
+                </manifest>
+              </archive>
+              <descriptorRefs>
+                <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
             </configuration>
           </execution>
         </executions>
       </plugin>
-
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>2.6.1</version>
-        <configuration>
-          <filesets>
-            <fileset>
-              <directory>${basedir}</directory>
-              <includes>
-                <include>updatebot.yml</include>
-              </includes>
-            </fileset>
-          </filesets>
-        </configuration>
-      </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>release</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <version>${maven.enforcer.plugin.version}</version>
-            <executions>
-              <execution>
-                <id>enforce-no-snapshots</id>
-                <goals>
-                  <goal>enforce</goal>
-                </goals>
-                <configuration>
-                  <rules>
-                    <requireReleaseDeps>
-                      <message>No Snapshots Allowed!</message>
-                    </requireReleaseDeps>
-                  </rules>
-                  <fail>true</fail>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.jolokia</groupId>
-            <artifactId>docker-maven-plugin</artifactId>
-            <version>${docker.maven.plugin.version}</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>build</goal>
-                  <goal>push</goal>
-                </goals>
-                <phase>package</phase>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-                <configuration>
-                  <additionalparam>${javadoc.opts}</additionalparam>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>2.4</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>license</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>com.mycila</groupId>
-            <artifactId>license-maven-plugin</artifactId>
-            <version>2.6</version>
-            <configuration>
-              <includes>
-                <include>src/main/java/**</include>
-                <include>src/test/java/**</include>
-                <include>pom.xml</include>
-                <include>**/*.xml</include>
-                <include>**/*.cfg</include>
-                <include>**/*.properties</include>
-              </includes>
-              <excludes>
-                <!-- exclude sampel data -->
-                <exclude>**/src/data/**</exclude>
-                <exclude>**/resources/data/**</exclude>
-                <!-- exclude hidden dir -->
-                <exclude>**/.*/**</exclude>
-              </excludes>
-            </configuration>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>check</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <id>doclint-java8-disable</id>
-      <activation>
-        <jdk>[1.8,)</jdk>
-      </activation>
-      <properties>
-        <javadoc.opts>-Xdoclint:none</javadoc.opts>
-      </properties>
-    </profile>
-  </profiles>
 
 </project>
