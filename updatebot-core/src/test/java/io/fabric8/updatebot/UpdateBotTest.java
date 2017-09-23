@@ -23,23 +23,23 @@ import java.io.File;
 
 /**
  */
-public class UpdaterTest {
-    protected Updater updater = new Updater();
+public class UpdateBotTest {
+    protected UpdateBot updateBot = new UpdateBot();
 
     @Before
     public void init() {
         String basedir = System.getProperty("basedir", ".");
         File testClasses = new File(basedir, "src/test/resources/updatebot.yml");
-        updater.setConfigFile(testClasses.getPath());
+        updateBot.setConfigFile(testClasses.getPath());
 
 
         // simuate updating a single version
-        updater.setUpdateProjectURI("mvn:io.fabric8:kubernetes-client");
-        updater.setUpdateProjectVersion("2.6.3");
+        updateBot.setUpdateProjectURI("mvn:io.fabric8:kubernetes-client");
+        updateBot.setUpdateProjectVersion("2.6.3");
     }
     @Test
     public void testUpdater() throws Exception {
-        updater.run();
+        updateBot.run();
     }
 
 }

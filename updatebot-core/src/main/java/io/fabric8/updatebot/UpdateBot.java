@@ -36,8 +36,8 @@ import static io.fabric8.updatebot.support.YamlHelper.loadYaml;
 
 /**
  */
-public class Updater {
-    private static final transient Logger LOG = LoggerFactory.getLogger(Updater.class);
+public class UpdateBot {
+    private static final transient Logger LOG = LoggerFactory.getLogger(UpdateBot.class);
 
     private GitHub github;
     private String configFile;
@@ -49,9 +49,9 @@ public class Updater {
     private String updateProjectVersion;
 
     public static void main(String[] args) {
-        Updater updater = new Updater();
+        UpdateBot updateBot = new UpdateBot();
         try {
-            updater.run();
+            updateBot.run();
         } catch (IOException e) {
             System.err.println("Failed to update repositories: " + e);
             e.printStackTrace();

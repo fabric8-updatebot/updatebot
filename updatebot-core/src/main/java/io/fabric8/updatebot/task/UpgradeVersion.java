@@ -15,7 +15,7 @@
  */
 package io.fabric8.updatebot.task;
 
-import io.fabric8.updatebot.Updater;
+import io.fabric8.updatebot.UpdateBot;
 import io.fabric8.updatebot.repository.LocalRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +26,12 @@ import org.slf4j.LoggerFactory;
 public class UpgradeVersion implements Operation {
     private static final transient Logger LOG = LoggerFactory.getLogger(UpgradeVersion.class);
 
-    private final Updater updater;
+    private final UpdateBot updateBot;
     private final String projectURI;
     private final String projectVersion;
 
-    public UpgradeVersion(Updater updater, String projectURI, String projectVersion) {
-        this.updater = updater;
+    public UpgradeVersion(UpdateBot updateBot, String projectURI, String projectVersion) {
+        this.updateBot = updateBot;
         this.projectURI = projectURI;
         this.projectVersion = projectVersion;
     }

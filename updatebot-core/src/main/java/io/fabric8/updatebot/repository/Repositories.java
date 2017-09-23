@@ -15,7 +15,7 @@
  */
 package io.fabric8.updatebot.repository;
 
-import io.fabric8.updatebot.Updater;
+import io.fabric8.updatebot.UpdateBot;
 import io.fabric8.updatebot.model.GitHubProjects;
 import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.GithubOrganisation;
@@ -42,8 +42,8 @@ public class Repositories {
     private static final transient Logger LOG = LoggerFactory.getLogger(Repositories.class);
 
 
-    public static List<LocalRepository> cloneOrPullRepositories(Updater updater, Projects projects) throws IOException {
-        List<LocalRepository> repositories = findRepositories(updater, projects);
+    public static List<LocalRepository> cloneOrPullRepositories(UpdateBot updateBot, Projects projects) throws IOException {
+        List<LocalRepository> repositories = findRepositories(updateBot, projects);
         for (LocalRepository repository : repositories) {
             cloneOrPull(repository);
         }
@@ -65,8 +65,8 @@ public class Repositories {
         }
     }
 
-    protected static List<LocalRepository> findRepositories(Updater updater, Projects projects) throws IOException {
-        File workDir = new File(updater.getWorkDir());
+    protected static List<LocalRepository> findRepositories(UpdateBot updateBot, Projects projects) throws IOException {
+        File workDir = new File(updateBot.getWorkDir());
         workDir.mkdirs();
 
         Map<String, LocalRepository> map = new LinkedHashMap<>();
@@ -77,7 +77,7 @@ public class Repositories {
         if (githubProjects != null) {
             List<GithubOrganisation> organisations = githubProjects.getOrganisations();
             if (organisations != null && !organisations.isEmpty()) {
-                GitHub github = updater.getGithub();
+                GitHub github = updateBot.getGithub();
                 for (GithubOrganisation organisation : organisations) {
                     addGitHubRepositories(map, github, organisation, new File(gitHubDir, organisation.getName()));
                 }
