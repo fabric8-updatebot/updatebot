@@ -32,7 +32,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
-import static io.fabric8.updatebot.support.YamlHelper.loadYaml;
+import static io.fabric8.updatebot.support.MarkupHelper.loadYaml;
 
 /**
  */

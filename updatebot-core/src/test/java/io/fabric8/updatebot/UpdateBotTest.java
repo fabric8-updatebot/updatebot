@@ -16,6 +16,7 @@
 package io.fabric8.updatebot;
 
 
+import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,8 +29,7 @@ public class UpdateBotTest {
 
     @Before
     public void init() {
-        String basedir = System.getProperty("basedir", ".");
-        File testClasses = new File(basedir, "src/test/resources/updatebot.yml");
+        File testClasses = new File(Tests.getBasedir(), "src/test/resources/updatebot.yml");
         updateBot.setConfigFile(testClasses.getPath());
 
 
@@ -37,6 +37,7 @@ public class UpdateBotTest {
         updateBot.setUpdateProjectURI("mvn:io.fabric8:kubernetes-client");
         updateBot.setUpdateProjectVersion("2.6.3");
     }
+
     @Test
     public void testUpdater() throws Exception {
         updateBot.run();

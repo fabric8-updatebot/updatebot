@@ -22,6 +22,13 @@ public class GitRepository {
     private String cloneUrl;
     private String projectUrl;
 
+    public GitRepository() {
+    }
+
+    public GitRepository(String name) {
+        this.name = name;
+    }
+
     @Override
     public String toString() {
         return "GitRepository{" +
