@@ -27,10 +27,20 @@ public class Commands {
     private static final transient Logger LOG = LoggerFactory.getLogger(Commands.class);
 
     public static int runCommand(File dir, String... commands) {
+        return runCommand(dir, true, commands);
+    }
+
+    public static int runCommandIgnoreOutput(File dir, String... commands) {
+        return runCommand(dir, false, commands);
+    }
+
+    public static int runCommand(File dir, boolean inheritIO, String... commands) {
         String line = String.join(" ", commands);
         ProcessBuilder builder = new ProcessBuilder(commands);
         builder.directory(dir);
-        builder.inheritIO();
+        if (inheritIO) {
+            builder.inheritIO();
+        }
         try {
             Process process = builder.start();
             int exitCode = process.waitFor();

@@ -54,9 +54,9 @@ public class Repositories {
         File dir = repository.getDir();
         File gitDir = new File(dir, ".git");
         if (gitDir.exists()) {
-            if (Commands.runCommand(dir, "git", "stash") == 0) {
+            if (Commands.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
                 LOG.info("Pulling: " + dir + " repo: " + repository.getCloneUrl());
-                Commands.runCommand(dir, "git", "pull");
+                Commands.runCommandIgnoreOutput(dir, "git", "pull");
             }
         } else {
             File parentDir = dir.getParentFile();

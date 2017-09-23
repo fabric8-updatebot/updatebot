@@ -112,7 +112,7 @@ public class UpdateBot {
         File dir = repository.getDir();
         dir.getParentFile().mkdirs();
 
-        LOG.info("Updating: " + dir + " repo: " + repository.getCloneUrl() + " with " + operation);
+        LOG.debug("Updating: " + dir + " repo: " + repository.getCloneUrl() + " with " + operation);
 
         return operation.apply(repository);
     }
