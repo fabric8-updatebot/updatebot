@@ -53,9 +53,7 @@ def mergePullRequest(prId){
 def updateDownstreamDependencies(stagedProject) {
   pushDockerfileEnvVarChangePR {
     propertyName = 'UPDATEBOT_VERSION'
-    projects = [
-            'fabric8io/updatebot'
-    ]
+    project = 'fabric8io/updatebot'
     version = stagedProject[1]
   }
 }
