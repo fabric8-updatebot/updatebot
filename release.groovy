@@ -53,8 +53,9 @@ def mergePullRequest(prId){
 def updateDownstreamDependencies(stagedProject) {
   pushDockerfileEnvVarChangePR {
     propertyName = 'UPDATEBOT_VERSION'
-    project = 'fabric8-images/maven-builder'
+    project = 'fabric8io-images/maven-builder'
     version = stagedProject[1]
+    containerName = 'maven'
   }
 }
 return this;
