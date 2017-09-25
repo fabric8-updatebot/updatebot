@@ -23,8 +23,10 @@ import io.fabric8.updatebot.model.Projects;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.updatebot.support.Commands;
+import io.fabric8.updatebot.support.GitHubHelpers;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.updatebot.support.Systems;
+import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHCommitPointer;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
@@ -61,6 +63,9 @@ public abstract class UpdateBotCommand {
     @Parameter(names = {"--github-password", "-ghp"}, description = "GitHub Password")
     private String githubPassword = Systems.getConfigValue(EnvironmentVariables.GITHUB_PASSWORD);
 
+    @Parameter(names = {"--github-pr-label", "-ghl"}, description = "GitHub Pull Request Label")
+    private String githubPullRequestLabel = Systems.getConfigValue(EnvironmentVariables.GITHUB_PR_LABEL, "updatebot");
+
     @Parameter(names = {"--github-token", "-ght"}, description = "GitHub Token")
     private String githubToken = Systems.getConfigValue(EnvironmentVariables.GITHUB_TOKEN);
 
@@ -68,16 +73,23 @@ public abstract class UpdateBotCommand {
     private boolean dryRun = Systems.isConfigFlag(EnvironmentVariables.DRY_RUN);
 
 
-    public void run() throws IOException {
-        Projects projects = loadProjects();
+    private boolean rebaseMode = true;
 
-        List<LocalRepository> repositories = Repositories.cloneOrPullRepositories(this, projects);
+
+    public void run() throws IOException {
+        List<LocalRepository> repositories = closeOrPullRepositories();
         for (LocalRepository repository : repositories) {
             UpdateContext context = new UpdateContext(repository);
             if (processRepository(context) && !dryRun) {
                 gitCommitAndPullRequest(context);
             }
         }
+    }
+
+    public List<LocalRepository> closeOrPullRepositories() throws IOException {
+        Projects projects = loadProjects();
+
+        return Repositories.cloneOrPullRepositories(this, projects);
     }
 
 
@@ -150,6 +162,14 @@ public abstract class UpdateBotCommand {
         this.githubToken = githubToken;
     }
 
+    public String getGithubPullRequestLabel() {
+        return githubPullRequestLabel;
+    }
+
+    public void setGithubPullRequestLabel(String githubPullRequestLabel) {
+        this.githubPullRequestLabel = githubPullRequestLabel;
+    }
+
     public boolean isDryRun() {
         return dryRun;
     }
@@ -157,6 +177,15 @@ public abstract class UpdateBotCommand {
     public void setDryRun(boolean dryRun) {
         this.dryRun = dryRun;
     }
+
+    public boolean isRebaseMode() {
+        return rebaseMode;
+    }
+
+    public void setRebaseMode(boolean rebaseMode) {
+        this.rebaseMode = rebaseMode;
+    }
+
 
     // Implementation
     //-------------------------------------------------------------------------
@@ -203,10 +232,21 @@ public abstract class UpdateBotCommand {
                 pullRequest = ghRepository.createPullRequest(title, head, "master", body);
                 LOG.info("Created pull request " + pullRequest.getHtmlUrl());
 
-                pullRequest.setLabels("updatebot");
+                pullRequest.setLabels(githubPullRequestLabel);
             } else {
-                pullRequest.comment("Replacing previous commit");
-                pullRequest.setTitle(title);
+                String oldTitle = pullRequest.getTitle();
+                if (Objects.equal(oldTitle, title)) {
+                    // lets check if we need to rebase
+                    if (isRebaseMode()) {
+                        if (GitHubHelpers.isMergeable(pullRequest)) {
+                            return;
+                        }
+                        pullRequest.comment("[UpdateBot](https://github.com/fabric8io/updatebot) rebasing due to merge conflicts");
+                    }
+                } else {
+                    pullRequest.comment("Replacing previous commit");
+                    pullRequest.setTitle(title);
+                }
 
                 GHCommitPointer head = pullRequest.getHead();
                 String remoteRef = head.getRef();
@@ -259,4 +299,5 @@ public abstract class UpdateBotCommand {
         }
         return null;
     }
+
 }

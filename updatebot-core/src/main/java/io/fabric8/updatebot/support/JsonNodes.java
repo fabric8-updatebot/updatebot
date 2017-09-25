@@ -13,18 +13,23 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot;
+package io.fabric8.updatebot.support;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
+ * Helper assertions for dealing with JSON or YAML markup
  */
-public class EnvironmentVariables {
-    public static final String CONFIG_FILE = "UPDATEBOT_CONFIG_FILE";
-    public static final String WORK_DIR = "UPDATEBOT_WORK_DIR";
+public class JsonNodes {
 
-    public static final String GITHUB_USER = "UPDATEBOT_GITHUB_USER";
-    public static final String GITHUB_PASSWORD = "UPDATEBOT_GITHUB_PASSWORD";
-    public static final String GITHUB_TOKEN = "UPDATEBOT_GITHUB_TOKEN";
-    public static final String GITHUB_PR_LABEL = "UPDATEBOT_GITHUB_PR_LABEL";
-
-    public static final String DRY_RUN = "UPDATEBOT_DRY_RUN";
+    public static JsonNode path(JsonNode tree, String... paths) {
+        JsonNode node = tree;
+        for (String path : paths) {
+            if (node == null || !node.isObject()) {
+                return null;
+            }
+            node = node.get(path);
+        }
+        return node;
+    }
 }

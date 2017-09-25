@@ -16,6 +16,7 @@
 package io.fabric8.updatebot.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.Arrays;
 
@@ -33,6 +34,32 @@ public class MarkupAssertions {
         assertThat(node.isTextual()).describedAs("Value of path " + pathText + " is not textual but is " + node).isTrue();
 
         return node.asText();
+    }
+
+    public static ObjectNode assertSetValue(JsonNode tree, String value, String... paths) {
+        assertThat(paths.length).describedAs("Should have at least one path expression!").isGreaterThan(0);
+
+        int objectPathLength = paths.length - 1;
+        ObjectNode objectNode ;
+        if (paths.length > 1) {
+            String[] objectPath = new String[objectPathLength];
+            System.arraycopy(paths, 0, objectPath, 0, objectPathLength);
+            objectNode = assertObjectPath(tree, objectPath);
+        } else {
+            objectNode = assertObjectNode(tree);
+        }
+        objectNode.put(paths[objectPathLength], value);
+        return objectNode;
+    }
+
+    public static ObjectNode assertObjectNode(JsonNode node) {
+        assertThat(node).describedAs("ObjectNode expected").isInstanceOf(ObjectNode.class);
+        return (ObjectNode) node;
+    }
+
+    public static ObjectNode assertObjectPath(JsonNode tree, String... paths) {
+        JsonNode node = assertPath(tree, paths);
+        return assertObjectNode(node);
     }
 
     public static JsonNode assertPath(JsonNode tree, String... paths) {
