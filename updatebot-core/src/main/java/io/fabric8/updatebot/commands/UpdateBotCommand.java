@@ -202,6 +202,8 @@ public abstract class UpdateBotCommand {
                 }
                 pullRequest = ghRepository.createPullRequest(title, head, "master", body);
                 LOG.info("Created pull request " + pullRequest.getHtmlUrl());
+
+                pullRequest.setLabels("updatebot");
             } else {
                 pullRequest.comment("Replacing previous commit");
                 pullRequest.setTitle(title);
