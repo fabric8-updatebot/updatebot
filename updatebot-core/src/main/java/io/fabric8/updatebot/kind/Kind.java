@@ -20,12 +20,23 @@ import io.fabric8.updatebot.kind.npm.PackageJsonUpdater;
 /**
  */
 public enum Kind {
-    NPM(new PackageJsonUpdater());
+    NPM("npm", new PackageJsonUpdater());
 
+    private String name;
     private Updater updater;
 
-    Kind(Updater updater) {
+    Kind(String name, Updater updater) {
+        this.name = name;
         this.updater = updater;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public Updater getUpdater() {

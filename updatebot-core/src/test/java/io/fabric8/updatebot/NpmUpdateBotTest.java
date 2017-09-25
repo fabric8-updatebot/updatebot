@@ -16,7 +16,7 @@
 package io.fabric8.updatebot;
 
 
-import io.fabric8.updatebot.commands.UpdateSingleVersion;
+import io.fabric8.updatebot.commands.PushVersionChanges;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
@@ -27,7 +27,7 @@ import java.io.File;
 /**
  */
 public class NpmUpdateBotTest {
-    protected UpdateSingleVersion updateBot = new UpdateSingleVersion();
+    protected PushVersionChanges updateBot = new PushVersionChanges();
 
     @Before
     public void init() {

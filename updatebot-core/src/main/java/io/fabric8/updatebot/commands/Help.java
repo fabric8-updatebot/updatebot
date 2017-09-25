@@ -17,15 +17,16 @@ package io.fabric8.updatebot.commands;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.support.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Displays help
  */
+@Parameters(commandDescription = "Displays help on using the available commands")
 public class Help {
-    private static final transient Logger LOG = LoggerFactory.getLogger(Help.class);
-
     @Parameter()
     private String command;
 

@@ -17,8 +17,8 @@ package io.fabric8.updatebot;
 
 import com.beust.jcommander.JCommander;
 import io.fabric8.updatebot.commands.Help;
-import io.fabric8.updatebot.commands.UpdateAllVersions;
-import io.fabric8.updatebot.commands.UpdateSingleVersion;
+import io.fabric8.updatebot.commands.PullVersionChanges;
+import io.fabric8.updatebot.commands.PushVersionChanges;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +31,16 @@ public class UpdateBot {
 
     public static void main(String[] args) {
         try {
-            UpdateSingleVersion updateSingleVersion = new UpdateSingleVersion();
-            UpdateAllVersions updateAllVersions = new UpdateAllVersions();
+            PushVersionChanges pushVersionChanges = new PushVersionChanges();
+            PullVersionChanges pullVersionChanges = new PullVersionChanges();
             Help help = new Help();
 
             JCommander commander = JCommander.newBuilder()
-                    .addCommand("version", updateSingleVersion)
-                    .addCommand("all", updateAllVersions)
+                    .addCommand("push", pushVersionChanges)
+                    .addCommand("pull", pullVersionChanges)
                     .addCommand("help", help)
                     .build();
+            commander.setProgramName("updatebot");
             commander.parse(args);
 
             String parsedCommand = commander.getParsedCommand();
@@ -47,12 +48,12 @@ public class UpdateBot {
                 commander.usage();
             } else {
                 switch (parsedCommand) {
-                    case "single":
-                        updateSingleVersion.run();
+                    case "push":
+                        pushVersionChanges.run();
                         return;
 
-                    case "all":
-                        updateAllVersions.run();
+                    case "pull":
+                        pullVersionChanges.run();
                         return;
 
                     case "help":
@@ -63,12 +64,8 @@ public class UpdateBot {
                         commander.usage();
                 }
             }
-        } catch (IllegalArgumentException e) {
-            System.err.println("Error: " + e);
-            System.err.println("Usage:  updatebot <kind> <propertyName> <version>");
-            System.exit(1);
         } catch (IOException e) {
-            System.err.println("Failed to update repositories: " + e);
+            System.err.println("Failed: " + e);
             e.printStackTrace();
             Throwable cause = e.getCause();
             if (cause != e) {

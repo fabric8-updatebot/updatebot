@@ -17,6 +17,7 @@ package io.fabric8.updatebot.commands;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.UpdateVersionContext;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.kind.Updater;
@@ -29,11 +30,14 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Push changes from a specific release pipeline into downstream projects
  */
-public class UpdateSingleVersion extends UpdateBotCommand {
-    private static final transient Logger LOG = LoggerFactory.getLogger(UpdateSingleVersion.class);
+@Parameters(commandDescription = "Pushes version changes into your projects. " +
+        "You usually invoke this command after a release has been performed")
+public class PushVersionChanges extends UpdateBotCommand {
+    private static final transient Logger LOG = LoggerFactory.getLogger(PushVersionChanges.class);
 
-    @Parameter(names = {"--kind", "-k"}, description = "The kind of property to replace (e.g. npm, maven etc)", required = true)
+    @Parameter(order = 0, names = {"--kind", "-k"}, description = "The kind of property to replace based on the kind of language or build tool.", required = true)
     private Kind kind;
 
     @Parameter(description = "The property name and values to be replaced", required = true)

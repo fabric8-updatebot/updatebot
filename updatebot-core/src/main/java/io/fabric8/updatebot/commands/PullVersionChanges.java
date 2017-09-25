@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.commands;
 
+import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.repository.LocalRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,13 +23,16 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 /**
+ * Pulls updates to your projects from upstream artifact repositories like npm or maven central
  */
-public class UpdateAllVersions extends UpdateBotCommand {
-    private static final transient Logger LOG = LoggerFactory.getLogger(UpdateAllVersions.class);
+@Parameters(commandDescription = "Pulls version changes into your projects. " +
+        "Lets you periodically query all the dependencies for all your projects and pull any upstream releases into your projects")
+public class PullVersionChanges extends UpdateBotCommand {
+    private static final transient Logger LOG = LoggerFactory.getLogger(PullVersionChanges.class);
 
     @Override
     protected boolean doProcess(LocalRepository repository) throws IOException {
-        LOG.debug("Updating al version in: " + repository.getDir() + " repo: " + repository.getCloneUrl());
+        LOG.debug("Pulling version changes into: " + repository.getDir() + " repo: " + repository.getCloneUrl());
         return false;
     }
 }
