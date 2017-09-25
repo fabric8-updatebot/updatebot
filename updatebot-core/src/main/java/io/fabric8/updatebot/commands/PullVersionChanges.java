@@ -15,7 +15,11 @@
  */
 package io.fabric8.updatebot.commands;
 
+import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import io.fabric8.updatebot.kind.CompositeUpdater;
+import io.fabric8.updatebot.kind.Kind;
+import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.repository.LocalRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +34,27 @@ import java.io.IOException;
 public class PullVersionChanges extends UpdateBotCommand {
     private static final transient Logger LOG = LoggerFactory.getLogger(PullVersionChanges.class);
 
+    @Parameter(order = 0, names = {"--kind", "-k"}, description = "The kind of property to replace based on the kind of language or build tool. If not specified then all supported languages and build tools will be updated")
+    private Kind kind;
+
+    private Updater updater;
+
     @Override
     protected boolean doProcess(LocalRepository repository) throws IOException {
         LOG.debug("Pulling version changes into: " + repository.getDir() + " repo: " + repository.getCloneUrl());
-        return false;
+
+        UpdateContext context = new UpdateContext(repository);
+        return getUpdater().pullVersions(context);
+    }
+
+    protected Updater getUpdater() {
+        if (updater == null) {
+            if (kind != null) {
+                updater = kind.getUpdater();
+            } else {
+                updater = new CompositeUpdater();
+            }
+        }
+        return updater;
     }
 }

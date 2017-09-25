@@ -15,14 +15,17 @@
  */
 package io.fabric8.updatebot.kind;
 
-import io.fabric8.updatebot.UpdateVersionContext;
+import io.fabric8.updatebot.commands.UpdateContext;
+import io.fabric8.updatebot.commands.UpdateVersionContext;
 
 import java.io.IOException;
 
 /**
  */
 public interface Updater {
-    boolean isApplicable(UpdateVersionContext context);
+    boolean isApplicable(UpdateContext context);
 
-    boolean updateVersion(UpdateVersionContext context) throws IOException;
+    boolean pushVersions(UpdateVersionContext context) throws IOException;
+
+    boolean pullVersions(UpdateContext context) throws IOException;
 }

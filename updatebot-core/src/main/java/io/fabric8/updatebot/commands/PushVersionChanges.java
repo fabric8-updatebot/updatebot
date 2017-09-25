@@ -18,7 +18,6 @@ package io.fabric8.updatebot.commands;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
-import io.fabric8.updatebot.UpdateVersionContext;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.repository.LocalRepository;
@@ -90,7 +89,7 @@ public class PushVersionChanges extends UpdateBotCommand {
         Updater updater = kind.getUpdater();
         boolean updated = false;
         if (updater.isApplicable(context)) {
-            updated = updater.updateVersion(context);
+            updated = updater.pushVersions(context);
         }
         return updated;
     }

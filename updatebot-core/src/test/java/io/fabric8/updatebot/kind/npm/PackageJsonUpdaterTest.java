@@ -16,8 +16,8 @@
 package io.fabric8.updatebot.kind.npm;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.fabric8.updatebot.UpdateContext;
-import io.fabric8.updatebot.UpdateVersionContext;
+import io.fabric8.updatebot.commands.UpdateContext;
+import io.fabric8.updatebot.commands.UpdateVersionContext;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.support.MarkupHelper;
 import io.fabric8.updatebot.test.Tests;
@@ -60,7 +60,7 @@ public class PackageJsonUpdaterTest {
         assertThat(updater.isApplicable(context)).
                 describedAs("File should be applicable " + packageJson).
                 isTrue();
-        updater.updateVersion(context);
+        updater.pushVersions(context);
 
         UpdateVersionContext.Change change = context.change(name);
         assertThat(change).describedAs("expected change for name " + name).isNotNull();

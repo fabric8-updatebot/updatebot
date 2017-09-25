@@ -13,7 +13,7 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot;
+package io.fabric8.updatebot.commands;
 
 import io.fabric8.updatebot.repository.LocalRepository;
 
