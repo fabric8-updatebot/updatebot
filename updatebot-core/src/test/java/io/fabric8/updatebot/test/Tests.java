@@ -37,9 +37,9 @@ public class Tests {
      * @return the directory of test files
      */
     public static File copyPackageSources(Class<?> clazz) {
-        String packagePath = clazz.getPackage().getName().replace('.', '/');
+        String packagePath = getPackagePath(clazz);
         File basedir = Tests.getBasedir();
-        File testDir = new File(basedir, "target/test-data/" + packagePath + "/" + clazz.getSimpleName());
+        File testDir = getTestDataDir(clazz);
         File srcDir = new File(basedir, "src/test/resources/" + packagePath);
 
         assertThat(srcDir).describedAs("Source test files for test " + clazz.getName()).isDirectory();
@@ -62,6 +62,16 @@ public class Tests {
         File[] childFiles = testDir.listFiles();
         assertThat(childFiles).describedAs("Test data dir " + testDir).isNotEmpty();
         return testDir;
+    }
+
+    public static String getPackagePath(Class<?> clazz) {
+        return clazz.getPackage().getName().replace('.', '/');
+    }
+
+    public static File getTestDataDir(Class<?> clazz) {
+        String packagePath = getPackagePath(clazz);
+        File basedir = Tests.getBasedir();
+        return new File(basedir, "target/test-data/" + packagePath + "/" + clazz.getSimpleName());
     }
 
     /**

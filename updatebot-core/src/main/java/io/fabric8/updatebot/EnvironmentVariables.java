@@ -25,4 +25,5 @@ public class EnvironmentVariables {
     public static final String GITHUB_PASSWORD = "UPDATEBOT_GITHUB_PASSWORD";
     public static final String GITHUB_TOKEN = "UPDATEBOT_GITHUB_TOKEN";
 
+    public static final String DRY_RUN = "UPDATEBOT_DRY_RUN";
 }

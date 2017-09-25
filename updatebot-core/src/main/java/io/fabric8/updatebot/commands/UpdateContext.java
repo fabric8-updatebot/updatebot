@@ -15,9 +15,12 @@
  */
 package io.fabric8.updatebot.commands;
 
+import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.repository.LocalRepository;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -27,6 +30,7 @@ public class UpdateContext {
     private final LocalRepository repository;
     private final Set<File> updatedFiles = new TreeSet<>();
     private final UpdateContext parentContext;
+    private List<UpdateContext> children = new ArrayList<>();
 
     public UpdateContext(LocalRepository repository) {
         this.repository = repository;
@@ -36,6 +40,11 @@ public class UpdateContext {
     public UpdateContext(UpdateContext parentContext) {
         this.repository = parentContext.getRepository();
         this.parentContext = parentContext;
+        this.parentContext.addChild(this);
+    }
+
+    protected void addChild(UpdateContext child) {
+        children.add(child);
     }
 
     public UpdateContext getParentContext() {
@@ -68,7 +77,22 @@ public class UpdateContext {
         updatedFiles.add(file);
     }
 
-    public UpdateVersionContext updateVersion(String name, String version) {
-        return new UpdateVersionContext(this, name, version);
+    public UpdateVersionContext updateVersion(Kind kind, String name, String version) {
+        return new UpdateVersionContext(this, kind, name, version);
     }
+
+    public String createTitle() {
+        if (!children.isEmpty()) {
+            return children.get(0).createTitle();
+        }
+        return "Pulling new versions";
+    }
+
+    public String createTitlePrefix() {
+        if (!children.isEmpty()) {
+            return children.get(0).createTitlePrefix();
+        }
+        return createTitle();
+    }
+
 }

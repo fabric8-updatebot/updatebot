@@ -15,7 +15,6 @@
  */
 package io.fabric8.updatebot.repository;
 
-import io.fabric8.updatebot.UpdateBot;
 import io.fabric8.updatebot.commands.UpdateBotCommand;
 import io.fabric8.updatebot.model.GitHubProjects;
 import io.fabric8.updatebot.model.GitRepository;
@@ -25,12 +24,15 @@ import io.fabric8.updatebot.model.Projects;
 import io.fabric8.updatebot.support.Commands;
 import io.fabric8.utils.Filter;
 import org.kohsuke.github.GHOrganization;
+import org.kohsuke.github.GHPerson;
 import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -56,8 +58,10 @@ public class Repositories {
         File gitDir = new File(dir, ".git");
         if (gitDir.exists()) {
             if (Commands.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
-                LOG.info("Pulling: " + dir + " repo: " + repository.getCloneUrl());
-                Commands.runCommandIgnoreOutput(dir, "git", "pull");
+                if (Commands.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
+                    LOG.info("Pulling: " + dir + " repo: " + repository.getCloneUrl());
+                    Commands.runCommandIgnoreOutput(dir, "git", "pull");
+                }
             }
         } else {
             File parentDir = dir.getParentFile();
@@ -103,21 +107,34 @@ public class Repositories {
     protected static void addGitHubRepositories(Map<String, LocalRepository> map, GitHub github, GithubOrganisation organisation, File file) {
         String orgName = organisation.getName();
         Filter<String> filter = organisation.createFilter();
-        try {
-            GHOrganization ghOrg = github.getOrganization(orgName);
-            Map<String, GHRepository> repositories = ghOrg.getRepositories();
-            for (Map.Entry<String, GHRepository> entry : repositories.entrySet()) {
-                String repoName = entry.getKey();
-                if (filter.matches(repoName)) {
-                    GitRepository gitRepository = new GithubRepository(entry.getValue());
-                    addRepository(map, file, gitRepository);
 
-                }
-            }
+        GHPerson person = null;
+        try {
+            person = github.getOrganization(orgName);
         } catch (IOException e) {
-            LOG.warn("Failed to load organisation: " + orgName + ". " + e, e);
+        }
+        if (person == null) {
+            try {
+                person = github.getUser(orgName);
+            } catch (IOException e) {
+                LOG.warn("Could not find organisation or user for " + orgName + ". " + e, e);
+            }
+        }
+        if (person != null) {
+            try {
+                Map<String, GHRepository> repositories = person.getRepositories();
+                for (Map.Entry<String, GHRepository> entry : repositories.entrySet()) {
+                    String repoName = entry.getKey();
+                    if (filter.matches(repoName)) {
+                        GitRepository gitRepository = new GithubRepository(entry.getValue());
+                        addRepository(map, file, gitRepository);
+
+                    }
+                }
+            } catch (IOException e) {
+                LOG.warn("Failed to load organisation: " + orgName + ". " + e, e);
+            }
         }
     }
-
 
 }

@@ -69,7 +69,8 @@ public class PushVersionChanges extends UpdateBotCommand {
     }
 
     @Override
-    protected boolean doProcess(LocalRepository repository) throws IOException {
+    protected boolean doProcess(UpdateContext context) throws IOException {
+        LocalRepository repository = context.getRepository();
         LOG.debug("Updating version in: " + repository.getDir() + " repo: " + repository.getCloneUrl());
 
         boolean answer = false;
@@ -77,15 +78,15 @@ public class PushVersionChanges extends UpdateBotCommand {
             String propertyName = values.get(i);
             String version = values.get(i+1);
 
-            if (updatePropertyVersion(repository, propertyName, version)) {
+            if (updatePropertyVersion(context, propertyName, version)) {
                 answer = true;
             }
         }
         return answer;
     }
 
-    protected boolean updatePropertyVersion(LocalRepository repository, String propertyName, String version) throws IOException {
-        UpdateVersionContext context = new UpdateVersionContext(repository, propertyName, version);
+    protected boolean updatePropertyVersion(UpdateContext parentContext, String propertyName, String version) throws IOException {
+        UpdateVersionContext context = new UpdateVersionContext(parentContext, kind, propertyName, version);
         Updater updater = kind.getUpdater();
         boolean updated = false;
         if (updater.isApplicable(context)) {

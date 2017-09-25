@@ -40,10 +40,10 @@ public class PullVersionChanges extends UpdateBotCommand {
     private Updater updater;
 
     @Override
-    protected boolean doProcess(LocalRepository repository) throws IOException {
+    protected boolean doProcess(UpdateContext context) throws IOException {
+        LocalRepository repository = context.getRepository();
         LOG.debug("Pulling version changes into: " + repository.getDir() + " repo: " + repository.getCloneUrl());
 
-        UpdateContext context = new UpdateContext(repository);
         return getUpdater().pullVersions(context);
     }
 

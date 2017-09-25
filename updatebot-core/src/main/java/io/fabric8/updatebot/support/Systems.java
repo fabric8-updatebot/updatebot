@@ -47,4 +47,12 @@ public class Systems {
             return defaultValue;
         }
     }
+
+    /**
+     * Returns true if the env var or system property is "true"
+     */
+    public static boolean isConfigFlag(String envVar) {
+        String value = getConfigValue(envVar);
+        return value != null && value.equalsIgnoreCase("true");
+    }
 }

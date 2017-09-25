@@ -1,0 +1,5 @@
+github:
+  organisations:
+  - name: jstrachan
+    includes:
+    - npm-pipeline-test-project
