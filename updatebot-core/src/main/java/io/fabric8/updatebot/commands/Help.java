@@ -13,21 +13,29 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot.task;
+package io.fabric8.updatebot.commands;
 
-import io.fabric8.updatebot.repository.LocalRepository;
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import io.fabric8.updatebot.support.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  */
-public class UpgradeAllVersions implements Operation {
-    private static final transient Logger LOG = LoggerFactory.getLogger(UpgradeAllVersions.class);
+public class Help {
+    private static final transient Logger LOG = LoggerFactory.getLogger(Help.class);
 
-    @Override
-    public boolean apply(LocalRepository repository) {
-        LOG.info("Upgrading all versions in " + repository.getDir());
+    @Parameter()
+    private String command;
 
-        return false;
+
+    public void run(JCommander commander) {
+        if (Strings.notEmpty(command)) {
+            commander.usage(command);
+        } else {
+            commander.usage();
+        }
     }
+
 }

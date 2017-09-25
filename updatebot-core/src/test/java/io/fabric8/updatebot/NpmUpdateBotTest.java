@@ -16,7 +16,8 @@
 package io.fabric8.updatebot;
 
 
-import io.fabric8.updatebot.kind.KindNames;
+import io.fabric8.updatebot.commands.UpdateSingleVersion;
+import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,18 +27,20 @@ import java.io.File;
 /**
  */
 public class NpmUpdateBotTest {
-    protected UpdateBot updateBot = new UpdateBot();
+    protected UpdateSingleVersion updateBot = new UpdateSingleVersion();
 
     @Before
     public void init() {
         File testClasses = new File(Tests.getBasedir(), "src/test/resources/npm/updatebot.yml");
         updateBot.setConfigFile(testClasses.getPath());
 
-        // simuate updating a single version
-        updateBot.arguments(KindNames.NPM, "@angular/core", "4.3.7");
+        // lets update a single version
+        updateBot.setKind(Kind.NPM);
+        updateBot.values("@angular/core", "4.3.7");
+        
 /*
-        updateBot.setUpdateProjectURI("mvn:io.fabric8:kubernetes-client");
-        updateBot.setUpdateProjectVersion("2.6.3");
+        updateBot.setKind(Kind.Maven);
+        updateBot.values("mvn:io.fabric8:kubernetes-client", "2.6.3");
 */
     }
 

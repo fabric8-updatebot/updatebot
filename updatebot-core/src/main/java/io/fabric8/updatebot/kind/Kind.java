@@ -13,20 +13,22 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot.task;
+package io.fabric8.updatebot.kind;
 
-import io.fabric8.updatebot.repository.LocalRepository;
-
-import java.io.IOException;
+import io.fabric8.updatebot.kind.npm.PackageJsonUpdater;
 
 /**
- * An interface to represent some kind of update operation
  */
-public interface Operation {
-    /**
-     * Applies a task to the local repository.
-     *
-     * @returns true if the operation modified the source
-     */
-    boolean apply(LocalRepository repository) throws IOException;
+public enum Kind {
+    NPM(new PackageJsonUpdater());
+
+    private Updater updater;
+
+    Kind(Updater updater) {
+        this.updater = updater;
+    }
+
+    public Updater getUpdater() {
+        return updater;
+    }
 }

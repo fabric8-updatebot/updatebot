@@ -16,6 +16,7 @@
 package io.fabric8.updatebot.repository;
 
 import io.fabric8.updatebot.UpdateBot;
+import io.fabric8.updatebot.commands.UpdateBotCommand;
 import io.fabric8.updatebot.model.GitHubProjects;
 import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.GithubOrganisation;
@@ -42,7 +43,7 @@ public class Repositories {
     private static final transient Logger LOG = LoggerFactory.getLogger(Repositories.class);
 
 
-    public static List<LocalRepository> cloneOrPullRepositories(UpdateBot updateBot, Projects projects) throws IOException {
+    public static List<LocalRepository> cloneOrPullRepositories(UpdateBotCommand updateBot, Projects projects) throws IOException {
         List<LocalRepository> repositories = findRepositories(updateBot, projects);
         for (LocalRepository repository : repositories) {
             cloneOrPull(repository);
@@ -67,7 +68,7 @@ public class Repositories {
         }
     }
 
-    protected static List<LocalRepository> findRepositories(UpdateBot updateBot, Projects projects) throws IOException {
+    protected static List<LocalRepository> findRepositories(UpdateBotCommand updateBot, Projects projects) throws IOException {
         File workDir = new File(updateBot.getWorkDir());
         workDir.mkdirs();
 
