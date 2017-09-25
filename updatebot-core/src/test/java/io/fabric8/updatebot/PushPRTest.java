@@ -77,7 +77,7 @@ public class PushPRTest {
             updateBot.run();
 
 
-            // lets do some dummy commits
+            // lets do some dummy commits that force existing PRs to not be mergeable
             NpmTests.generateDummyPackageJsonCommit(localRepositories, oldVersion, "devDependencies", dependency);
 
             // now lets repeat the same command to see if we do anything (rebase mode)
