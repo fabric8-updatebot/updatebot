@@ -43,7 +43,7 @@ public class PackageJsonUpdaterTest {
     public void init() throws Exception {
         testDir = Tests.copyPackageSources(getClass());
         parentContext = new UpdateContext(LocalRepository.fromDirectory(testDir));
-         packageJson = Tests.testFile(this.testDir, "package.json");
+        packageJson = Tests.testFile(this.testDir, "package.json");
     }
 
     @Test

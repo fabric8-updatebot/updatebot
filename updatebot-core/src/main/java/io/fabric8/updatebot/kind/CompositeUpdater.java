@@ -41,7 +41,8 @@ public class CompositeUpdater implements Updater {
             if (updater.isApplicable(context)) {
                 if (updater.pushVersions(context)) {
                     answer = true;
-                };
+                }
+                ;
             }
         }
         return answer;
@@ -56,7 +57,8 @@ public class CompositeUpdater implements Updater {
             if (updater.isApplicable(context)) {
                 if (updater.pullVersions(context)) {
                     answer = true;
-                };
+                }
+                ;
             }
         }
         return answer;

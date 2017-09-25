@@ -59,7 +59,7 @@ public class PushVersionChanges extends UpdateBotCommand {
         if (values.isEmpty()) {
             throw new ParameterException("At least 2 values need to be specified for the property to be updated and its value!");
         }
-        if (values.size() %2 == 1) {
+        if (values.size() % 2 == 1) {
             throw new ParameterException("You must specify an even number of arguments for pairs of the property and version!");
         }
     }
@@ -76,7 +76,7 @@ public class PushVersionChanges extends UpdateBotCommand {
         boolean answer = false;
         for (int i = 0; i + 1 < values.size(); i += 2) {
             String propertyName = values.get(i);
-            String version = values.get(i+1);
+            String version = values.get(i + 1);
 
             if (updatePropertyVersion(context, propertyName, version)) {
                 answer = true;

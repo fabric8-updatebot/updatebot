@@ -23,16 +23,13 @@ import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.model.Projects;
 import io.fabric8.updatebot.support.Commands;
 import io.fabric8.utils.Filter;
-import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHPerson;
 import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHUser;
 import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

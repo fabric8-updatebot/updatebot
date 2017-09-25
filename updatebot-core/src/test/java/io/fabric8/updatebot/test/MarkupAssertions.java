@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Fail.fail;
 
 /**
  * Helper assertions for dealing with JSON or YAML markup

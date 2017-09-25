@@ -15,7 +15,9 @@
  */
 package io.fabric8.updatebot.support;
 
-import java.io.File; /**
+import java.io.File;
+
+/**
  */
 public class FileHelper {
     public static boolean isFile(File file) {

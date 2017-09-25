@@ -25,16 +25,16 @@ public class LocalRepository {
     private GitRepository repo;
     private File dir;
 
+    public LocalRepository(GitRepository repo, File dir) {
+        this.repo = repo;
+        this.dir = dir;
+    }
+
     /**
      * Returns a local repository from a directory.
      */
     public static LocalRepository fromDirectory(File dir) {
         return new LocalRepository(new GitRepository(dir.getName()), dir);
-    }
-
-    public LocalRepository(GitRepository repo, File dir) {
-        this.repo = repo;
-        this.dir = dir;
     }
 
     @Override
