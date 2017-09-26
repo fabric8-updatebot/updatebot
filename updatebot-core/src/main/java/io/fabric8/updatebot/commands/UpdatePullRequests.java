@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.commands;
 
+import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.CommandNames;
 import io.fabric8.updatebot.Configuration;
@@ -23,6 +24,8 @@ import io.fabric8.updatebot.support.GitHubHelpers;
 import io.fabric8.updatebot.support.PullRequests;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Objects;
+import org.kohsuke.github.GHCommitState;
+import org.kohsuke.github.GHCommitStatus;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
@@ -34,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
+import static io.fabric8.updatebot.support.GitHubHelpers.getLastCommitStatus;
 import static io.fabric8.updatebot.support.PullRequests.UPDATEBOT;
 
 /**
@@ -43,13 +47,17 @@ import static io.fabric8.updatebot.support.PullRequests.UPDATEBOT;
 public class UpdatePullRequests extends CommandSupport {
     private static final transient Logger LOG = LoggerFactory.getLogger(UpdatePullRequests.class);
 
+    @Parameter(names = "--merge", description = "Whether we should merge Pull Requests that are Open and have a successful last commit status", arity = 1)
+    private boolean mergeOnSuccess = true;
+
     @Override
     public void run(CommandContext context) throws IOException {
         GHRepository ghRepository = context.gitHubRepository();
         if (ghRepository != null) {
             List<GHPullRequest> pullRequests = ghRepository.getPullRequests(GHIssueState.OPEN);
             for (GHPullRequest pullRequest : pullRequests) {
-                if (GitHubHelpers.hasLabel(pullRequest.getLabels(), context.getConfiguration().getGithubPullRequestLabel())) {
+                Configuration configuration = context.getConfiguration();
+                if (GitHubHelpers.hasLabel(pullRequest.getLabels(), configuration.getGithubPullRequestLabel())) {
                     if (!GitHubHelpers.isMergeable(pullRequest)) {
                         // lets re-run the update commands we can find on the PR
                         CompositeCommand commands = loadCommandsFromPullRequest(context, ghRepository, pullRequest);
@@ -57,6 +65,22 @@ public class UpdatePullRequests extends CommandSupport {
                             commands.run(context, ghRepository, pullRequest);
                         }
                     }
+
+                    if (mergeOnSuccess) {
+                        try {
+                            GHCommitStatus status = getLastCommitStatus(ghRepository, pullRequest);
+                            if (status != null) {
+                                GHCommitState state = status.getState();
+                                if (state != null && state.equals(GHCommitState.SUCCESS)) {
+                                    String message = PullRequests.UPDATEBOT_ICON + " merging this pull request as its CI was successful";
+                                    pullRequest.merge(message);
+                                }
+                            }
+                        } catch (IOException e) {
+                            LOG.warn("Failed to find last commit status for PR " + pullRequest.getHtmlUrl() + " " + e, e);
+                        }
+                    }
+
                 }
             }
         }

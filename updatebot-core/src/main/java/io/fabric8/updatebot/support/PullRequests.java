@@ -19,8 +19,9 @@ package io.fabric8.updatebot.support;
  */
 public class PullRequests {
     public static final String UPDATEBOT = "updatebot";
+    public static final String UPDATEBOT_ICON = "[UpdateBot](https://github.com/fabric8io/updatebot)";
 
-    public static final String COMMAND_COMMENT_PREFIX = "[UpdateBot](https://github.com/fabric8io/updatebot) commands:";
+    public static final String COMMAND_COMMENT_PREFIX = UPDATEBOT_ICON + " commands:";
     public static final String COMMAND_COMMENT_PREFIX_SEPARATOR = "\n\n";
     public static final String COMMAND_COMMENT_INDENT = "    " + UPDATEBOT + " ";
 

@@ -23,6 +23,7 @@ import io.fabric8.updatebot.model.GithubOrganisation;
 import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.model.Projects;
 import io.fabric8.updatebot.support.Commands;
+import io.fabric8.updatebot.support.GitHubHelpers;
 import io.fabric8.utils.Filter;
 import org.kohsuke.github.GHPerson;
 import org.kohsuke.github.GHRepository;
@@ -116,18 +117,7 @@ public class Repositories {
         String orgName = organisation.getName();
         Filter<String> filter = organisation.createFilter();
 
-        GHPerson person = null;
-        try {
-            person = github.getOrganization(orgName);
-        } catch (IOException e) {
-        }
-        if (person == null) {
-            try {
-                person = github.getUser(orgName);
-            } catch (IOException e) {
-                LOG.warn("Could not find organisation or user for " + orgName + ". " + e, e);
-            }
-        }
+        GHPerson person = GitHubHelpers.getOrganisationOrUser(github, orgName);
         if (person != null) {
             try {
                 Map<String, GHRepository> repositories = person.getRepositories();

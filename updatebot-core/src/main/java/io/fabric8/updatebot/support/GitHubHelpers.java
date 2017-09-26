@@ -18,12 +18,16 @@ package io.fabric8.updatebot.support;
 import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.repository.LocalRepository;
+import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHBranch;
+import org.kohsuke.github.GHCommitStatus;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHLabel;
+import org.kohsuke.github.GHPerson;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +105,26 @@ public class GitHubHelpers {
                 }
             }
         }
+    }
 
+    public static GHPerson getOrganisationOrUser(GitHub github, String orgName) {
+        GHPerson person = null;
+        try {
+            person = github.getOrganization(orgName);
+        } catch (IOException e) {
+        }
+        if (person == null) {
+            try {
+                person = github.getUser(orgName);
+            } catch (IOException e) {
+                LOG.warn("Could not find organisation or user for " + orgName + ". " + e, e);
+            }
+        }
+        return person;
+    }
 
+    public static GHCommitStatus getLastCommitStatus(GHRepository repository, GHPullRequest pullRequest) throws IOException {
+        String commitSha = pullRequest.getHead().getRef();
+        return repository.getLastCommitStatus(commitSha);
     }
 }
