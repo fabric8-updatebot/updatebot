@@ -1,6 +1,9 @@
 ## UpdateBot
 
-A bot for updating dependencies
+A bot for updating dependencies on your projects automatically!
+
+[![Javadocs](http://www.javadoc.io/badge/io.fabric8.updatebot/updatebot-core.svg?color=blue)]
+[![Maven Central](https://img.shields.io/maven-central/v/io.fabric8.updatebot/updatebot-core.svg?maxAge=2592000)](http://search.maven.org/#search%7Cga%7C1%7Cg%3Aio.fabric8.updatebot%20a%3Aupdatebot-core)
 
 ### Configuration
 
