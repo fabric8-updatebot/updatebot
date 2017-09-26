@@ -35,7 +35,7 @@ public class Configuration {
     @Parameter(names = {"--config", "-c"}, description = "Location of the UpdateBot YAML configuration file")
     private String configFile = Systems.getConfigValue(EnvironmentVariables.CONFIG_FILE, "updatebot.yml");
     @Parameter(names = {"--dir", "-d"}, description = "Directory where the git repositories are cloned")
-    private String workDir = Systems.getConfigValue(EnvironmentVariables.WORK_DIR, "updatebot-repos");
+    private String workDir = Systems.getConfigValue(EnvironmentVariables.WORK_DIR, "./.updatebot-repos");
     @Parameter(names = {"--github-username", "-ghu"}, description = "GitHub Username")
     private String githubUsername = Systems.getConfigValue(EnvironmentVariables.GITHUB_USER);
     @Parameter(names = {"--github-password", "-ghp"}, description = "GitHub Password")
