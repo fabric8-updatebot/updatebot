@@ -28,6 +28,7 @@
   <artifactId>updatebot-core</artifactId>
   <packaging>jar</packaging>
   <name>updatebot :: core</name>
+  <version>1.0-SNAPSHOT</version>
 
 
   <dependencies>
@@ -50,6 +51,12 @@
       <groupId>org.kohsuke</groupId>
       <artifactId>github-api</artifactId>
       <version>${kohsuke.github-api.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.fasterxml.jackson.*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -64,8 +71,18 @@
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
       <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${slf4j-log4j12.version}</version>
     </dependency>
 
 
@@ -80,15 +97,62 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j-log4j12.version}</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
 
   <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <basedir>${basedir}</basedir>
+            <project.version>${project.version}</project.version>
+          </systemPropertyVariables>
+          <includes>
+            <include>**/*TestSuite.java</include>
+            <include>**/*Test.java</include>
+          </includes>
+          <excludes>
+            <exclude>**/NpmUpdateBotTest.java</exclude>
+            <exclude>**/PushPRTest.java</exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <!--
+      enable all the integration tests
+
+      assumes you have the GITHUB environment variables defined for user name and password/token
+
+      see EnvironmentVariables.java
+      https://github.com/fabric8io/updatebot/blob/master/updatebot-core/src/main/java/io/fabric8/updatebot/EnvironmentVariables.java#L21
+
+      -->
+
+      <id>itest</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <systemPropertyVariables>
+                <basedir>${basedir}</basedir>
+                <project.version>${project.version}</project.version>
+              </systemPropertyVariables>
+              <excludes>
+              </excludes>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+  </profiles>
 </project>

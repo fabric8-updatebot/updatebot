@@ -26,6 +26,7 @@
   </parent>
 
   <artifactId>updatebot</artifactId>
+  <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>updatebot :: executable</name>
 
@@ -36,11 +37,31 @@
       <version>${project.version}</version>
     </dependency>
 
+    <!--
+    TODO no idea why this is required but oddness occurs when using transitive dependencies for jackson
+    which force an old version of jackson
+    -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>${slf4j-log4j12.version}</version>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>${jackson.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+
   </dependencies>
 
 
@@ -73,29 +94,6 @@
         </executions>
       </plugin>
 
-<!--
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.8</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <configuration>
-              <target>
-
-                <concat destfile="${basedir}/target/updatebot-${project.version}.jar" append="true">
-                  <filelist dir="${basedir}/src/main/resources" files="run.sh"/>
-                </concat>
-
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
--->
 
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
