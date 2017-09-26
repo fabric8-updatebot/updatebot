@@ -26,7 +26,10 @@ import io.fabric8.utils.Strings;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
@@ -122,6 +125,21 @@ public abstract class CommandSupport {
         String configFile = configuration.getConfigFile();
         File file = new File(configFile);
         if (!file.isFile() || !file.exists()) {
+            URL url = null;
+            try {
+                url = new URL(configFile);
+                InputStream in = null;
+                try {
+                    in = url.openStream();
+                } catch (IOException e) {
+                    throw new IOException("Failed to open URL " + configFile + ". " + e, e);
+                }
+                if (in != null) {
+                    return loadYaml(in, Projects.class);
+                }
+            } catch (MalformedURLException e) {
+                // ignore
+            }
             throw new FileNotFoundException(configFile);
         }
         return loadYaml(file, Projects.class);

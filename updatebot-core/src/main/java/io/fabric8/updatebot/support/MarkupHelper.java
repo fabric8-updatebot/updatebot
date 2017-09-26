@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.net.URL;
 
 /**
  */
@@ -67,11 +68,19 @@ public class MarkupHelper {
     }
 
     /**
-     * Loads the YAML text for the given DTO class
+     * Loads the YAML for the given DTO class
      */
     public static <T> T loadYaml(File file, Class<T> clazz) throws IOException {
         ObjectMapper mapper = createYamlObjectMapper();
         return mapper.readValue(file, clazz);
+    }
+
+    /**
+     * Loads the YAML for the given DTO class
+     */
+    public static <T> T loadYaml(URL src, Class<T> clazz) throws IOException {
+        ObjectMapper mapper = createYamlObjectMapper();
+        return mapper.readValue(src, clazz);
     }
 
     /**
