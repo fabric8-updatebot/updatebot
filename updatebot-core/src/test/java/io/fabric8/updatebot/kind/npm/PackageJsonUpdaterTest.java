@@ -16,8 +16,9 @@
 package io.fabric8.updatebot.kind.npm;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.fabric8.updatebot.commands.UpdateContext;
-import io.fabric8.updatebot.commands.UpdateVersionContext;
+import io.fabric8.updatebot.Configuration;
+import io.fabric8.updatebot.commands.CommandContext;
+import io.fabric8.updatebot.commands.PushVersionContext;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.support.MarkupHelper;
@@ -35,14 +36,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class PackageJsonUpdaterTest {
     protected PackageJsonUpdater updater = new PackageJsonUpdater();
-    protected UpdateContext parentContext;
+    protected CommandContext parentContext;
     protected File testDir;
     protected File packageJson;
+    protected Configuration configuration = new Configuration();
 
     @Before
     public void init() throws Exception {
         testDir = Tests.copyPackageSources(getClass());
-        parentContext = new UpdateContext(LocalRepository.fromDirectory(testDir));
+        parentContext = new CommandContext(LocalRepository.fromDirectory(testDir), configuration);
         packageJson = Tests.testFile(this.testDir, "package.json");
     }
 
@@ -57,13 +59,13 @@ public class PackageJsonUpdaterTest {
     }
 
     public void assertUpdatePackageJson(File packageJson, String dependencyKey, String name, String version) throws IOException {
-        UpdateVersionContext context = parentContext.updateVersion(Kind.NPM, name, version);
+        PushVersionContext context = parentContext.updateVersion(Kind.NPM, name, version);
         assertThat(updater.isApplicable(context)).
                 describedAs("File should be applicable " + packageJson).
                 isTrue();
         updater.pushVersions(context);
 
-        UpdateVersionContext.Change change = context.change(name);
+        PushVersionContext.Change change = context.change(name);
         assertThat(change).describedAs("expected change for name " + name).isNotNull();
         assertThat(change.getNewValue()).isEqualTo(version);
 

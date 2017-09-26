@@ -17,6 +17,7 @@ package io.fabric8.updatebot.commands;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import io.fabric8.updatebot.CommandNames;
 import io.fabric8.updatebot.kind.CompositeUpdater;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.kind.Updater;
@@ -29,9 +30,9 @@ import java.io.IOException;
 /**
  * Pulls updates to your projects from upstream artifact repositories like npm or maven central
  */
-@Parameters(commandDescription = "Pulls version changes into your projects. " +
+@Parameters(commandNames = CommandNames.PULL, commandDescription = "Pulls version changes into your projects. " +
         "Lets you periodically query all the dependencies for all your projects and pull any upstream releases into your projects")
-public class PullVersionChanges extends UpdateBotCommand {
+public class PullVersionChanges extends ModifyFilesCommandSupport {
     private static final transient Logger LOG = LoggerFactory.getLogger(PullVersionChanges.class);
 
     @Parameter(order = 0, names = {"--kind", "-k"}, description = "The kind of property to replace based on the kind of language or build tool. If not specified then all supported languages and build tools will be updated")
@@ -40,7 +41,7 @@ public class PullVersionChanges extends UpdateBotCommand {
     private Updater updater;
 
     @Override
-    protected boolean doProcess(UpdateContext context) throws IOException {
+    protected boolean doProcess(CommandContext context) throws IOException {
         LocalRepository repository = context.getRepository();
         LOG.debug("Pulling version changes into: " + repository.getDir() + " repo: " + repository.getCloneUrl());
 

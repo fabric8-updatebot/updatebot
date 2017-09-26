@@ -13,19 +13,13 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot.kind;
-
-import io.fabric8.updatebot.commands.CommandContext;
-import io.fabric8.updatebot.commands.PushVersionContext;
-
-import java.io.IOException;
+package io.fabric8.updatebot;
 
 /**
  */
-public interface Updater {
-    boolean isApplicable(CommandContext context);
-
-    boolean pushVersions(PushVersionContext context) throws IOException;
-
-    boolean pullVersions(CommandContext context) throws IOException;
+public final class CommandNames {
+    public static final String HELP = "help";
+    public static final String PULL = "pull";
+    public static final String PUSH = "push";
+    public static final String UPDATE = "update";
 }

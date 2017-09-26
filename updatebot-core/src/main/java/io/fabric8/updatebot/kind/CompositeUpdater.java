@@ -15,8 +15,8 @@
  */
 package io.fabric8.updatebot.kind;
 
-import io.fabric8.updatebot.commands.UpdateContext;
-import io.fabric8.updatebot.commands.UpdateVersionContext;
+import io.fabric8.updatebot.commands.CommandContext;
+import io.fabric8.updatebot.commands.PushVersionContext;
 
 import java.io.IOException;
 
@@ -28,12 +28,12 @@ public class CompositeUpdater implements Updater {
     }
 
     @Override
-    public boolean isApplicable(UpdateContext context) {
+    public boolean isApplicable(CommandContext context) {
         return true;
     }
 
     @Override
-    public boolean pushVersions(UpdateVersionContext context) throws IOException {
+    public boolean pushVersions(PushVersionContext context) throws IOException {
         Kind[] kinds = Kind.values();
         boolean answer = false;
         for (Kind kind : kinds) {
@@ -49,7 +49,7 @@ public class CompositeUpdater implements Updater {
     }
 
     @Override
-    public boolean pullVersions(UpdateContext context) throws IOException {
+    public boolean pullVersions(CommandContext context) throws IOException {
         Kind[] kinds = Kind.values();
         boolean answer = false;
         for (Kind kind : kinds) {

@@ -40,7 +40,7 @@ public class MarkupAssertions {
         assertThat(paths.length).describedAs("Should have at least one path expression!").isGreaterThan(0);
 
         int objectPathLength = paths.length - 1;
-        ObjectNode objectNode ;
+        ObjectNode objectNode;
         if (paths.length > 1) {
             String[] objectPath = new String[objectPathLength];
             System.arraycopy(paths, 0, objectPath, 0, objectPathLength);

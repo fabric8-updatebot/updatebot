@@ -13,19 +13,15 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot.kind;
-
-import io.fabric8.updatebot.commands.CommandContext;
-import io.fabric8.updatebot.commands.PushVersionContext;
-
-import java.io.IOException;
+package io.fabric8.updatebot.support;
 
 /**
  */
-public interface Updater {
-    boolean isApplicable(CommandContext context);
+public class PullRequests {
+    public static final String UPDATEBOT = "updatebot";
 
-    boolean pushVersions(PushVersionContext context) throws IOException;
+    public static final String COMMAND_COMMENT_PREFIX = "[UpdateBot](https://github.com/fabric8io/updatebot) commands:";
+    public static final String COMMAND_COMMENT_PREFIX_SEPARATOR = "\n\n";
+    public static final String COMMAND_COMMENT_INDENT = "    " + UPDATEBOT + " ";
 
-    boolean pullVersions(CommandContext context) throws IOException;
 }

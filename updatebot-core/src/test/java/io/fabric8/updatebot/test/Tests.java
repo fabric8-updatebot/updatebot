@@ -82,4 +82,11 @@ public class Tests {
         assertThat(answer).describedAs("test file").isFile();
         return answer;
     }
+
+    public static String getCleanWorkDir(Class<?> clazz) {
+        File testDataDir = getTestDataDir(clazz);
+        System.out.println("Using workDir: " + testDataDir);
+        Files.recursiveDelete(testDataDir);
+        return testDataDir.getPath();
+    }
 }

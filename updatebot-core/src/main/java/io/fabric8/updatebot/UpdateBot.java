@@ -16,13 +16,20 @@
 package io.fabric8.updatebot;
 
 import com.beust.jcommander.JCommander;
+import io.fabric8.updatebot.commands.CommandSupport;
 import io.fabric8.updatebot.commands.Help;
 import io.fabric8.updatebot.commands.PullVersionChanges;
 import io.fabric8.updatebot.commands.PushVersionChanges;
+import io.fabric8.updatebot.commands.UpdatePullRequests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+
+import static io.fabric8.updatebot.CommandNames.HELP;
+import static io.fabric8.updatebot.CommandNames.PULL;
+import static io.fabric8.updatebot.CommandNames.PUSH;
+import static io.fabric8.updatebot.CommandNames.UPDATE;
 
 /**
  */
@@ -31,39 +38,9 @@ public class UpdateBot {
 
     public static void main(String[] args) {
         try {
-            PushVersionChanges pushVersionChanges = new PushVersionChanges();
-            PullVersionChanges pullVersionChanges = new PullVersionChanges();
-            Help help = new Help();
-
-            JCommander commander = JCommander.newBuilder()
-                    .addCommand("push", pushVersionChanges)
-                    .addCommand("pull", pullVersionChanges)
-                    .addCommand("help", help)
-                    .build();
-            commander.setProgramName("updatebot");
-            commander.parse(args);
-
-            String parsedCommand = commander.getParsedCommand();
-            if (parsedCommand == null) {
-                commander.usage();
-            } else {
-                switch (parsedCommand) {
-                    case "push":
-                        pushVersionChanges.run();
-                        return;
-
-                    case "pull":
-                        pullVersionChanges.run();
-                        return;
-
-                    case "help":
-                        help.run(commander);
-                        return;
-
-                    default:
-                        commander.usage();
-                }
-            }
+            Configuration config = new Configuration();
+            CommandSupport command = parseCommand(args, config, true);
+            command.run(config);
         } catch (IOException e) {
             System.err.println("Failed: " + e);
             e.printStackTrace();
@@ -74,5 +51,49 @@ public class UpdateBot {
             }
             System.exit(1);
         }
+    }
+
+    /**
+     * Parses the command from the given command line arguments or returns null if there is no command found
+     */
+    public static CommandSupport parseCommand(String[] args, Configuration config, boolean defaultToHelp) {
+        PushVersionChanges pushVersionChanges = new PushVersionChanges();
+        PullVersionChanges pullVersionChanges = new PullVersionChanges();
+        UpdatePullRequests updatePullRequests = new UpdatePullRequests();
+        Help help = new Help();
+
+        JCommander commander = JCommander.newBuilder()
+                .addObject(config)
+                .addCommand(HELP, help)
+                .addCommand(PULL, pullVersionChanges)
+                .addCommand(PUSH, pushVersionChanges)
+                .addCommand(UPDATE, updatePullRequests)
+                .build();
+        commander.setExpandAtSign(false);
+        commander.setProgramName("updatebot");
+        commander.parse(args);
+
+        help.setCommander(commander);
+
+        String parsedCommand = commander.getParsedCommand();
+        if (parsedCommand != null) {
+            switch (parsedCommand) {
+                case HELP:
+                    return help;
+
+                case PULL:
+                    return pullVersionChanges;
+
+                case PUSH:
+                    return pushVersionChanges;
+
+                case UPDATE:
+                    return updatePullRequests;
+            }
+        }
+        if (defaultToHelp) {
+            return help;
+        }
+        return null;
     }
 }

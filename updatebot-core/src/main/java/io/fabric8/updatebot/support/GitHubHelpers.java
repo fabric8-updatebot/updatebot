@@ -15,12 +15,11 @@
  */
 package io.fabric8.updatebot.support;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.repository.LocalRepository;
-import io.fabric8.utils.Files;
 import io.fabric8.utils.Objects;
+import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPullRequest;
@@ -28,11 +27,10 @@ import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  */
@@ -41,10 +39,8 @@ public class GitHubHelpers {
 
     public static void closeOpenUpdateBotPullRequests(String prLabel, List<LocalRepository> repositories) {
         for (LocalRepository repository : repositories) {
-            GitRepository repo = repository.getRepo();
-            if (repo instanceof GithubRepository) {
-                GithubRepository githubRepository = (GithubRepository) repo;
-                GHRepository ghRepo = githubRepository.getRepository();
+            GHRepository ghRepo = GitHubHelpers.getGitHubRepository(repository);
+            if (ghRepo != null) {
                 try {
                     List<GHPullRequest> pullRequests = ghRepo.getPullRequests(GHIssueState.OPEN);
                     for (GHPullRequest pullRequest : pullRequests) {
@@ -55,11 +51,20 @@ public class GitHubHelpers {
                 } catch (IOException e) {
                     LOG.warn("Failed to close pending open Pull Requests on " + repository.getCloneUrl());
                 }
-
-
             }
         }
+    }
 
+    /**
+     * Returns the underlying GitHub repository if this repository is on github
+     */
+    public static GHRepository getGitHubRepository(LocalRepository repository) {
+        GitRepository repo = repository.getRepo();
+        if (repo instanceof GithubRepository) {
+            GithubRepository githubRepository = (GithubRepository) repo;
+            return githubRepository.getRepository();
+        }
+        return null;
     }
 
     public static boolean hasLabel(Collection<GHLabel> labels, String label) {
@@ -74,7 +79,6 @@ public class GitHubHelpers {
     }
 
 
-
     public static boolean isMergeable(GHPullRequest pullRequest) throws IOException {
         boolean canMerge = false;
         Boolean mergeable = pullRequest.getMergeable();
@@ -82,5 +86,22 @@ public class GitHubHelpers {
             canMerge = true;
         }
         return canMerge;
+    }
+
+    public static void deleteUpdateBotBranches(List<LocalRepository> localRepositories) throws IOException {
+        for (LocalRepository localRepository : localRepositories) {
+            GHRepository ghRepository = getGitHubRepository(localRepository);
+            if (ghRepository != null) {
+                Map<String, GHBranch> branches = ghRepository.getBranches();
+                for (GHBranch ghBranch : branches.values()) {
+                    String name = ghBranch.getName();
+                    if (name.startsWith("updatebot-")) {
+                        // TODO no API to delete branches yet
+                    }
+                }
+            }
+        }
+
+
     }
 }

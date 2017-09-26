@@ -28,21 +28,22 @@ import java.io.File;
  */
 public class NpmUpdateBotTest {
     protected PushVersionChanges updateBot = new PushVersionChanges();
+    private Configuration configuration = new Configuration();
 
     @Before
     public void init() {
         File testClasses = new File(Tests.getBasedir(), "src/test/resources/npm/updatebot.yml");
-        updateBot.setConfigFile(testClasses.getPath());
+        configuration.setConfigFile(testClasses.getPath());
+        configuration.setDryRun(true);
 
         // lets update a single version
         updateBot.setKind(Kind.NPM);
         updateBot.values("@angular/core", "4.3.7");
-        updateBot.setDryRun(true);
     }
 
     @Test
     public void testUpdater() throws Exception {
-        updateBot.run();
+        updateBot.run(configuration);
     }
 
 }

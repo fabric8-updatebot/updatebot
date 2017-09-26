@@ -17,8 +17,8 @@ package io.fabric8.updatebot.kind.npm;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.fabric8.updatebot.commands.UpdateContext;
-import io.fabric8.updatebot.commands.UpdateVersionContext;
+import io.fabric8.updatebot.commands.CommandContext;
+import io.fabric8.updatebot.commands.PushVersionContext;
 import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.FileHelper;
@@ -36,12 +36,12 @@ public class PackageJsonUpdater implements Updater {
     };
 
     @Override
-    public boolean isApplicable(UpdateContext context) {
+    public boolean isApplicable(CommandContext context) {
         return FileHelper.isFile(context.file("package.json"));
     }
 
     @Override
-    public boolean pushVersions(UpdateVersionContext context) throws IOException {
+    public boolean pushVersions(PushVersionContext context) throws IOException {
         File file = context.file("package.json");
         JsonNode tree = MarkupHelper.loadJson(file);
         boolean answer = false;
@@ -62,7 +62,7 @@ public class PackageJsonUpdater implements Updater {
     }
 
     @Override
-    public boolean pullVersions(UpdateContext context) throws IOException {
+    public boolean pullVersions(CommandContext context) throws IOException {
         File dir = context.getRepository().getDir();
         int status = Commands.runCommand(dir, "ncu", "--upgrade");
         if (status == 0) {
@@ -71,7 +71,7 @@ public class PackageJsonUpdater implements Updater {
         return false;
     }
 
-    protected boolean updateDependencyVersion(String dependencyKey, ObjectNode dependencies, UpdateVersionContext context) {
+    protected boolean updateDependencyVersion(String dependencyKey, ObjectNode dependencies, PushVersionContext context) {
         String name = context.getName();
         String value = context.getValue();
         JsonNode dependency = dependencies.get(name);

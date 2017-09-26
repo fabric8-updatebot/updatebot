@@ -18,12 +18,14 @@ package io.fabric8.updatebot.commands;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
+import io.fabric8.updatebot.CommandNames;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.repository.LocalRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -31,9 +33,9 @@ import java.util.List;
 /**
  * Push changes from a specific release pipeline into downstream projects
  */
-@Parameters(commandDescription = "Pushes version changes into your projects. " +
+@Parameters(commandNames = CommandNames.PUSH, commandDescription = "Pushes version changes into your projects. " +
         "You usually invoke this command after a release has been performed")
-public class PushVersionChanges extends UpdateBotCommand {
+public class PushVersionChanges extends ModifyFilesCommandSupport {
     private static final transient Logger LOG = LoggerFactory.getLogger(PushVersionChanges.class);
 
     @Parameter(order = 0, names = {"--kind", "-k"}, description = "The kind of property to replace based on the kind of language or build tool.", required = true)
@@ -41,6 +43,18 @@ public class PushVersionChanges extends UpdateBotCommand {
 
     @Parameter(description = "The property name and values to be replaced", required = true)
     private List<String> values;
+
+    public PushVersionChanges() {
+    }
+
+    public PushVersionChanges(Kind kind, List<String> values) {
+        this.kind = kind;
+        this.values = values;
+    }
+
+    public PushVersionChanges(Kind kind, String... values) {
+        this(kind, Arrays.asList(values));
+    }
 
     public Kind getKind() {
         return kind;
@@ -69,9 +83,10 @@ public class PushVersionChanges extends UpdateBotCommand {
     }
 
     @Override
-    protected boolean doProcess(UpdateContext context) throws IOException {
+    protected boolean doProcess(CommandContext context) throws IOException {
         LocalRepository repository = context.getRepository();
-        LOG.debug("Updating version in: " + repository.getDir() + " repo: " + repository.getCloneUrl());
+        File dir = repository.getDir();
+        LOG.debug("Updating version in: " + dir + " repo: " + repository.getCloneUrl());
 
         boolean answer = false;
         for (int i = 0; i + 1 < values.size(); i += 2) {
@@ -85,8 +100,8 @@ public class PushVersionChanges extends UpdateBotCommand {
         return answer;
     }
 
-    protected boolean updatePropertyVersion(UpdateContext parentContext, String propertyName, String version) throws IOException {
-        UpdateVersionContext context = new UpdateVersionContext(parentContext, kind, propertyName, version);
+    protected boolean updatePropertyVersion(CommandContext parentContext, String propertyName, String version) throws IOException {
+        PushVersionContext context = new PushVersionContext(parentContext, kind, propertyName, version);
         Updater updater = kind.getUpdater();
         boolean updated = false;
         if (updater.isApplicable(context)) {

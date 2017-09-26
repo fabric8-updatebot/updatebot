@@ -16,7 +16,6 @@
 package io.fabric8.updatebot.commands;
 
 import io.fabric8.updatebot.kind.Kind;
-import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.utils.Objects;
 
 import java.util.ArrayList;
@@ -24,20 +23,13 @@ import java.util.List;
 
 /**
  */
-public class UpdateVersionContext extends UpdateContext {
+public class PushVersionContext extends CommandContext {
     private final String name;
     private final String value;
     private Kind kind;
     private List<Change> changes = new ArrayList<>();
 
-    public UpdateVersionContext(LocalRepository repository, Kind kind, String name, String value) {
-        super(repository);
-        this.kind = kind;
-        this.name = name;
-        this.value = value;
-    }
-
-    public UpdateVersionContext(UpdateContext parentContext, Kind kind, String name, String value) {
+    public PushVersionContext(CommandContext parentContext, Kind kind, String name, String value) {
         super(parentContext);
         this.kind = kind;
         this.name = name;
@@ -46,8 +38,9 @@ public class UpdateVersionContext extends UpdateContext {
 
     @Override
     public String toString() {
-        return "UpdateVersionContext{" +
-                "name='" + name + '\'' +
+        return "PushVersionContext{" +
+                "kind='" + kind + '\'' +
+                ", name='" + name + '\'' +
                 ", value='" + value + '\'' +
                 '}';
     }

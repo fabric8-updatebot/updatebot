@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  */
@@ -42,7 +43,9 @@ public class NpmTests {
             if (repo instanceof GithubRepository) {
                 File dir = repository.getDir();
 
+                String localBranch = "updatebot-test-" + UUID.randomUUID().toString();
                 Commands.runCommand(dir, "git", "checkout", "master");
+                Commands.runCommand(dir, "git", "checkout", "-b", localBranch);
 
                 boolean changed = false;
                 if (generateDummyChangePackageJson(dir, value, paths)) {
@@ -51,7 +54,7 @@ public class NpmTests {
                 if (changed) {
                     Commands.runCommand(dir, "git", "add", "*");
                     if (Commands.runCommand(dir, "git", "commit", "-m", "Dummy commit to test rebase at " + new Date()) == 0) {
-                        if (Commands.runCommand(dir, "git", "push", "origin", "master") == 0) {
+                        if (Commands.runCommand(dir, "git", "push", "origin", localBranch + ":master") == 0) {
                             break;
                         }
                     }

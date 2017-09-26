@@ -18,18 +18,34 @@ package io.fabric8.updatebot.commands;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import io.fabric8.updatebot.CommandNames;
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.support.Strings;
+
+import java.io.IOException;
 
 /**
  * Displays help
  */
-@Parameters(commandDescription = "Displays help on using the available commands")
-public class Help {
+@Parameters(commandNames = CommandNames.HELP, commandDescription = "Displays help on using the available commands")
+public class Help extends CommandSupport {
     @Parameter()
     private String command;
 
+    private JCommander commander;
 
-    public void run(JCommander commander) {
+
+    @Override
+    public void run(Configuration configuration) throws IOException {
+        showUsage();
+    }
+
+    @Override
+    public void run(CommandContext context) throws IOException {
+        showUsage();
+    }
+
+    public void showUsage() {
         if (Strings.notEmpty(command)) {
             commander.usage(command);
         } else {
@@ -37,4 +53,11 @@ public class Help {
         }
     }
 
+    public JCommander getCommander() {
+        return commander;
+    }
+
+    public void setCommander(JCommander commander) {
+        this.commander = commander;
+    }
 }

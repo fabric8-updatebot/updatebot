@@ -15,7 +15,8 @@
  */
 package io.fabric8.updatebot.repository;
 
-import io.fabric8.updatebot.commands.UpdateBotCommand;
+import io.fabric8.updatebot.Configuration;
+import io.fabric8.updatebot.commands.CommandSupport;
 import io.fabric8.updatebot.model.GitHubProjects;
 import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.GithubOrganisation;
@@ -42,12 +43,22 @@ public class Repositories {
     private static final transient Logger LOG = LoggerFactory.getLogger(Repositories.class);
 
 
-    public static List<LocalRepository> cloneOrPullRepositories(UpdateBotCommand updateBot, Projects projects) throws IOException {
-        List<LocalRepository> repositories = findRepositories(updateBot, projects);
+    public static List<LocalRepository> cloneOrPullRepositories(CommandSupport command, Configuration configuration, Projects projects) throws IOException {
+        List<LocalRepository> repositories = findRepositories(command, configuration, projects);
         for (LocalRepository repository : repositories) {
             cloneOrPull(repository);
         }
         return repositories;
+    }
+
+    public static boolean gitStashAndCheckoutMaster(File dir) {
+        if (Commands.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
+            if (Commands.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
+                return true;
+            }
+        }
+        LOG.warn("Failed to checkout master in " + dir);
+        return false;
     }
 
     private static void cloneOrPull(LocalRepository repository) {
@@ -69,8 +80,8 @@ public class Repositories {
         }
     }
 
-    protected static List<LocalRepository> findRepositories(UpdateBotCommand updateBot, Projects projects) throws IOException {
-        File workDir = new File(updateBot.getWorkDir());
+    protected static List<LocalRepository> findRepositories(CommandSupport updateBot, Configuration configuration, Projects projects) throws IOException {
+        File workDir = new File(configuration.getWorkDir());
         workDir.mkdirs();
 
         Map<String, LocalRepository> map = new LinkedHashMap<>();
@@ -81,7 +92,7 @@ public class Repositories {
         if (githubProjects != null) {
             List<GithubOrganisation> organisations = githubProjects.getOrganisations();
             if (organisations != null && !organisations.isEmpty()) {
-                GitHub github = updateBot.getGithub();
+                GitHub github = configuration.getGithub();
                 for (GithubOrganisation organisation : organisations) {
                     addGitHubRepositories(map, github, organisation, new File(gitHubDir, organisation.getName()));
                 }

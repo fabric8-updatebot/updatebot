@@ -15,8 +15,11 @@
  */
 package io.fabric8.updatebot.commands;
 
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.repository.LocalRepository;
+import io.fabric8.updatebot.support.GitHubHelpers;
+import org.kohsuke.github.GHRepository;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,29 +29,36 @@ import java.util.TreeSet;
 
 /**
  */
-public class UpdateContext {
+public class CommandContext {
     private final LocalRepository repository;
+    private final Configuration configuration;
     private final Set<File> updatedFiles = new TreeSet<>();
-    private final UpdateContext parentContext;
-    private List<UpdateContext> children = new ArrayList<>();
+    private final CommandContext parentContext;
+    private List<CommandContext> children = new ArrayList<>();
 
-    public UpdateContext(LocalRepository repository) {
+    public CommandContext(LocalRepository repository, Configuration configuration) {
         this.repository = repository;
+        this.configuration = configuration;
         this.parentContext = null;
     }
 
-    public UpdateContext(UpdateContext parentContext) {
+    public CommandContext(CommandContext parentContext) {
         this.repository = parentContext.getRepository();
+        this.configuration = parentContext.getConfiguration();
         this.parentContext = parentContext;
         this.parentContext.addChild(this);
     }
 
-    protected void addChild(UpdateContext child) {
-        children.add(child);
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
-    public UpdateContext getParentContext() {
+    public CommandContext getParentContext() {
         return parentContext;
+    }
+
+    public List<CommandContext> getChildren() {
+        return children;
     }
 
     public LocalRepository getRepository() {
@@ -66,6 +76,22 @@ public class UpdateContext {
         return updatedFiles;
     }
 
+
+    public String getCloneUrl() {
+        return repository.getCloneUrl();
+    }
+
+    public File getDir() {
+        return repository.getDir();
+    }
+
+    /**
+     * Returns the underlying github repository or null if its not a github repo
+     */
+    public GHRepository gitHubRepository() {
+        return GitHubHelpers.getGitHubRepository(repository);
+    }
+
     /**
      * Returns the relative file path within the local repo
      */
@@ -77,8 +103,8 @@ public class UpdateContext {
         updatedFiles.add(file);
     }
 
-    public UpdateVersionContext updateVersion(Kind kind, String name, String version) {
-        return new UpdateVersionContext(this, kind, name, version);
+    public PushVersionContext updateVersion(Kind kind, String name, String version) {
+        return new PushVersionContext(this, kind, name, version);
     }
 
     public String createTitle() {
@@ -94,5 +120,11 @@ public class UpdateContext {
         }
         return createTitle();
     }
+
+
+    protected void addChild(CommandContext child) {
+        children.add(child);
+    }
+
 
 }
