@@ -77,5 +77,4 @@ public class GitRepository extends DtoSupport {
     }
 
 
-
 }

@@ -32,7 +32,7 @@ To push versions from a repository just run the `push` command passing in the gi
 
     updatebot push --repo https://github.com/foo/bar.git 
     
-You can specify a particular git commit reference (sha, branch, tag) via `--tag`   
+You can specify a particular git commit reference (sha, branch, tag) via `--ref`   
 
     updatebot push --repo https://github.com/foo/bar.git --ref 1.2.3
 

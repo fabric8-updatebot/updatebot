@@ -11,5 +11,5 @@ github:
           devDependencies:
             includes:
             - "*"
-    - name: ngx-widgets
+    - name: ngx-login-client
 

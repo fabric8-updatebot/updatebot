@@ -29,6 +29,7 @@ import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.support.JsonNodes;
 import io.fabric8.updatebot.support.MarkupHelper;
+import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Files;
 import io.fabric8.utils.Filter;
 import io.fabric8.utils.Objects;
@@ -94,6 +95,15 @@ public class PackageJsonUpdater implements Updater {
                     LOG.warn("Failed to parse JSON " + file + ". " + e, e);
                     return;
                 }
+                String name = JsonNodes.textValue(tree, "name");
+                String version = JsonNodes.textValue(tree, "version");
+                if (Strings.notEmpty(name) && Strings.notEmpty(version)) {
+                    if (isDevelopmentVersion(name, version)) {
+                        LOG.info("Not updating NPM dependency " + name + " version " + version + " as this is a development version and not a release");
+                    } else {
+                        list.add(new PushVersionDetails(Kind.NPM, name, version, DEPENDENCIES));
+                    }
+                }
                 if (tree != null) {
                     addUpdateDependencySteps(list, tree, dependencies.getDependencies(), DEPENDENCIES);
                     addUpdateDependencySteps(list, tree, dependencies.getDevDependencies(), DEV_DEPENDENCIES);
@@ -101,6 +111,20 @@ public class PackageJsonUpdater implements Updater {
                 }
             }
         }
+    }
+
+    /**
+     * Returns true if the version string is
+     *
+     * @param name
+     * @param version
+     * @return
+     */
+    protected boolean isDevelopmentVersion(String name, String version) {
+        if (version.endsWith("-development")) {
+            return true;
+        }
+        return false;
     }
 
     protected void addUpdateDependencySteps(List<PushVersionDetails> list, JsonNode tree, DependencySet dependencySet, String dependencyKey) {
