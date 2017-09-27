@@ -26,27 +26,63 @@ To install on a unix operating system just copy the updatebot-${version).jar to 
 
 ### Pushing
 
-When you release an artifact its common to wish to eagerly update all of the projects using your artifact so that you can get fast feedback if your new version breaks any Continuous Integration tests.
+When you release an artifact its good practice to eagerly update all of the projects that use your artifact to use the new version via a Pull Request. Using a Pull Request means that this version change will trigger any Continuous Integration tests to validate the version change which also gives good feedback upstream to your project. It also lets downstream projects review and approve any version change.
 
-To do this just run the `push` command passing in the source directory of the source code. e.g. when doing a CD pipeline your local directory will be the tagged source after a release; so use that.
+To push versions from a repository just run the `push` command passing in the git clone URL or a local directory that contains a git clone.
 
-    updatebot push
+    updatebot push --repo https://github.com/foo/bar.git 
     
-Which will use the source in the current directory or
+You can specify a particular git commit reference (sha, branch, tag) via `--tag`   
+
+    updatebot push --repo https://github.com/foo/bar.git --ref 1.2.3
+
+This will then grab the source code for that repository and update its version in the downstream dependent projects.
+
+When doing a CD pipeline you will typically have the git repository cloned locally already so you can just point to a local clone:
     
-    updatebot push /foo/bar
+    updatebot push --dir /foo/bar
 
-if you wish to look at the source in `/foo/bar`    
+Or specifying the tag as well:
+
+    updatebot push --dir /foo/bar  --tag 1.2.3
     
-#### Pushing other dependencies
 
-You can configure other dependencies to push to other downstream projects. 
+#### Pushing other dependency versions
 
-e.g. in []this example updatebot.yml](https://github.com/fabric8io/updatebot/blob/master/updatebot-core/src/test/resources/npm/source/updatebot.yml#L6-L13) we let the project `ngx-base` define the exact versions of lots of base dependencies like angular so that whenever they change in `ngx-base` it gets updated into the downstream dependent projects like `ngx-widgets`
+Often projects have other dependencies such as shared libraries or packages. e.g. an npm project may have dependencies on angular packages.  
 
-We can use the `includes` and `excludes` patterns to filter out which dependencies you wish to push to other projects.
+You may want to use a single project as your _exemplar_ project so that it defines a set of dependency versions; so that if they change in one repository then updatebot will replicate those changes into other repositories.
 
+To push other versions from a repository we use the `push` object below, then we include language/framework specific dependency set definitions. In the case of `npm` we can specify lists of includes or excludes dependencies for `dependencies`, `devDependencies` or `peerDependencies`. You can use `*` too for a wildcard to make this YAML more DRY.
+ 
+e.g. here's an example `updatebot.yml` file that sets up a repo called `ngx-base` as the exemplar project for all of its dependencies:
 
+```yaml
+github:
+  organisations:
+  - name: jstrachan-testing
+    repositories:
+    - name: ngx-base
+      push:
+        npm:
+          dependencies:
+            includes:
+            - "*"
+          devDependencies:
+            includes:
+            - "*"
+    - name: ngx-widgets
+```
+
+Then when we run this command:
+
+    updatebot push --repo https://github.com/jstrachan-testing/ngx-base
+    
+updatebot will look at all of those matching dependencies in the `ngx-base/package.json` and if they are different to the downstream dependencies it will generate a Pull Request.
+
+e.g. here's an [example generated Pull Request on the ngx-widgets project](https://github.com/jstrachan-testing/ngx-widgets/pull/13)  where it generated a [single commit to update all the changed versions](https://github.com/jstrachan-testing/ngx-widgets/pull/13/commits/a3ade936a21c0f4727bcbad52e6ca227607d86e6)  
+    
+    
 #### Pushing specific versions
 
 Sometimes you just want to upgrade a specific version through your projects. To do this use the `push-version` command:
