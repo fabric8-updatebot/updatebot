@@ -28,13 +28,34 @@ To install on a unix operating system just copy the updatebot-${version).jar to 
 
 When you release an artifact its common to wish to eagerly update all of the projects using your artifact so that you can get fast feedback if your new version breaks any Continuous Integration tests.
 
-To do this just run the `push` command passing in the kind of project, the property name and version.
+To do this just run the `push` command passing in the source directory of the source code. e.g. when doing a CD pipeline your local directory will be the tagged source after a release; so use that.
 
-e.g.
+    updatebot push
+    
+Which will use the source in the current directory or
+    
+    updatebot push /foo/bar
 
-    updatebot push -k npm myapp 1.2.3
+if you wish to look at the source in `/foo/bar`    
+    
+#### Pushing other dependencies
+
+You can configure other dependencies to push to other downstream projects. 
+
+e.g. in []this example updatebot.yml](https://github.com/fabric8io/updatebot/blob/master/updatebot-core/src/test/resources/npm/source/updatebot.yml#L6-L13) we let the project `ngx-base` define the exact versions of lots of base dependencies like angular so that whenever they change in `ngx-base` it gets updated into the downstream dependent projects like `ngx-widgets`
+
+We can use the `includes` and `excludes` patterns to filter out which dependencies you wish to push to other projects.
+
+
+#### Pushing specific versions
+
+Sometimes you just want to upgrade a specific version through your projects. To do this use the `push-version` command:
+
+    updatebot push-version -k npm myapp 1.2.3
     
 This will then iterate through all the projects defined by the configuration file you give it and generate the necessary code changes to adopt the new version and submit pull requests.    
+
+
 
 ### Pulling
 
