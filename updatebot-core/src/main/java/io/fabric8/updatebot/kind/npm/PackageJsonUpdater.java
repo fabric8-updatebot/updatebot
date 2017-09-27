@@ -18,7 +18,7 @@ package io.fabric8.updatebot.kind.npm;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.fabric8.updatebot.commands.CommandContext;
-import io.fabric8.updatebot.commands.PushVersionContext;
+import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.model.Dependencies;
@@ -57,7 +57,7 @@ public class PackageJsonUpdater implements Updater {
     }
 
     @Override
-    public boolean pushVersions(PushVersionContext context) throws IOException {
+    public boolean pushVersions(PushVersionChangesContext context) throws IOException {
         File file = context.file("package.json");
         JsonNode tree = MarkupHelper.loadJson(file);
         boolean answer = false;
@@ -134,7 +134,7 @@ public class PackageJsonUpdater implements Updater {
     }
 
 
-    protected boolean updateDependencyVersion(String dependencyKey, ObjectNode dependencies, PushVersionContext context) {
+    protected boolean updateDependencyVersion(String dependencyKey, ObjectNode dependencies, PushVersionChangesContext context) {
         String name = context.getName();
         String value = context.getValue();
         JsonNode dependency = dependencies.get(name);

@@ -16,7 +16,7 @@
 package io.fabric8.updatebot.kind;
 
 import io.fabric8.updatebot.commands.CommandContext;
-import io.fabric8.updatebot.commands.PushVersionContext;
+import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.PushVersionDetails;
 
@@ -28,7 +28,7 @@ import java.util.List;
 public interface Updater {
     boolean isApplicable(CommandContext context);
 
-    boolean pushVersions(PushVersionContext context) throws IOException;
+    boolean pushVersions(PushVersionChangesContext context) throws IOException;
 
     void addPushVersionsSteps(CommandContext context, Dependencies dependencyConfig, List<PushVersionDetails> list);
 

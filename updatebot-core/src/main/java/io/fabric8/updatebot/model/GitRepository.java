@@ -15,12 +15,14 @@
  */
 package io.fabric8.updatebot.model;
 
+import io.fabric8.utils.Objects;
+
 /**
  */
 public class GitRepository extends DtoSupport {
     private String name;
     private String cloneUrl;
-    private String projectUrl;
+    private String htmlUrl;
     private GitHubRepositoryDetails repositoryDetails;
 
     public GitRepository() {
@@ -54,12 +56,12 @@ public class GitRepository extends DtoSupport {
         this.cloneUrl = cloneUrl;
     }
 
-    public String getProjectUrl() {
-        return projectUrl;
+    public String getHtmlUrl() {
+        return htmlUrl;
     }
 
-    public void setProjectUrl(String projectUrl) {
-        this.projectUrl = projectUrl;
+    public void setHtmlUrl(String htmlUrl) {
+        this.htmlUrl = htmlUrl;
     }
 
     public GitHubRepositoryDetails getRepositoryDetails() {
@@ -69,4 +71,11 @@ public class GitRepository extends DtoSupport {
     public void setRepositoryDetails(GitHubRepositoryDetails repositoryDetails) {
         this.repositoryDetails = repositoryDetails;
     }
+
+    public boolean hasCloneUrl(String url) {
+        return Objects.equal(this.cloneUrl, url);
+    }
+
+
+
 }

@@ -17,6 +17,7 @@ package io.fabric8.updatebot.commands;
 
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.model.PushVersionDetails;
+import io.fabric8.updatebot.support.PullRequests;
 import io.fabric8.utils.Objects;
 
 import java.util.ArrayList;
@@ -24,11 +25,11 @@ import java.util.List;
 
 /**
  */
-public class PushVersionContext extends CommandContext {
+public class PushVersionChangesContext extends CommandContext {
     private final PushVersionDetails step;
     private List<Change> changes = new ArrayList<>();
 
-    public PushVersionContext(CommandContext parentContext, PushVersionDetails step) {
+    public PushVersionChangesContext(CommandContext parentContext, PushVersionDetails step) {
         super(parentContext);
         this.step = step;
     }
@@ -43,8 +44,18 @@ public class PushVersionContext extends CommandContext {
     }
 
     @Override
-    public String createTitle() {
+    public String createPullRequestBody() {
+        return PullRequests.UPDATEBOT_ICON + " pushed " + step.getKind() + " dependency: `" + step.getProperty() + "` to: `" + step.getValue() + "`";
+    }
+
+    @Override
+    public String createCommit() {
         return "fix(version): update " + step.getProperty() + " to " + step.getValue();
+    }
+
+    @Override
+    public String createTitle() {
+        return "update " + step.getProperty() + " to " + step.getValue();
     }
 
     @Override

@@ -57,4 +57,10 @@ public class LocalRepository {
         return repo.getCloneUrl();
     }
 
+    /**
+     * Returns true if this repository can be cloned using the given URL
+     */
+    public boolean hasCloneUrl(String cloneUrl) {
+        return repo.hasCloneUrl(cloneUrl);
+    }
 }

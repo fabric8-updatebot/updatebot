@@ -16,7 +16,7 @@
 package io.fabric8.updatebot.kind;
 
 import io.fabric8.updatebot.commands.CommandContext;
-import io.fabric8.updatebot.commands.PushVersionContext;
+import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.PushVersionDetails;
 
@@ -36,7 +36,7 @@ public class CompositeUpdater implements Updater {
     }
 
     @Override
-    public boolean pushVersions(PushVersionContext context) throws IOException {
+    public boolean pushVersions(PushVersionChangesContext context) throws IOException {
         Kind[] kinds = Kind.values();
         boolean answer = false;
         for (Kind kind : kinds) {

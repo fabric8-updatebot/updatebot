@@ -35,8 +35,8 @@ import java.util.UUID;
 
 /**
  */
-public class PushVersionPRUpdateAndRebasePR {
-    private static final transient Logger LOG = LoggerFactory.getLogger(PushVersionPRUpdateAndRebasePR.class);
+public class PushVersionPRUpdateAndRebasePRTest {
+    private static final transient Logger LOG = LoggerFactory.getLogger(PushVersionPRUpdateAndRebasePRTest.class);
 
     protected String dependency = "@angular/core";
     protected String firstVersion = "4.3.7";

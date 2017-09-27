@@ -18,7 +18,7 @@ package io.fabric8.updatebot.kind.npm;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.commands.CommandContext;
-import io.fabric8.updatebot.commands.PushVersionContext;
+import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.support.MarkupHelper;
@@ -59,13 +59,13 @@ public class PackageJsonUpdaterTest {
     }
 
     public void assertUpdatePackageJson(File packageJson, String dependencyKey, String name, String version) throws IOException {
-        PushVersionContext context = parentContext.updateVersion(Kind.NPM, name, version);
+        PushVersionChangesContext context = parentContext.updateVersion(Kind.NPM, name, version);
         assertThat(updater.isApplicable(context)).
                 describedAs("File should be applicable " + packageJson).
                 isTrue();
         updater.pushVersions(context);
 
-        PushVersionContext.Change change = context.change(name);
+        PushVersionChangesContext.Change change = context.change(name);
         assertThat(change).describedAs("expected change for name " + name).isNotNull();
         assertThat(change.getNewValue()).isEqualTo(version);
 

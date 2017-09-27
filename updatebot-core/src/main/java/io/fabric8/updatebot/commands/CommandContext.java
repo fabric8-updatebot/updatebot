@@ -20,6 +20,7 @@ import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.model.PushVersionDetails;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.support.GitHubHelpers;
+import io.fabric8.updatebot.support.PullRequests;
 import org.kohsuke.github.GHRepository;
 
 import java.io.File;
@@ -106,28 +107,59 @@ public class CommandContext {
 
 
     // TODO inline or remove?? should use the Command rather than context?
-    public PushVersionContext updateVersion(Kind kind, String name, String version) {
-        return new PushVersionContext(this, new PushVersionDetails(kind, name, version));
+    public PushVersionChangesContext updateVersion(Kind kind, String name, String version) {
+        return new PushVersionChangesContext(this, new PushVersionDetails(kind, name, version));
     }
 
     public String createTitle() {
-        if (!children.isEmpty()) {
-            return children.get(0).createTitle();
+        CommandContext child = firstChild();
+        if (child != null) {
+            return child.createTitle();
         }
         return "Pulling new versions";
     }
 
     public String createTitlePrefix() {
-        if (!children.isEmpty()) {
-            return children.get(0).createTitlePrefix();
+        CommandContext child = firstChild();
+        if (child != null) {
+            return child.createTitlePrefix();
+        }
+        return createTitle();
+    }
+
+    public String createCommit() {
+        CommandContext child = firstChild();
+        if (child != null) {
+            return child.createCommit();
         }
         return createTitle();
     }
 
 
+    public String createPullRequestBody() {
+        CommandContext child = firstChild();
+        if (child != null) {
+            return child.createPullRequestBody();
+        }
+        return PullRequests.GENERATED_BY;
+    }
+
     protected void addChild(CommandContext child) {
         children.add(child);
     }
 
+    /**
+     * Lets remove a child context if it wasn't applicable (to avoid generating unnecessary change comments etc
+     */
+    public void removeChild(CommandContext child) {
+        children.remove(child);
+    }
+
+    protected CommandContext firstChild() {
+        if (!children.isEmpty()) {
+            return children.get(0);
+        }
+        return null;
+    }
 
 }

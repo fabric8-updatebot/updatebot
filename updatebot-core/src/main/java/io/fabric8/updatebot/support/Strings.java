@@ -15,13 +15,39 @@
  */
 package io.fabric8.updatebot.support;
 
+import io.fabric8.utils.Objects;
+
 /**
  */
 public class Strings {
+    /**
+     * Returns true if the string is null or empty
+     */
+    public static boolean empty(String text) {
+        return text == null || text.isEmpty();
+    }
+
     /**
      * Returns true if the string is not null and not empty
      */
     public static boolean notEmpty(String text) {
         return text != null && !text.isEmpty();
+    }
+
+    /**
+     * Returns true if the actual value matches any of the String representations of the given values.
+     * <p>
+     * So can match against String or URL objects etc
+     */
+    public static boolean equalAnyValue(String actual, Object... values) {
+        for (Object value : values) {
+            if (value != null) {
+                String text = value.toString();
+                if (Objects.equal(text, actual)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

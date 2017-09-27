@@ -15,7 +15,10 @@
  */
 package io.fabric8.updatebot.model;
 
+import io.fabric8.updatebot.support.Strings;
 import org.kohsuke.github.GHRepository;
+
+import java.net.URL;
 
 /**
  */
@@ -24,6 +27,10 @@ public class GithubRepository extends GitRepository {
 
     public GithubRepository(GHRepository repository) {
         this.repository = repository;
+        URL htmlUrl = repository.getHtmlUrl();
+        if (htmlUrl != null) {
+            setHtmlUrl(htmlUrl.toString());
+        }
         setName(repository.getName());
         setCloneUrl(repository.getGitTransportUrl());
     }
@@ -43,5 +50,18 @@ public class GithubRepository extends GitRepository {
 
     public GHRepository getRepository() {
         return repository;
+    }
+
+    @Override
+    public boolean hasCloneUrl(String url) {
+        if (super.hasCloneUrl(url)) {
+            return true;
+        }
+        return Strings.equalAnyValue(url,
+                repository.getGitTransportUrl(),
+                repository.gitHttpTransportUrl(),
+                repository.getSshUrl(),
+                repository.getUrl(),
+                repository.getSvnUrl());
     }
 }
