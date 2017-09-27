@@ -20,7 +20,7 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.CommandNames;
 import io.fabric8.updatebot.kind.Kind;
-import io.fabric8.updatebot.kind.Updater;
+import io.fabric8.updatebot.model.PushVersionDetails;
 import io.fabric8.updatebot.repository.LocalRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ import java.util.List;
 /**
  * Push changes from a specific release pipeline into downstream projects
  */
-@Parameters(commandNames = CommandNames.PUSH, commandDescription = "Pushes version changes into your projects. " +
+@Parameters(commandNames = CommandNames.PUSH_VERSION, commandDescription = "Pushes version changes into your projects. " +
         "You usually invoke this command after a release has been performed")
 public class PushVersionChanges extends ModifyFilesCommandSupport {
     private static final transient Logger LOG = LoggerFactory.getLogger(PushVersionChanges.class);
@@ -93,21 +93,12 @@ public class PushVersionChanges extends ModifyFilesCommandSupport {
             String propertyName = values.get(i);
             String version = values.get(i + 1);
 
-            if (updatePropertyVersion(context, propertyName, version)) {
+            PushVersionDetails step = new PushVersionDetails(Kind.NPM, propertyName, version);
+            if (pushVersion(context, step)) {
                 answer = true;
             }
         }
         return answer;
-    }
-
-    protected boolean updatePropertyVersion(CommandContext parentContext, String propertyName, String version) throws IOException {
-        PushVersionContext context = new PushVersionContext(parentContext, kind, propertyName, version);
-        Updater updater = kind.getUpdater();
-        boolean updated = false;
-        if (updater.isApplicable(context)) {
-            updated = updater.pushVersions(context);
-        }
-        return updated;
     }
 
 

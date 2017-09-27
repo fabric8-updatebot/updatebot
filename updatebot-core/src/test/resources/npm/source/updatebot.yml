@@ -1,0 +1,15 @@
+github:
+  organisations:
+  - name: jstrachan-testing
+    repositories:
+    - name: ngx-base
+      push:
+        npm:
+          dependencies:
+            includes:
+            - "*"
+          devDependencies:
+            includes:
+            - "*"
+    - name: ngx-widgets
+

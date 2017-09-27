@@ -15,6 +15,8 @@
  */
 package io.fabric8.updatebot.model;
 
+import io.fabric8.utils.Objects;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +40,22 @@ public class Projects {
 
     public void setGit(List<GitRepository> git) {
         this.git = git;
+    }
+
+
+    public GitHubRepositoryDetails getRepositoryDetails(String cloneUrl) {
+        GitHubRepositoryDetails answer = github.getRepositoryDetails(cloneUrl);
+        if (answer == null) {
+            for (GitRepository gitRepository : git) {
+                if (Objects.equal(cloneUrl, gitRepository.getCloneUrl())) {
+                    answer = gitRepository.getRepositoryDetails();
+                    if (answer != null) {
+                        return answer;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 }

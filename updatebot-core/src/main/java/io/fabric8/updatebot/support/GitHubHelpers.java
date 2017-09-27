@@ -18,7 +18,6 @@ package io.fabric8.updatebot.support;
 import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.repository.LocalRepository;
-import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHCommitStatus;

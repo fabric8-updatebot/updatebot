@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static io.fabric8.updatebot.CommandNames.PUSH;
+import static io.fabric8.updatebot.CommandNames.PUSH_VERSION;
 import static io.fabric8.updatebot.kind.Kind.NPM;
 import static io.fabric8.updatebot.support.PullRequests.COMMAND_COMMENT_INDENT;
 import static io.fabric8.updatebot.support.PullRequests.COMMAND_COMMENT_PREFIX;
@@ -66,7 +66,7 @@ public class CommentReadWriteTest {
         PushVersionChanges command = new PushVersionChanges(NPM, dependency, version);
         parentContext.updateVersion(NPM, dependency, version);
         assertContextCommandComment(command,
-                COMMAND_COMMENT_INDENT + Strings.join(" ", PUSH, "--kind", NPM, dependency, version));
+                COMMAND_COMMENT_INDENT + Strings.join(" ", PUSH_VERSION, "--kind", NPM, dependency, version));
 
 
         String comment = command.createPullRequestComment();
@@ -86,7 +86,7 @@ public class CommentReadWriteTest {
         PushVersionChanges command = new PushVersionChanges(NPM, dependency1, version1, dependency2, version2);
 
         assertContextCommandComment(command,
-                COMMAND_COMMENT_INDENT + Strings.join(" ", PUSH, "--kind", NPM, dependency1, version1, dependency2, version2));
+                COMMAND_COMMENT_INDENT + Strings.join(" ", PUSH_VERSION, "--kind", NPM, dependency1, version1, dependency2, version2));
 
         String comment = command.createPullRequestComment();
         CompositeCommand parsedCommands = parseCommandComment(comment, 1);

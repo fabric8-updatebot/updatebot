@@ -16,6 +16,7 @@
 package io.fabric8.updatebot.commands;
 
 import io.fabric8.updatebot.kind.Kind;
+import io.fabric8.updatebot.model.PushVersionDetails;
 import io.fabric8.utils.Objects;
 
 import java.util.ArrayList;
@@ -24,47 +25,43 @@ import java.util.List;
 /**
  */
 public class PushVersionContext extends CommandContext {
-    private final String name;
-    private final String value;
-    private Kind kind;
+    private final PushVersionDetails step;
     private List<Change> changes = new ArrayList<>();
 
-    public PushVersionContext(CommandContext parentContext, Kind kind, String name, String value) {
+    public PushVersionContext(CommandContext parentContext, PushVersionDetails step) {
         super(parentContext);
-        this.kind = kind;
-        this.name = name;
-        this.value = value;
+        this.step = step;
     }
 
     @Override
     public String toString() {
         return "PushVersionContext{" +
-                "kind='" + kind + '\'' +
-                ", name='" + name + '\'' +
-                ", value='" + value + '\'' +
+                "kind='" + getKind() + '\'' +
+                ", name='" + getName() + '\'' +
+                ", value='" + getValue() + '\'' +
                 '}';
     }
 
     @Override
     public String createTitle() {
-        return "fix(version): update " + name + " to " + value;
+        return "fix(version): update " + step.getProperty() + " to " + step.getValue();
     }
 
     @Override
     public String createTitlePrefix() {
-        return "fix(version): update " + name + " to ";
+        return "fix(version): update " + step.getProperty() + " to ";
     }
 
     public Kind getKind() {
-        return kind;
+        return step.getKind();
     }
 
     public String getName() {
-        return name;
+        return step.getProperty();
     }
 
     public String getValue() {
-        return value;
+        return step.getValue();
     }
 
     public List<Change> getChanges() {

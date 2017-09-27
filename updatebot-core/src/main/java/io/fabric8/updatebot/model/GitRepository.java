@@ -17,10 +17,11 @@ package io.fabric8.updatebot.model;
 
 /**
  */
-public class GitRepository {
+public class GitRepository extends DtoSupport {
     private String name;
     private String cloneUrl;
     private String projectUrl;
+    private GitHubRepositoryDetails repositoryDetails;
 
     public GitRepository() {
     }
@@ -59,5 +60,13 @@ public class GitRepository {
 
     public void setProjectUrl(String projectUrl) {
         this.projectUrl = projectUrl;
+    }
+
+    public GitHubRepositoryDetails getRepositoryDetails() {
+        return repositoryDetails;
+    }
+
+    public void setRepositoryDetails(GitHubRepositoryDetails repositoryDetails) {
+        this.repositoryDetails = repositoryDetails;
     }
 }

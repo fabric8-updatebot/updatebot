@@ -15,6 +15,9 @@
  */
 package io.fabric8.updatebot.commands;
 
+import io.fabric8.updatebot.kind.Kind;
+import io.fabric8.updatebot.kind.Updater;
+import io.fabric8.updatebot.model.PushVersionDetails;
 import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.GitHubHelpers;
@@ -167,5 +170,25 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             }
         }
         return null;
+    }
+
+    protected boolean pushVersion(CommandContext parentContext, PushVersionDetails step) throws IOException {
+        Kind kind = step.getKind();
+        Updater updater = kind.getUpdater();
+        PushVersionContext context = new PushVersionContext(parentContext, step);
+        if (updater.isApplicable(context)) {
+            return updater.pushVersions(context);
+        }
+        return false;
+    }
+
+    protected boolean pushVersions(CommandContext parentContext, List<PushVersionDetails> steps) throws IOException {
+        boolean answer = false;
+        for (PushVersionDetails step : steps) {
+            if (pushVersion(parentContext, step)) {
+                answer = true;
+            }
+        }
+        return answer;
     }
 }

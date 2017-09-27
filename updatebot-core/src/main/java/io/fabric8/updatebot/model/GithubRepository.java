@@ -28,6 +28,11 @@ public class GithubRepository extends GitRepository {
         setCloneUrl(repository.getGitTransportUrl());
     }
 
+    public GithubRepository(GHRepository ghRepository, GitHubRepositoryDetails details) {
+        this(ghRepository);
+        setRepositoryDetails(details);
+    }
+
     @Override
     public String toString() {
         return "GithubRepository{" +

@@ -18,13 +18,16 @@ package io.fabric8.updatebot.repository;
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.commands.CommandSupport;
 import io.fabric8.updatebot.model.GitHubProjects;
+import io.fabric8.updatebot.model.GitHubRepositoryDetails;
 import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.GithubOrganisation;
 import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.model.Projects;
 import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.GitHubHelpers;
+import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Filter;
+import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHPerson;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -37,6 +40,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  */
@@ -120,13 +125,34 @@ public class Repositories {
         GHPerson person = GitHubHelpers.getOrganisationOrUser(github, orgName);
         if (person != null) {
             try {
+                Set<String> foundNames = new TreeSet<>();
+                List<GitHubRepositoryDetails> namedRepositories = organisation.getRepositories();
+                if (namedRepositories != null) {
+                    for (GitHubRepositoryDetails namedRepository : namedRepositories) {
+                        String name = namedRepository.getName();
+                        if (Strings.notEmpty(name) && foundNames.add(name)) {
+                            GHRepository ghRepository = null;
+                            try {
+                                ghRepository = person.getRepository(name);
+                            } catch (IOException e) {
+                                LOG.warn("Github repository " + orgName + "/" + name + " not found: " + e);
+                                continue;
+                            }
+                            if (ghRepository != null) {
+                                GitRepository gitRepository = new GithubRepository(ghRepository, namedRepository);
+                                addRepository(map, file, gitRepository);
+                            } else {
+                                LOG.warn("Github repository " + orgName + "/" + name + " not found!");
+                            }
+                        }
+                    }
+                }
                 Map<String, GHRepository> repositories = person.getRepositories();
                 for (Map.Entry<String, GHRepository> entry : repositories.entrySet()) {
                     String repoName = entry.getKey();
-                    if (filter.matches(repoName)) {
+                    if (filter.matches(repoName) && foundNames.add(repoName)) {
                         GitRepository gitRepository = new GithubRepository(entry.getValue());
                         addRepository(map, file, gitRepository);
-
                     }
                 }
             } catch (IOException e) {
@@ -135,4 +161,20 @@ public class Repositories {
         }
     }
 
+    /**
+     * Returns the repository for the given name or null if it could not be found
+     */
+    public static LocalRepository findRepository(List<LocalRepository> localRepositories, String name) {
+        if (localRepositories != null) {
+            for (LocalRepository repository : localRepositories) {
+                GitRepository repo = repository.getRepo();
+                if (repo != null) {
+                    if (Objects.equal(name, repo.getName())) {
+                        return repository;
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }

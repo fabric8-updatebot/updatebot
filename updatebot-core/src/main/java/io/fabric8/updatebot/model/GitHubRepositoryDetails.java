@@ -15,14 +15,20 @@
  */
 package io.fabric8.updatebot.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
+ * Represents a named repository inside an organisation along with any optional configuration
  */
-public class GithubOrganisation extends FilterSupport {
+public class GitHubRepositoryDetails extends DtoSupport {
     private String name;
-    private List<GitHubRepositoryDetails> repositories = new ArrayList<>();
+    private Dependencies push;
+    private Dependencies pull;
+
+    public GitHubRepositoryDetails() {
+    }
+
+    public GitHubRepositoryDetails(String name) {
+        this.name = name;
+    }
 
     public String getName() {
         return name;
@@ -32,16 +38,19 @@ public class GithubOrganisation extends FilterSupport {
         this.name = name;
     }
 
-    public List<GitHubRepositoryDetails> getRepositories() {
-        return repositories;
+    public Dependencies getPush() {
+        return push;
     }
 
-    public void setRepositories(List<GitHubRepositoryDetails> repositories) {
-        this.repositories = repositories;
+    public void setPush(Dependencies push) {
+        this.push = push;
     }
 
-    public GitHubRepositoryDetails getRepositoryDetails(String cloneUrl) {
-        // TODO we don't cache the repos yet...
-        return null;
+    public Dependencies getPull() {
+        return pull;
+    }
+
+    public void setPull(Dependencies pull) {
+        this.pull = pull;
     }
 }

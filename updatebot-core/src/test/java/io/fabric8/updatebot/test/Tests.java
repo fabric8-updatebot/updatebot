@@ -15,7 +15,11 @@
  */
 package io.fabric8.updatebot.test;
 
+import io.fabric8.updatebot.Configuration;
+import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Files;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +30,8 @@ import static org.assertj.core.api.Fail.fail;
 /**
  */
 public class Tests {
+    private static final transient Logger LOG = LoggerFactory.getLogger(Tests.class);
+
     public static File getBasedir() {
         String basedirName = System.getProperty("basedir", ".");
         return new File(basedirName);
@@ -88,5 +94,17 @@ public class Tests {
         System.out.println("Using workDir: " + testDataDir);
         Files.recursiveDelete(testDataDir);
         return testDataDir.getPath();
+    }
+
+    /**
+     * Returns true if we have configured environment variables or system properties so that we can use the github API to query repos
+     */
+    public static boolean canTestWithGithubAPI(Configuration configuration) {
+        if (Strings.notEmpty(configuration.getGithubUsername()) &&
+                (Strings.notEmpty(configuration.getGithubPassword()) || Strings.notEmpty(configuration.getGithubToken()))) {
+            return true;
+        }
+        LOG.info("Disabling this test case as we do not have a github username and password/token defined via environment variables");
+        return false;
     }
 }

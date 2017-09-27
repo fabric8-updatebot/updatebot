@@ -16,6 +16,7 @@
 package io.fabric8.updatebot.support;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Helper assertions for dealing with JSON or YAML markup
@@ -31,5 +32,16 @@ public class JsonNodes {
             node = node.get(path);
         }
         return node;
+    }
+
+    /**
+     * Returns the text value of the given field on an object or null if its not a value or the value is not a string
+     */
+    public static String textValue(ObjectNode node, String field) {
+        JsonNode value = node.get(field);
+        if (value != null && value.isTextual()) {
+            return value.textValue();
+        }
+        return null;
     }
 }

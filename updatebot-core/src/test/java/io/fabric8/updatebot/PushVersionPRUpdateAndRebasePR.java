@@ -21,7 +21,6 @@ import io.fabric8.updatebot.commands.UpdatePullRequests;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.support.GitHubHelpers;
-import io.fabric8.updatebot.support.Strings;
 import io.fabric8.updatebot.test.NpmTests;
 import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
@@ -36,8 +35,8 @@ import java.util.UUID;
 
 /**
  */
-public class PushPRTest {
-    private static final transient Logger LOG = LoggerFactory.getLogger(PushPRTest.class);
+public class PushVersionPRUpdateAndRebasePR {
+    private static final transient Logger LOG = LoggerFactory.getLogger(PushVersionPRUpdateAndRebasePR.class);
 
     protected String dependency = "@angular/core";
     protected String firstVersion = "4.3.7";
@@ -61,7 +60,7 @@ public class PushPRTest {
         updateBot.setKind(Kind.NPM);
         updateBot.values(dependency, firstVersion);
 
-        this.localRepositories = updateBot.closeOrPullRepositories(configuration);
+        this.localRepositories = updateBot.cloneOrPullRepositories(configuration);
 
         // lets close all open PRs
         GitHubHelpers.closeOpenUpdateBotPullRequests(configuration.getGithubPullRequestLabel(), localRepositories);
@@ -70,8 +69,7 @@ public class PushPRTest {
 
     @Test
     public void testUpdater() throws Exception {
-        if (Strings.notEmpty(configuration.getGithubUsername()) &&
-                (Strings.notEmpty(configuration.getGithubPassword()) || Strings.notEmpty(configuration.getGithubToken()))) {
+        if (Tests.canTestWithGithubAPI(configuration)) {
             updateBot.run(configuration);
 
             // now lets try a second update to the same PR
@@ -84,10 +82,8 @@ public class PushPRTest {
 
             // now lets rebase
             updatePullRequests.run(configuration);
-
-        } else {
-            LOG.info("Disabling this test case as we do not have a github username and password/token defined via environment variables");
         }
+
     }
 
 }

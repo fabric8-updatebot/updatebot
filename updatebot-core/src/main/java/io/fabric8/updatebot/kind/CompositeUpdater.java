@@ -17,8 +17,11 @@ package io.fabric8.updatebot.kind;
 
 import io.fabric8.updatebot.commands.CommandContext;
 import io.fabric8.updatebot.commands.PushVersionContext;
+import io.fabric8.updatebot.model.Dependencies;
+import io.fabric8.updatebot.model.PushVersionDetails;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  */
@@ -42,11 +45,11 @@ public class CompositeUpdater implements Updater {
                 if (updater.pushVersions(context)) {
                     answer = true;
                 }
-                ;
             }
         }
         return answer;
     }
+
 
     @Override
     public boolean pullVersions(CommandContext context) throws IOException {
@@ -62,5 +65,16 @@ public class CompositeUpdater implements Updater {
             }
         }
         return answer;
+    }
+
+    @Override
+    public void addPushVersionsSteps(CommandContext context, Dependencies dependencyConfig, List<PushVersionDetails> list) {
+        Kind[] kinds = Kind.values();
+        for (Kind kind : kinds) {
+            Updater updater = kind.getUpdater();
+            if (updater.isApplicable(context)) {
+                updater.addPushVersionsSteps(context, dependencyConfig, list);
+            }
+        }
     }
 }

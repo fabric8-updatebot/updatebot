@@ -1,0 +1,10 @@
+github:
+  organisations:
+  - name: jstrachan-testing
+    repositories:
+    - name: ngx-base
+    - name: ngx-fabric8-wit
+    - name: ngx-widgets
+    - name: ngx-login-client
+    - name: fabric8-planner
+

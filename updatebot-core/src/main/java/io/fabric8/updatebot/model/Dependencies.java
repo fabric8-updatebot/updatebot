@@ -13,14 +13,18 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot;
+package io.fabric8.updatebot.model;
 
 /**
  */
-public final class CommandNames {
-    public static final String HELP = "help";
-    public static final String PULL = "pull";
-    public static final String PUSH_VERSION = "push-version";
-    public static final String PUSH_SOURCE = "push";
-    public static final String UPDATE = "update";
+public class Dependencies {
+    private NpmDependencies npm;
+
+    public NpmDependencies getNpm() {
+        return npm;
+    }
+
+    public void setNpm(NpmDependencies npm) {
+        this.npm = npm;
+    }
 }

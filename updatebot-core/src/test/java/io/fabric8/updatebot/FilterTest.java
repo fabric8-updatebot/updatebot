@@ -48,7 +48,7 @@ public class FilterTest {
         for (String value : values) {
             boolean actual = filter.matches(value);
             assertThat(actual).
-                    describedAs("Filter " + filter + " from includes " + organisation.include() + " excludes: " + organisation.getExcludes()).
+                    describedAs("Filter " + filter + " from includes " + organisation.getIncludes() + " excludes: " + organisation.getExcludes()).
                     isEqualTo(expected);
         }
     }

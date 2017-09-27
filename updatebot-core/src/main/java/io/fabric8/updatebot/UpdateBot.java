@@ -28,7 +28,7 @@ import java.io.IOException;
 
 import static io.fabric8.updatebot.CommandNames.HELP;
 import static io.fabric8.updatebot.CommandNames.PULL;
-import static io.fabric8.updatebot.CommandNames.PUSH;
+import static io.fabric8.updatebot.CommandNames.PUSH_VERSION;
 import static io.fabric8.updatebot.CommandNames.UPDATE;
 
 /**
@@ -66,7 +66,7 @@ public class UpdateBot {
                 .addObject(config)
                 .addCommand(HELP, help)
                 .addCommand(PULL, pullVersionChanges)
-                .addCommand(PUSH, pushVersionChanges)
+                .addCommand(PUSH_VERSION, pushVersionChanges)
                 .addCommand(UPDATE, updatePullRequests)
                 .build();
         commander.setExpandAtSign(false);
@@ -84,7 +84,7 @@ public class UpdateBot {
                 case PULL:
                     return pullVersionChanges;
 
-                case PUSH:
+                case PUSH_VERSION:
                     return pushVersionChanges;
 
                 case UPDATE:

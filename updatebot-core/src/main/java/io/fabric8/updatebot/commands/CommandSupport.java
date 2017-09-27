@@ -43,6 +43,7 @@ import static io.fabric8.updatebot.support.ReflectionHelper.getFieldValue;
 /**
  */
 public abstract class CommandSupport {
+    private List<LocalRepository> localRepositories;
 
     public String createPullRequestComment() {
         StringBuilder builder = new StringBuilder(COMMAND_COMMENT_PREFIX);
@@ -105,7 +106,7 @@ public abstract class CommandSupport {
     }
 
     public void run(Configuration configuration) throws IOException {
-        List<LocalRepository> repositories = closeOrPullRepositories(configuration);
+        List<LocalRepository> repositories = cloneOrPullRepositories(configuration);
         for (LocalRepository repository : repositories) {
             CommandContext context = new CommandContext(repository, configuration);
             run(context);
@@ -114,9 +115,14 @@ public abstract class CommandSupport {
 
     public abstract void run(CommandContext context) throws IOException;
 
-    public List<LocalRepository> closeOrPullRepositories(Configuration configuration) throws IOException {
+    public List<LocalRepository> cloneOrPullRepositories(Configuration configuration) throws IOException {
         Projects projects = loadProjects(configuration);
-        return Repositories.cloneOrPullRepositories(this, configuration, projects);
+        this.localRepositories = Repositories.cloneOrPullRepositories(this, configuration, projects);
+        return localRepositories;
+    }
+
+    public List<LocalRepository> getLocalRepositories() {
+        return localRepositories;
     }
 
     // Properties

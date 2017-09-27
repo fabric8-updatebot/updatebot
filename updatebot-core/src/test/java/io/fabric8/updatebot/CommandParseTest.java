@@ -30,7 +30,7 @@ public class CommandParseTest {
     public void testParseSimpleCommand() throws Exception {
         String dependency = "cheese";
         String version = "1.2.3";
-        PushVersionChanges command = assertParseCommand(PushVersionChanges.class, "push", "--kind", "npm", dependency, version);
+        PushVersionChanges command = assertParseCommand(PushVersionChanges.class, CommandNames.PUSH_VERSION, "--kind", "npm", dependency, version);
         CommandAssertions.assertPushVersionContext(command, NPM, dependency, version);
     }
 
@@ -38,7 +38,7 @@ public class CommandParseTest {
     public void testParseDependencyWithAt() throws Exception {
         String dependency = "@angular/core";
         String version = "4.3.2";
-        PushVersionChanges command = assertParseCommand(PushVersionChanges.class, "push", "--kind", "npm", dependency, version);
+        PushVersionChanges command = assertParseCommand(PushVersionChanges.class, CommandNames.PUSH_VERSION, "--kind", "npm", dependency, version);
         CommandAssertions.assertPushVersionContext(command, NPM, dependency, version);
     }
 

@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  */
-public class GitHubProjects {
+public class GitHubProjects extends DtoSupport {
     private List<GithubOrganisation> organisations;
 
     public List<GithubOrganisation> getOrganisations() {
@@ -28,5 +28,17 @@ public class GitHubProjects {
 
     public void setOrganisations(List<GithubOrganisation> organisations) {
         this.organisations = organisations;
+    }
+
+    public GitHubRepositoryDetails getRepositoryDetails(String cloneUrl) {
+        if (organisations != null) {
+            for (GithubOrganisation organisation : organisations) {
+                GitHubRepositoryDetails answer = organisation.getRepositoryDetails(cloneUrl);
+                if (answer != null) {
+                    return answer;
+                }
+            }
+        }
+        return null;
     }
 }

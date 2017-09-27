@@ -17,6 +17,7 @@ package io.fabric8.updatebot.commands;
 
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.kind.Kind;
+import io.fabric8.updatebot.model.PushVersionDetails;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.support.GitHubHelpers;
 import org.kohsuke.github.GHRepository;
@@ -103,8 +104,10 @@ public class CommandContext {
         updatedFiles.add(file);
     }
 
+
+    // TODO inline or remove?? should use the Command rather than context?
     public PushVersionContext updateVersion(Kind kind, String name, String version) {
-        return new PushVersionContext(this, kind, name, version);
+        return new PushVersionContext(this, new PushVersionDetails(kind, name, version));
     }
 
     public String createTitle() {
