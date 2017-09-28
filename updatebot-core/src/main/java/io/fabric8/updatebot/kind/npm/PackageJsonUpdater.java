@@ -44,13 +44,8 @@ import java.util.List;
 /**
  */
 public class PackageJsonUpdater implements Updater {
-    public static final String DEPENDENCIES = "dependencies";
-    public static final String DEV_DEPENDENCIES = "devDependencies";
-    public static final String PEER_DEPENDENCIES = "peerDependencies";
+
     private static final transient Logger LOG = LoggerFactory.getLogger(PackageJsonUpdater.class);
-    private String[] dependencyKeys = {
-            DEPENDENCIES, DEV_DEPENDENCIES, PEER_DEPENDENCIES
-    };
 
     @Override
     public boolean isApplicable(CommandContext context) {
@@ -62,7 +57,7 @@ public class PackageJsonUpdater implements Updater {
         File file = context.file("package.json");
         JsonNode tree = MarkupHelper.loadJson(file);
         boolean answer = false;
-        for (String dependencyKey : dependencyKeys) {
+        for (String dependencyKey : NpmDependencyKinds.DEPENDENCY_KEYS) {
             JsonNode dependencies = tree.get(dependencyKey);
             if (dependencies instanceof ObjectNode) {
                 ObjectNode objectNode = (ObjectNode) dependencies;
@@ -101,13 +96,13 @@ public class PackageJsonUpdater implements Updater {
                     if (isDevelopmentVersion(name, version)) {
                         LOG.info("Not updating NPM dependency " + name + " version " + version + " as this is a development version and not a release");
                     } else {
-                        list.add(new PushVersionDetails(Kind.NPM, name, version, DEPENDENCIES));
+                        list.add(new PushVersionDetails(Kind.NPM, name, version, NpmDependencyKinds.DEPENDENCIES));
                     }
                 }
                 if (tree != null) {
-                    addUpdateDependencySteps(list, tree, dependencies.getDependencies(), DEPENDENCIES);
-                    addUpdateDependencySteps(list, tree, dependencies.getDevDependencies(), DEV_DEPENDENCIES);
-                    addUpdateDependencySteps(list, tree, dependencies.getPeerDependencies(), PEER_DEPENDENCIES);
+                    addUpdateDependencySteps(list, tree, dependencies.getDependencies(), NpmDependencyKinds.DEPENDENCIES);
+                    addUpdateDependencySteps(list, tree, dependencies.getDevDependencies(), NpmDependencyKinds.DEV_DEPENDENCIES);
+                    addUpdateDependencySteps(list, tree, dependencies.getPeerDependencies(), NpmDependencyKinds.PEER_DEPENDENCIES);
                 }
             }
         }
