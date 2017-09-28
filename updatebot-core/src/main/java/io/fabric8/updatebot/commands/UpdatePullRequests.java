@@ -20,15 +20,14 @@ import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.CommandNames;
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.UpdateBot;
-import io.fabric8.updatebot.support.GitHubHelpers;
+import io.fabric8.updatebot.github.GitHubHelpers;
+import io.fabric8.updatebot.github.PullRequests;
 import io.fabric8.updatebot.support.Markdown;
-import io.fabric8.updatebot.support.PullRequests;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHCommitState;
 import org.kohsuke.github.GHCommitStatus;
 import org.kohsuke.github.GHIssueComment;
-import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
@@ -38,7 +37,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
-import static io.fabric8.updatebot.support.GitHubHelpers.getLastCommitStatus;
+import static io.fabric8.updatebot.github.GitHubHelpers.getLastCommitStatus;
+import static io.fabric8.updatebot.github.Issues.getLabels;
 import static io.fabric8.updatebot.support.Markdown.UPDATEBOT;
 
 /**
@@ -55,10 +55,10 @@ public class UpdatePullRequests extends CommandSupport {
     public void run(CommandContext context) throws IOException {
         GHRepository ghRepository = context.gitHubRepository();
         if (ghRepository != null) {
-            List<GHPullRequest> pullRequests = ghRepository.getPullRequests(GHIssueState.OPEN);
+            List<GHPullRequest> pullRequests = PullRequests.getOpenPullRequests(ghRepository, context.getConfiguration());
             for (GHPullRequest pullRequest : pullRequests) {
                 Configuration configuration = context.getConfiguration();
-                if (GitHubHelpers.hasLabel(pullRequest.getLabels(), configuration.getGithubPullRequestLabel())) {
+                if (GitHubHelpers.hasLabel(getLabels(pullRequest), configuration.getGithubPullRequestLabel())) {
                     if (!GitHubHelpers.isMergeable(pullRequest)) {
                         // lets re-run the update commands we can find on the PR
                         CompositeCommand commands = loadCommandsFromPullRequest(context, ghRepository, pullRequest);

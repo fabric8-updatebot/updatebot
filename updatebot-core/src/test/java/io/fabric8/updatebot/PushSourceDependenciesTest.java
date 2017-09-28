@@ -17,9 +17,9 @@ package io.fabric8.updatebot;
 
 
 import io.fabric8.updatebot.commands.PushSourceChanges;
+import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.repository.Repositories;
-import io.fabric8.updatebot.support.GitHubHelpers;
 import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +59,7 @@ public class PushSourceDependenciesTest {
         pushSourceChanges.setDir(sourceRepo.getDir());
 
         // lets close all open PRs
-        GitHubHelpers.closeOpenUpdateBotPullRequests(configuration.getGithubPullRequestLabel(), localRepositories);
+        GitHubHelpers.closeOpenUpdateBotIssuesAndPullRequests(configuration.getGithubPullRequestLabel(), localRepositories);
         GitHubHelpers.deleteUpdateBotBranches(localRepositories);
     }
 

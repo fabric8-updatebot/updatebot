@@ -18,9 +18,9 @@ package io.fabric8.updatebot;
 
 import io.fabric8.updatebot.commands.PushVersionChanges;
 import io.fabric8.updatebot.commands.UpdatePullRequests;
+import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.repository.LocalRepository;
-import io.fabric8.updatebot.support.GitHubHelpers;
 import io.fabric8.updatebot.test.NpmTests;
 import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
@@ -63,7 +63,7 @@ public class PushVersionPRUpdateAndRebasePRTest {
         this.localRepositories = updateBot.cloneOrPullRepositories(configuration);
 
         // lets close all open PRs
-        GitHubHelpers.closeOpenUpdateBotPullRequests(configuration.getGithubPullRequestLabel(), localRepositories);
+        GitHubHelpers.closeOpenUpdateBotIssuesAndPullRequests(configuration.getGithubPullRequestLabel(), localRepositories);
         GitHubHelpers.deleteUpdateBotBranches(localRepositories);
     }
 

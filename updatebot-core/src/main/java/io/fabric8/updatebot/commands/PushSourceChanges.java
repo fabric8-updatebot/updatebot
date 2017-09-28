@@ -22,6 +22,7 @@ import io.fabric8.updatebot.kind.CompositeUpdater;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.model.GitHubRepositoryDetails;
+import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Files;
@@ -49,7 +50,6 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
     @Parameter(description = "The git repository to clone from for the source code", required = true)
     private String cloneUrl;
 
-    private List<DependencyVersionChange> pushVersionsSteps;
     private LocalRepository sourceRepository;
 
     public PushSourceChanges() {
@@ -95,34 +95,48 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
     protected boolean doProcess(CommandContext context) throws IOException {
         LocalRepository repository = context.getRepository();
         if (repository.hasCloneUrl(cloneUrl)) {
-            LOG.info("Ignoring repository " + repository.getCloneUrl() + " as this is the source repository!");
+            LOG.debug("Ignoring repository " + repository.getCloneUrl() + " as this is the source repository!");
             return false;
         }
-        List<DependencyVersionChange> steps = getPushVersionsSteps(context);
-
+        List<DependencyVersionChange> steps = loadPushVersionSteps(context);
+        String sourceFullName = getCloneUrl();
+        LocalRepository sourceRepository = getSourceRepository();
+        if (sourceRepository != null) {
+            sourceFullName = sourceRepository.getFullName();
+        }
+        LOG.info("pushing " + sourceFullName + " on " + context.getRepositoryFullName() + " has version changes " + DependencyVersionChange.describe(steps));
         return pushVersionsWithChecks(new PushSourceChangesContext(context, this, sourceRepository), steps);
     }
 
-    public List<DependencyVersionChange> getPushVersionsSteps(CommandContext context) throws IOException {
-        if (pushVersionsSteps == null) {
-            pushVersionsSteps = loadPushVersionSteps(context);
+    public LocalRepository getSourceRepository() {
+        if (this.sourceRepository == null) {
+            this.sourceRepository = findLocalRepository();
         }
-        return pushVersionsSteps;
+        return sourceRepository;
     }
 
     protected List<DependencyVersionChange> loadPushVersionSteps(CommandContext context) {
         List<DependencyVersionChange> list = new ArrayList<>();
         validateCloneUrl();
-        this.sourceRepository = findLocalRepository();
-        GitHubRepositoryDetails repositoryDetails = sourceRepository.getRepo().getRepositoryDetails();
+        LocalRepository sourceRepository = getSourceRepository();
+        if (this.sourceRepository == null) {
+            LOG.warn("No source repository for " + context.getDir());
+            return list;
+        }
+        GitRepository repo = sourceRepository.getRepo();
+        if (repo == null) {
+            LOG.warn("No git repo for " + sourceRepository + " " + context.getDir());
+            return list;
+        }
+        GitHubRepositoryDetails repositoryDetails = repo.getRepositoryDetails();
         if (repositoryDetails == null) {
             LOG.warn("No repository details found for repository " + sourceRepository);
             return list;
         }
         Dependencies push = repositoryDetails.getPush();
         if (push == null) {
-            LOG.warn("No push version details found for repository " + sourceRepository + " for configuration " + repositoryDetails);
-            return list;
+            LOG.debug("No push version details found for repository " + sourceRepository + " for configuration " + repositoryDetails);
+            push = new Dependencies();
         }
         CommandContext sourceContext = new CommandContext(sourceRepository, context.getConfiguration());
         CompositeUpdater updater = new CompositeUpdater();
@@ -142,9 +156,10 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
      * {@link GitHubRepositoryDetails} for a local repository
      */
     protected LocalRepository findLocalRepository() {
+        String cloneUrl = getCloneUrl();
         List<LocalRepository> localRepositories = getLocalRepositories();
         for (LocalRepository localRepository : localRepositories) {
-            if (localRepository.hasCloneUrl(getCloneUrl())) {
+            if (localRepository.hasCloneUrl(cloneUrl)) {
                 return localRepository;
             }
         }

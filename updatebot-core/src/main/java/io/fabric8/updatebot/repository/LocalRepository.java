@@ -45,6 +45,10 @@ public class LocalRepository {
                 '}';
     }
 
+    public String getFullName() {
+        return repo.getFullName();
+    }
+
     public GitRepository getRepo() {
         return repo;
     }
@@ -61,6 +65,7 @@ public class LocalRepository {
      * Returns true if this repository can be cloned using the given URL
      */
     public boolean hasCloneUrl(String cloneUrl) {
-        return repo.hasCloneUrl(cloneUrl);
+        // sometimes folks miss off the ".git" from URLs so lets check for that too
+        return repo.hasCloneUrl(cloneUrl) || repo.hasCloneUrl(cloneUrl + ".git");
     }
 }

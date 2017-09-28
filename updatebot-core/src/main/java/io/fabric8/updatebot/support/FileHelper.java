@@ -15,7 +15,10 @@
  */
 package io.fabric8.updatebot.support;
 
+import io.fabric8.utils.Files;
+
 import java.io.File;
+import java.io.IOException;
 
 /**
  */
@@ -26,5 +29,16 @@ public class FileHelper {
 
     public static boolean isDirectory(File file) {
         return file != null && file.isDirectory() && file.exists();
+    }
+
+    public static Object getRelativePathToCurrentDir(File dir) {
+        File currentDir = new File(System.getProperty("user.dir", "."));
+        Object relativePath;
+        try {
+            relativePath = Files.getRelativePath(currentDir, dir);
+        } catch (IOException e) {
+            relativePath = dir;
+        }
+        return relativePath;
     }
 }

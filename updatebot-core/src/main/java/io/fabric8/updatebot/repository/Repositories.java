@@ -17,6 +17,7 @@ package io.fabric8.updatebot.repository;
 
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.commands.CommandSupport;
+import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.model.GitHubProjects;
 import io.fabric8.updatebot.model.GitHubRepositoryDetails;
 import io.fabric8.updatebot.model.GitRepository;
@@ -24,7 +25,7 @@ import io.fabric8.updatebot.model.GithubOrganisation;
 import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.model.Projects;
 import io.fabric8.updatebot.support.Commands;
-import io.fabric8.updatebot.support.GitHubHelpers;
+import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Filter;
 import io.fabric8.utils.Objects;
@@ -57,16 +58,6 @@ public class Repositories {
         return repositories;
     }
 
-    public static boolean gitStashAndCheckoutMaster(File dir) {
-        if (Commands.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
-            if (Commands.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
-                return true;
-            }
-        }
-        LOG.warn("Failed to checkout master in " + dir);
-        return false;
-    }
-
     private static void cloneOrPull(Configuration configuration, LocalRepository repository) {
         File dir = repository.getDir();
         File gitDir = new File(dir, ".git");
@@ -83,7 +74,7 @@ public class Repositories {
             File parentDir = dir.getParentFile();
             parentDir.mkdirs();
 
-            LOG.info("Cloning: " + dir + " repo: " + repository.getCloneUrl());
+            LOG.info("Cloning: " + repository.getFullName() + " to " + FileHelper.getRelativePathToCurrentDir(dir));
             Commands.runCommand(parentDir, "git", "clone", repository.getCloneUrl(), dir.getName());
         }
     }

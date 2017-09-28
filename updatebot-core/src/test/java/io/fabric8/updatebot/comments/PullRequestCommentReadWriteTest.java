@@ -31,10 +31,10 @@ import org.junit.Test;
 import java.io.File;
 
 import static io.fabric8.updatebot.CommandNames.PUSH_VERSION;
+import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_INDENT;
+import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_PREFIX;
+import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_PREFIX_SEPARATOR;
 import static io.fabric8.updatebot.kind.Kind.NPM;
-import static io.fabric8.updatebot.support.PullRequests.COMMAND_COMMENT_INDENT;
-import static io.fabric8.updatebot.support.PullRequests.COMMAND_COMMENT_PREFIX;
-import static io.fabric8.updatebot.support.PullRequests.COMMAND_COMMENT_PREFIX_SEPARATOR;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**

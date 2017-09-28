@@ -16,19 +16,19 @@
 package io.fabric8.updatebot.commands;
 
 import io.fabric8.updatebot.Configuration;
+import io.fabric8.updatebot.github.GitHubHelpers;
+import io.fabric8.updatebot.github.Issues;
+import io.fabric8.updatebot.github.PullRequests;
 import io.fabric8.updatebot.kind.DependenciesCheck;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.kind.KindDependenciesCheck;
 import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.model.DependencyVersionChange;
-import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.updatebot.support.Commands;
-import io.fabric8.updatebot.support.GitHubHelpers;
-import io.fabric8.updatebot.support.Issues;
+import io.fabric8.updatebot.support.GitHelper;
 import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHCommitPointer;
 import org.kohsuke.github.GHIssue;
-import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
@@ -42,13 +42,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.kohsuke.github.GHIssueState.OPEN;
-
 /**
  * Base class for all UpdateBot commands
  */
 public abstract class ModifyFilesCommandSupport extends CommandSupport {
     private static final transient Logger LOG = LoggerFactory.getLogger(ModifyFilesCommandSupport.class);
+    private GHIssue issue;
 
     @Override
     public void run(CommandContext context) throws IOException {
@@ -70,7 +69,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
     protected void prepareDirectory(CommandContext context) {
         File dir = context.getRepository().getDir();
         dir.getParentFile().mkdirs();
-        Repositories.gitStashAndCheckoutMaster(dir);
+        GitHelper.gitStashAndCheckoutMaster(dir);
     }
 
     protected boolean doProcess(CommandContext context) throws IOException {
@@ -80,8 +79,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
     protected void gitCommitAndPullRequest(CommandContext context) throws IOException {
         GHRepository ghRepository = context.gitHubRepository();
         if (ghRepository != null) {
-            List<GHPullRequest> pullRequests = ghRepository.getPullRequests(OPEN);
-
+            List<GHPullRequest> pullRequests = PullRequests.getOpenPullRequests(ghRepository, context.getConfiguration());
             GHPullRequest pullRequest = findPullRequest(context, pullRequests);
             processPullRequest(context, ghRepository, pullRequest);
         } else {
@@ -155,11 +153,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
     private boolean doCommit(CommandContext context, File dir, String branch) {
         String commitComment = context.createCommit();
         if (Commands.runCommandIgnoreOutput(dir, "git", "checkout", "-b", branch) == 0) {
-            if (Commands.runCommandIgnoreOutput(dir, "git", "add", "*") == 0) {
-                if (Commands.runCommand(dir, "git", "commit", "-m", commitComment) == 0) {
-                    return true;
-                }
-            }
+            return GitHelper.gitAddAndCommit(dir, commitComment);
         }
         return false;
     }
@@ -205,16 +199,17 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
     }
 
     protected boolean pushVersionsWithChecks(CommandContext context, List<DependencyVersionChange> originalSteps) throws IOException {
-        List<DependencyVersionChange> steps = combineWithPendingChanges(context, originalSteps);
+        List<DependencyVersionChange> pendingChanges = loadPendingChanges(context);
+        List<DependencyVersionChange> steps = combinePendingChanges(originalSteps, pendingChanges);
         boolean answer = pushVersionChangesWithoutChecks(context, steps);
         if (answer) {
             if (context.getConfiguration().isCheckDependencies()) {
                 DependenciesCheck check = checkDependencyChanges(context, steps);
                 List<DependencyVersionChange> invalidChanges = check.getInvalidChanges();
+                List<DependencyVersionChange> validChanges = check.getValidChanges();
                 if (invalidChanges.size() > 0) {
                     // lets revert the current changes
                     revertCurrentChanges(context);
-                    List<DependencyVersionChange> validChanges = check.getValidChanges();
                     if (validChanges.size() > 0) {
                         // lets perform just the valid changes
                         if (!pushVersionChangesWithoutChecks(context, validChanges)) {
@@ -222,32 +217,49 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
                             return false;
                         }
                     }
-                    updatePendingChanges(context, check);
                 }
+                updatePendingChanges(context, check, pendingChanges);
+                return validChanges.size() > 0;
             }
         }
         return answer;
     }
 
-    public void updatePendingChanges(CommandContext context, DependenciesCheck check) throws IOException {
+    public void updatePendingChanges(CommandContext context, DependenciesCheck check, List<DependencyVersionChange> pendingChanges) throws IOException {
+        List<DependencyVersionChange> currentPendingChanges = check.getInvalidChanges();
         GHRepository ghRepository = context.gitHubRepository();
         if (ghRepository != null) {
-            List<GHIssue> issues = ghRepository.getIssues(GHIssueState.OPEN);
-            GHIssue issue = Issues.findIssue(context, issues);
+            GHIssue issue = context.getIssue();
+            if (issue == null) {
+                List<GHIssue> issues = Issues.getOpenIssues(ghRepository, context.getConfiguration());
+                issue = Issues.findIssue(context, issues);
+                context.setIssue(issue);
+            }
+            if (currentPendingChanges.equals(pendingChanges)) {
+                if (issue != null) {
+                    LOG.debug("Pending changes unchanged so not modifying the issue");
+                }
+                return;
+            }
+            if (currentPendingChanges.isEmpty()) {
+                LOG.info("Closing issue as we have no further pending issues");
+                issue.comment("No more pending issues");
+                issue.close();
+                return;
+            }
             if (issue == null) {
                 issue = Issues.createIssue(context, ghRepository);
+                LOG.info("Created issue " + issue.getHtmlUrl());
+            } else {
+                LOG.info("Modifying issue " + issue.getHtmlUrl());
             }
-            Issues.addPendingChangesComment(issue, check.getInvalidChanges());
+            Issues.addPendingChangesComment(issue, currentPendingChanges);
         } else {
             // TODO what to do with vanilla git repos?
         }
     }
 
-    /**
-     * Combine the current changes with any pending chagnes
-     */
-    private List<DependencyVersionChange> combineWithPendingChanges(CommandContext context, List<DependencyVersionChange> changes) throws IOException {
-        List<DependencyVersionChange> pendingChanges = loadPendingChanges(context);
+    private List<DependencyVersionChange> combinePendingChanges(List<DependencyVersionChange> changes, List<DependencyVersionChange> pendingChanges) {
         if (pendingChanges.isEmpty()) {
             return changes;
         }
@@ -263,9 +275,10 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
     protected List<DependencyVersionChange> loadPendingChanges(CommandContext context) throws IOException {
         GHRepository ghRepository = context.gitHubRepository();
         if (ghRepository != null) {
-            List<GHIssue> issues = ghRepository.getIssues(GHIssueState.OPEN);
+            List<GHIssue> issues = Issues.getOpenIssues(ghRepository, context.getConfiguration());
             GHIssue issue = Issues.findIssue(context, issues);
             if (issue != null) {
+                context.setIssue(issue);
                 return Issues.loadPendingChangesFromIssue(context, issue);
             }
         } else {

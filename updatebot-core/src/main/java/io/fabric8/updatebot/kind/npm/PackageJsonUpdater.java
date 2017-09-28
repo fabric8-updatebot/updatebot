@@ -86,23 +86,21 @@ public class PackageJsonUpdater implements Updater {
     @Override
     public void addPushVersionsSteps(CommandContext context, Dependencies dependencyConfig, List<DependencyVersionChange> list) {
         NpmDependencies dependencies = dependencyConfig.getNpm();
-        if (dependencies != null) {
-            JsonNode tree = getPackageJsonTree(context);
-            if (tree != null) {
-                String name = JsonNodes.textValue(tree, "name");
-                String version = JsonNodes.textValue(tree, "version");
-                if (Strings.notEmpty(name) && Strings.notEmpty(version)) {
-                    if (isDevelopmentVersion(name, version)) {
-                        LOG.info("Not updating NPM dependency " + name + " version " + version + " as this is a development version and not a release");
-                    } else {
-                        list.add(new DependencyVersionChange(Kind.NPM, name, version, NpmDependencyKinds.DEPENDENCIES));
-                    }
+        JsonNode tree = getPackageJsonTree(context);
+        if (tree != null) {
+            String name = JsonNodes.textValue(tree, "name");
+            String version = JsonNodes.textValue(tree, "version");
+            if (Strings.notEmpty(name) && Strings.notEmpty(version)) {
+                if (isDevelopmentVersion(name, version)) {
+                    LOG.info("Not updating NPM dependency " + name + " version " + version + " as this is a development version and not a release");
+                } else {
+                    list.add(new DependencyVersionChange(Kind.NPM, name, version, NpmDependencyKinds.DEPENDENCIES));
                 }
-                if (tree != null) {
-                    addUpdateDependencySteps(list, tree, dependencies.getDependencies(), NpmDependencyKinds.DEPENDENCIES);
-                    addUpdateDependencySteps(list, tree, dependencies.getDevDependencies(), NpmDependencyKinds.DEV_DEPENDENCIES);
-                    addUpdateDependencySteps(list, tree, dependencies.getPeerDependencies(), NpmDependencyKinds.PEER_DEPENDENCIES);
-                }
+            }
+            if (dependencies != null) {
+                addUpdateDependencySteps(list, tree, dependencies.getDependencies(), NpmDependencyKinds.DEPENDENCIES);
+                addUpdateDependencySteps(list, tree, dependencies.getDevDependencies(), NpmDependencyKinds.DEV_DEPENDENCIES);
+                addUpdateDependencySteps(list, tree, dependencies.getPeerDependencies(), NpmDependencyKinds.PEER_DEPENDENCIES);
             }
         }
     }
@@ -130,10 +128,17 @@ public class PackageJsonUpdater implements Updater {
         List<DependencyVersionChange> invalidChanges = new ArrayList<>();
         Map<String, DependencyCheck> failedChecks = new TreeMap<>();
 
-        String dependencyFileName = "dependency-tree.json";
+        String dependencyFileName = ".dependency-tree.json";
         generateDependencyTree(context, dependencyFileName);
-        JsonNode json = getJsonFile(context, dependencyFileName);
-
+        JsonNode json = null;
+        try {
+            json = getJsonFile(context, dependencyFileName);
+        } finally {
+            File file = new File(context.getDir(), dependencyFileName);
+            if (Files.isFile(file)) {
+                file.delete();
+            }
+        }
         if (json != null) {
             DependencyTree dependencyTree = DependencyTree.parseTree(json);
             for (DependencyVersionChange change : changes) {

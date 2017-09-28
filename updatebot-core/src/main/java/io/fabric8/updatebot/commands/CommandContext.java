@@ -16,11 +16,12 @@
 package io.fabric8.updatebot.commands;
 
 import io.fabric8.updatebot.Configuration;
+import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.repository.LocalRepository;
-import io.fabric8.updatebot.support.GitHubHelpers;
 import io.fabric8.updatebot.support.Markdown;
+import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHRepository;
 
 import java.io.File;
@@ -37,6 +38,7 @@ public class CommandContext {
     private final Set<File> updatedFiles = new TreeSet<>();
     private final CommandContext parentContext;
     private List<CommandContext> children = new ArrayList<>();
+    private GHIssue issue;
 
     public CommandContext(LocalRepository repository, Configuration configuration) {
         this.repository = repository;
@@ -164,5 +166,17 @@ public class CommandContext {
             return children.get(0);
         }
         return null;
+    }
+
+    public GHIssue getIssue() {
+        return issue;
+    }
+
+    public void setIssue(GHIssue issue) {
+        this.issue = issue;
+    }
+
+    public String getRepositoryFullName() {
+        return repository.getRepo().getFullName();
     }
 }

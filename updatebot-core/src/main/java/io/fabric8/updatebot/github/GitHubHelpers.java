@@ -13,48 +13,56 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot.support;
+package io.fabric8.updatebot.github;
 
 import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.utils.Objects;
-import org.kohsuke.github.GHBranch;
 import org.kohsuke.github.GHCommitStatus;
-import org.kohsuke.github.GHIssueState;
+import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHPerson;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.Callable;
 
 /**
  */
 public class GitHubHelpers {
     private static final transient Logger LOG = LoggerFactory.getLogger(GitHubHelpers.class);
 
-    public static void closeOpenUpdateBotPullRequests(String prLabel, List<LocalRepository> repositories) {
+    public static void closeOpenUpdateBotIssuesAndPullRequests(String prLabel, List<LocalRepository> repositories) {
         for (LocalRepository repository : repositories) {
             GHRepository ghRepo = GitHubHelpers.getGitHubRepository(repository);
             if (ghRepo != null) {
                 try {
-                    List<GHPullRequest> pullRequests = ghRepo.getPullRequests(GHIssueState.OPEN);
-                    for (GHPullRequest pullRequest : pullRequests) {
-                        if (hasLabel(pullRequest.getLabels(), prLabel)) {
-                            pullRequest.close();
-                        }
-                    }
+                    closePullRequests(PullRequests.getOpenPullRequests(ghRepo, prLabel));
+                    closeIssues(Issues.getOpenIssues(ghRepo, prLabel));
                 } catch (IOException e) {
                     LOG.warn("Failed to close pending open Pull Requests on " + repository.getCloneUrl());
                 }
             }
+        }
+    }
+
+    public static void closeIssues(List<GHIssue> issues) throws IOException {
+        for (GHIssue issue : issues) {
+            issue.close();
+        }
+    }
+
+    public static void closePullRequests(List<GHPullRequest> pullRequests) throws IOException {
+        for (GHPullRequest pullRequest : pullRequests) {
+            pullRequest.close();
         }
     }
 
@@ -92,6 +100,7 @@ public class GitHubHelpers {
     }
 
     public static void deleteUpdateBotBranches(List<LocalRepository> localRepositories) throws IOException {
+/*
         for (LocalRepository localRepository : localRepositories) {
             GHRepository ghRepository = getGitHubRepository(localRepository);
             if (ghRepository != null) {
@@ -104,6 +113,7 @@ public class GitHubHelpers {
                 }
             }
         }
+*/
     }
 
     public static GHPerson getOrganisationOrUser(GitHub github, String orgName) {
@@ -125,5 +135,38 @@ public class GitHubHelpers {
     public static GHCommitStatus getLastCommitStatus(GHRepository repository, GHPullRequest pullRequest) throws IOException {
         String commitSha = pullRequest.getHead().getRef();
         return repository.getLastCommitStatus(commitSha);
+    }
+
+    public static <T> T retryGithub(Callable<T> callable) throws IOException {
+        return retryGithub(callable, 5, 1000);
+    }
+
+    /**
+     * Allow automatic retries when timeout exceptions happen
+     */
+    public static <T> T retryGithub(Callable<T> callable, int retries, long timeout) throws IOException {
+        for (int i = 0; i < retries; i++) {
+            if (i > 0) {
+                try {
+                    Thread.sleep(timeout);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            try {
+                return callable.call();
+            } catch (HttpException e) {
+                int code = e.getResponseCode();
+                LOG.warn("GitHub Operation returned response " + code + " so retrying. Exception " + e, e);
+                if (code >= 100) {
+                    throw e;
+                }
+            } catch (IOException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
+        return null;
     }
 }

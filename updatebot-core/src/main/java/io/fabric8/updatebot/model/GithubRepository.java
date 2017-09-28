@@ -53,6 +53,12 @@ public class GithubRepository extends GitRepository {
     }
 
     @Override
+    public String getFullName() {
+        return repository.getFullName();
+
+    }
+
+    @Override
     public boolean hasCloneUrl(String url) {
         if (super.hasCloneUrl(url)) {
             return true;

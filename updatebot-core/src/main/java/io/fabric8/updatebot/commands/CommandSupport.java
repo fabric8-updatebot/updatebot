@@ -33,10 +33,10 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
+import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_INDENT;
+import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_PREFIX;
+import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_PREFIX_SEPARATOR;
 import static io.fabric8.updatebot.support.MarkupHelper.loadYaml;
-import static io.fabric8.updatebot.support.PullRequests.COMMAND_COMMENT_INDENT;
-import static io.fabric8.updatebot.support.PullRequests.COMMAND_COMMENT_PREFIX;
-import static io.fabric8.updatebot.support.PullRequests.COMMAND_COMMENT_PREFIX_SEPARATOR;
 import static io.fabric8.updatebot.support.ReflectionHelper.findFieldsAnnotatedWith;
 import static io.fabric8.updatebot.support.ReflectionHelper.getFieldValue;
 

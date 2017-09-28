@@ -13,14 +13,19 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot.support;
+package io.fabric8.updatebot.github;
 
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.commands.CommandContext;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.model.DependencyVersionChange;
+import io.fabric8.updatebot.support.Markdown;
+import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
+import org.kohsuke.github.GHIssueState;
+import org.kohsuke.github.GHLabel;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GHUser;
 import org.slf4j.Logger;
@@ -28,7 +33,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import static io.fabric8.updatebot.github.GitHubHelpers.retryGithub;
 
 /**
  */
@@ -36,6 +44,23 @@ public class Issues {
     public static final String BODY = "Dependency versions cannot yet be applied until other projects are released with new dependencies\n\n" + Markdown.GENERATED_BY;
     private static final transient Logger LOG = LoggerFactory.getLogger(Issues.class);
     public static String PENDING_CHANGE_COMMENT_PREFIX = Markdown.UPDATEBOT_ICON + " pending changes:";
+
+    public static List<GHIssue> getOpenIssues(GHRepository ghRepository, Configuration configuration) throws IOException {
+        String label = configuration.getGithubPullRequestLabel();
+        return getOpenIssues(ghRepository, label);
+    }
+
+    public static List<GHIssue> getOpenIssues(GHRepository ghRepository, String label) throws IOException {
+        List<GHIssue> issues = retryGithub(() -> ghRepository.getIssues(GHIssueState.OPEN));
+        List<GHIssue> answer = new ArrayList<>();
+        for (GHIssue issue : issues) {
+            if (GitHubHelpers.hasLabel(getLabels(issue), label) && !issue.isPullRequest()) {
+                answer.add(issue);
+            }
+        }
+        return answer;
+    }
+
 
     public static List<DependencyVersionChange> loadPendingChangesFromIssue(CommandContext context, GHIssue issue) throws IOException {
         List<GHIssueComment> comments = issue.getComments();
@@ -152,5 +177,18 @@ public class Issues {
                 body(BODY).
                 label(context.getConfiguration().getGithubPullRequestLabel()).
                 create();
+    }
+
+    public static void logOpen(List<GHIssue> issues) {
+        for (GHIssue issue : issues) {
+            LOG.info("Open issue " + issue.getHtmlUrl());
+        }
+    }
+
+    /**
+     * Lets return the labels on an issue with retries
+     */
+    public static Collection<GHLabel> getLabels(GHIssue issue) throws IOException {
+        return retryGithub(() -> issue.getLabels());
     }
 }

@@ -57,11 +57,11 @@ public class Commands {
             Process process = builder.start();
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                LOG.warn("Failed to run command " + line + " : exit " + exitCode);
+                LOG.warn("Failed to run command " + line + " in " + builder.directory() + " : exit " + exitCode);
             }
             return exitCode;
         } catch (IOException e) {
-            LOG.warn("Failed to run command " + line + " : error " + e);
+            LOG.warn("Failed to run command " + line + " in " + builder.directory() + " : error " + e);
         } catch (InterruptedException e) {
             // ignore
         }

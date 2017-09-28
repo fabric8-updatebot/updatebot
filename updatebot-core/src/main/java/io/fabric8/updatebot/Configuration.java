@@ -20,8 +20,10 @@ import io.fabric8.updatebot.kind.npm.DefaultNpmDependencyTreeGenerator;
 import io.fabric8.updatebot.kind.npm.NpmDependencyTreeGenerator;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.updatebot.support.Systems;
+import org.kohsuke.github.AbuseLimitHandler;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.RateLimitHandler;
 
 import java.io.IOException;
 
@@ -66,6 +68,8 @@ public class Configuration {
                     ghb.withOAuthToken(token);
                 }
             }
+            ghb.withRateLimitHandler(RateLimitHandler.WAIT).
+                    withAbuseLimitHandler(AbuseLimitHandler.WAIT);
             this.github = ghb.build();
         }
         return this.github;

@@ -16,7 +16,6 @@
 package io.fabric8.updatebot.github;
 
 import io.fabric8.updatebot.Configuration;
-import io.fabric8.updatebot.support.GitHubHelpers;
 import org.kohsuke.github.GHCommitStatus;
 import org.kohsuke.github.GHPerson;
 import org.kohsuke.github.GHPullRequest;

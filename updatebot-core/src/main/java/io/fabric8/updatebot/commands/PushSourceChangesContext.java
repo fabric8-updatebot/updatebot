@@ -41,9 +41,11 @@ public class PushSourceChangesContext extends CommandContext {
         String ref = command.getRef();
         String gitUrlText = "`" + gitUrl + "`";
 
-        String htmlUrl = sourceRepository.getRepo().getHtmlUrl();
-        if (Strings.notEmpty(htmlUrl)) {
-            gitUrlText = "[" + gitUrl + "](" + htmlUrl + ")";
+        if (sourceRepository != null) {
+            String htmlUrl = sourceRepository.getRepo().getHtmlUrl();
+            if (Strings.notEmpty(htmlUrl)) {
+                gitUrlText = "[" + gitUrl + "](" + htmlUrl + ")";
+            }
         }
         return Markdown.UPDATEBOT_ICON + " pushed version changes from the source code in repository: " +
                 gitUrlText +

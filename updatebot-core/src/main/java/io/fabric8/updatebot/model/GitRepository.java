@@ -76,5 +76,7 @@ public class GitRepository extends DtoSupport {
         return Objects.equal(this.cloneUrl, url);
     }
 
-
+    public String getFullName() {
+        return cloneUrl;
+    }
 }

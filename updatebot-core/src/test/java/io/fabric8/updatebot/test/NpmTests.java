@@ -16,6 +16,7 @@
 package io.fabric8.updatebot.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.repository.LocalRepository;
@@ -30,6 +31,11 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import static io.fabric8.updatebot.support.GitHelper.gitAddAndCommit;
+import static io.fabric8.updatebot.support.GitHelper.gitStashAndCheckoutMaster;
+import static io.fabric8.updatebot.test.MarkupAssertions.assertObjectNode;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  */
@@ -77,5 +83,19 @@ public class NpmTests {
             }
         }
         return false;
+    }
+
+    public static void updatePackageJsonVersion(File packageJson, String version) throws IOException {
+        assertThat(packageJson).isFile();
+        JsonNode tree = MarkupHelper.loadJson(packageJson);
+        ObjectNode objectNode = assertObjectNode(tree);
+        objectNode.put("version", version);
+
+        gitStashAndCheckoutMaster(packageJson.getParentFile());
+        MarkupHelper.savePrettyJson(packageJson, objectNode);
+
+        if (!gitAddAndCommit(packageJson.getParentFile(), "Simulated release of version " + version)) {
+            LOG.warn("Failed to git commit version change for " + packageJson);
+        }
     }
 }

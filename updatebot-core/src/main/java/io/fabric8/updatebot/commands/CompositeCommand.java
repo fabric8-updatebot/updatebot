@@ -23,9 +23,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.fabric8.updatebot.support.PullRequests.COMMAND_COMMENT_INDENT;
-import static io.fabric8.updatebot.support.PullRequests.COMMAND_COMMENT_PREFIX;
-import static io.fabric8.updatebot.support.PullRequests.COMMAND_COMMENT_PREFIX_SEPARATOR;
+import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_INDENT;
+import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_PREFIX;
+import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_PREFIX_SEPARATOR;
 
 /**
  * Represents a list of commands to execute.

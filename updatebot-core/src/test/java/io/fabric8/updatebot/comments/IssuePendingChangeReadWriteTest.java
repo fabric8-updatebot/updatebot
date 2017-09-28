@@ -15,9 +15,9 @@
  */
 package io.fabric8.updatebot.comments;
 
+import io.fabric8.updatebot.github.Issues;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.model.DependencyVersionChange;
-import io.fabric8.updatebot.support.Issues;
 import org.junit.Test;
 
 import java.util.Arrays;
