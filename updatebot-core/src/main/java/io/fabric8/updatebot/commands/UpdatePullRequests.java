@@ -21,6 +21,7 @@ import io.fabric8.updatebot.CommandNames;
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.UpdateBot;
 import io.fabric8.updatebot.support.GitHubHelpers;
+import io.fabric8.updatebot.support.Markdown;
 import io.fabric8.updatebot.support.PullRequests;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Objects;
@@ -38,7 +39,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static io.fabric8.updatebot.support.GitHubHelpers.getLastCommitStatus;
-import static io.fabric8.updatebot.support.PullRequests.UPDATEBOT;
+import static io.fabric8.updatebot.support.Markdown.UPDATEBOT;
 
 /**
  * Updates any open pull requests, rebasing any that require rebasing, merging any that are ready or responding to comments
@@ -72,7 +73,7 @@ public class UpdatePullRequests extends CommandSupport {
                             if (status != null) {
                                 GHCommitState state = status.getState();
                                 if (state != null && state.equals(GHCommitState.SUCCESS)) {
-                                    String message = PullRequests.UPDATEBOT_ICON + " merging this pull request as its CI was successful";
+                                    String message = Markdown.UPDATEBOT_ICON + " merging this pull request as its CI was successful";
                                     pullRequest.merge(message);
                                 }
                             }

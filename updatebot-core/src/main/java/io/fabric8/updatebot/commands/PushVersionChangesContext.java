@@ -16,8 +16,8 @@
 package io.fabric8.updatebot.commands;
 
 import io.fabric8.updatebot.kind.Kind;
-import io.fabric8.updatebot.model.PushVersionDetails;
-import io.fabric8.updatebot.support.PullRequests;
+import io.fabric8.updatebot.model.DependencyVersionChange;
+import io.fabric8.updatebot.support.Markdown;
 import io.fabric8.utils.Objects;
 
 import java.util.ArrayList;
@@ -26,10 +26,10 @@ import java.util.List;
 /**
  */
 public class PushVersionChangesContext extends CommandContext {
-    private final PushVersionDetails step;
+    private final DependencyVersionChange step;
     private List<Change> changes = new ArrayList<>();
 
-    public PushVersionChangesContext(CommandContext parentContext, PushVersionDetails step) {
+    public PushVersionChangesContext(CommandContext parentContext, DependencyVersionChange step) {
         super(parentContext);
         this.step = step;
     }
@@ -45,22 +45,22 @@ public class PushVersionChangesContext extends CommandContext {
 
     @Override
     public String createPullRequestBody() {
-        return PullRequests.UPDATEBOT_ICON + " pushed " + step.getKind() + " dependency: `" + step.getProperty() + "` to: `" + step.getValue() + "`";
+        return Markdown.UPDATEBOT_ICON + " pushed " + step.getKind() + " dependency: `" + step.getDependency() + "` to: `" + step.getVersion() + "`";
     }
 
     @Override
     public String createCommit() {
-        return "fix(version): update " + step.getProperty() + " to " + step.getValue();
+        return "fix(version): update " + step.getDependency() + " to " + step.getVersion();
     }
 
     @Override
-    public String createTitle() {
-        return "update " + step.getProperty() + " to " + step.getValue();
+    public String createPullRequestTitle() {
+        return createPullRequestTitlePrefix() + step.getVersion();
     }
 
     @Override
-    public String createTitlePrefix() {
-        return "fix(version): update " + step.getProperty() + " to ";
+    public String createPullRequestTitlePrefix() {
+        return "update " + step.getDependency() + " to ";
     }
 
     public Kind getKind() {
@@ -68,11 +68,11 @@ public class PushVersionChangesContext extends CommandContext {
     }
 
     public String getName() {
-        return step.getProperty();
+        return step.getDependency();
     }
 
     public String getValue() {
-        return step.getValue();
+        return step.getVersion();
     }
 
     public List<Change> getChanges() {

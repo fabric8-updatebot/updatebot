@@ -16,6 +16,8 @@
 package io.fabric8.updatebot;
 
 import com.beust.jcommander.Parameter;
+import io.fabric8.updatebot.kind.npm.DefaultNpmDependencyTreeGenerator;
+import io.fabric8.updatebot.kind.npm.NpmDependencyTreeGenerator;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.updatebot.support.Systems;
 import org.kohsuke.github.GitHub;
@@ -42,7 +44,12 @@ public class Configuration {
     private String githubPassword = Systems.getConfigValue(EnvironmentVariables.GITHUB_PASSWORD);
     @Parameter(names = {"--github-token", "-ght"}, description = "GitHub Token")
     private String githubToken = Systems.getConfigValue(EnvironmentVariables.GITHUB_TOKEN);
+    @Parameter(names = "--check", description = "Whether or not we should check dependencies are valid before submitting Pull Requests", arity = 1)
+    private boolean checkDependencies = true;
     private boolean rebaseMode = true;
+
+    private NpmDependencyTreeGenerator npmDependencyTreeGenerator = new DefaultNpmDependencyTreeGenerator();
+    private boolean pullDisabled;
 
     public GitHub getGithub() throws IOException {
         if (github == null) {
@@ -126,5 +133,34 @@ public class Configuration {
 
     public void setRebaseMode(boolean rebaseMode) {
         this.rebaseMode = rebaseMode;
+    }
+
+    public boolean isCheckDependencies() {
+        return checkDependencies;
+    }
+
+    public void setCheckDependencies(boolean checkDependencies) {
+        this.checkDependencies = checkDependencies;
+    }
+
+    public NpmDependencyTreeGenerator getNpmDependencyTreeGenerator() {
+        return npmDependencyTreeGenerator;
+    }
+
+    public void setNpmDependencyTreeGenerator(NpmDependencyTreeGenerator npmDependencyTreeGenerator) {
+        this.npmDependencyTreeGenerator = npmDependencyTreeGenerator;
+    }
+
+    public boolean isPullDisabled() {
+        return pullDisabled;
+    }
+
+    /**
+     * Allows pulling to be disabled which is handy for test cases where we commit to master without pushing
+     *
+     * @param pullDisabled
+     */
+    public void setPullDisabled(boolean pullDisabled) {
+        this.pullDisabled = pullDisabled;
     }
 }

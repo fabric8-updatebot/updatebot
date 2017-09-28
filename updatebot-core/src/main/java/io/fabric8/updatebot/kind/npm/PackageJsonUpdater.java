@@ -20,11 +20,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.fabric8.updatebot.commands.CommandContext;
 import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.kind.Kind;
+import io.fabric8.updatebot.kind.KindDependenciesCheck;
 import io.fabric8.updatebot.kind.Updater;
+import io.fabric8.updatebot.kind.npm.dependency.DependencyCheck;
+import io.fabric8.updatebot.kind.npm.dependency.DependencyTree;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.DependencySet;
+import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.model.NpmDependencies;
-import io.fabric8.updatebot.model.PushVersionDetails;
 import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.support.JsonNodes;
@@ -38,8 +41,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  */
@@ -78,25 +84,18 @@ public class PackageJsonUpdater implements Updater {
      * other repositories
      */
     @Override
-    public void addPushVersionsSteps(CommandContext context, Dependencies dependencyConfig, List<PushVersionDetails> list) {
+    public void addPushVersionsSteps(CommandContext context, Dependencies dependencyConfig, List<DependencyVersionChange> list) {
         NpmDependencies dependencies = dependencyConfig.getNpm();
         if (dependencies != null) {
-            File file = context.file("package.json");
-            if (Files.isFile(file)) {
-                JsonNode tree = null;
-                try {
-                    tree = MarkupHelper.loadJson(file);
-                } catch (IOException e) {
-                    LOG.warn("Failed to parse JSON " + file + ". " + e, e);
-                    return;
-                }
+            JsonNode tree = getPackageJsonTree(context);
+            if (tree != null) {
                 String name = JsonNodes.textValue(tree, "name");
                 String version = JsonNodes.textValue(tree, "version");
                 if (Strings.notEmpty(name) && Strings.notEmpty(version)) {
                     if (isDevelopmentVersion(name, version)) {
                         LOG.info("Not updating NPM dependency " + name + " version " + version + " as this is a development version and not a release");
                     } else {
-                        list.add(new PushVersionDetails(Kind.NPM, name, version, NpmDependencyKinds.DEPENDENCIES));
+                        list.add(new DependencyVersionChange(Kind.NPM, name, version, NpmDependencyKinds.DEPENDENCIES));
                     }
                 }
                 if (tree != null) {
@@ -107,6 +106,54 @@ public class PackageJsonUpdater implements Updater {
             }
         }
     }
+
+    protected JsonNode getPackageJsonTree(CommandContext context) {
+        return getJsonFile(context, "package.json");
+    }
+
+    protected JsonNode getJsonFile(CommandContext context, String fileName) {
+        JsonNode tree = null;
+        File file = context.file(fileName);
+        if (Files.isFile(file)) {
+            try {
+                tree = MarkupHelper.loadJson(file);
+            } catch (IOException e) {
+                LOG.warn("Failed to parse JSON " + file + ". " + e, e);
+            }
+        }
+        return tree;
+    }
+
+    @Override
+    public KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> changes) {
+        List<DependencyVersionChange> validChanges = new ArrayList<>();
+        List<DependencyVersionChange> invalidChanges = new ArrayList<>();
+        Map<String, DependencyCheck> failedChecks = new TreeMap<>();
+
+        String dependencyFileName = "dependency-tree.json";
+        generateDependencyTree(context, dependencyFileName);
+        JsonNode json = getJsonFile(context, dependencyFileName);
+
+        if (json != null) {
+            DependencyTree dependencyTree = DependencyTree.parseTree(json);
+            for (DependencyVersionChange change : changes) {
+                DependencyCheck dependencyCheck = dependencyTree.dependencyCheck(change.getDependency());
+                if (dependencyCheck.isValid()) {
+                    validChanges.add(change);
+                } else {
+                    invalidChanges.add(change);
+                    failedChecks.put(change.getDependency(), dependencyCheck);
+                }
+            }
+        }
+        return new KindDependenciesCheck(validChanges, invalidChanges, failedChecks);
+    }
+
+    protected void generateDependencyTree(CommandContext context, String dependencyFileName) {
+        context.getConfiguration().getNpmDependencyTreeGenerator().generateDependencyTree(context, dependencyFileName);
+
+    }
+
 
     /**
      * Returns true if the version string is
@@ -122,7 +169,7 @@ public class PackageJsonUpdater implements Updater {
         return false;
     }
 
-    protected void addUpdateDependencySteps(List<PushVersionDetails> list, JsonNode tree, DependencySet dependencySet, String dependencyKey) {
+    protected void addUpdateDependencySteps(List<DependencyVersionChange> list, JsonNode tree, DependencySet dependencySet, String dependencyKey) {
         if (dependencySet != null) {
             Filter<String> filter = dependencySet.createFilter();
             JsonNode dependencies = tree.get(dependencyKey);
@@ -134,7 +181,7 @@ public class PackageJsonUpdater implements Updater {
                     if (filter.matches(field)) {
                         String value = JsonNodes.textValue(objectNode, field);
                         if (value != null) {
-                            list.add(new PushVersionDetails(Kind.NPM, field, value, dependencyKey));
+                            list.add(new DependencyVersionChange(Kind.NPM, field, value, dependencyKey));
                         }
                     }
                 }

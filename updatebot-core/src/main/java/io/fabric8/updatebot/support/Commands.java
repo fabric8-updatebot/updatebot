@@ -35,12 +35,24 @@ public class Commands {
     }
 
     public static int runCommand(File dir, boolean inheritIO, String... commands) {
-        String line = String.join(" ", commands);
         ProcessBuilder builder = new ProcessBuilder(commands);
         builder.directory(dir);
         if (inheritIO) {
             builder.inheritIO();
         }
+        return doRunCommand(builder, commands);
+    }
+
+    public static int runCommand(File dir, File outputFile, File errorFile, String... commands) {
+        ProcessBuilder builder = new ProcessBuilder(commands);
+        builder.directory(dir);
+        builder.redirectOutput(outputFile);
+        builder.redirectError(errorFile);
+        return doRunCommand(builder, commands);
+    }
+
+    protected static int doRunCommand(ProcessBuilder builder, String[] commands) {
+        String line = String.join(" ", commands);
         try {
             Process process = builder.start();
             int exitCode = process.waitFor();
@@ -55,4 +67,5 @@ public class Commands {
         }
         return 1;
     }
+
 }

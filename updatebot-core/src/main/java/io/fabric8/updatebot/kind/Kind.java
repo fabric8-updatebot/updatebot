@@ -30,6 +30,18 @@ public enum Kind {
         this.updater = updater;
     }
 
+    /**
+     * Returns the kind for the given name or null if it could not be found
+     */
+    public static Kind fromName(String name) {
+        for (Kind value : values()) {
+            if (name.equalsIgnoreCase(value.getName())) {
+                return value;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return name;

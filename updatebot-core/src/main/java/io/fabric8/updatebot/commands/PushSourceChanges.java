@@ -20,8 +20,8 @@ import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.CommandNames;
 import io.fabric8.updatebot.kind.CompositeUpdater;
 import io.fabric8.updatebot.model.Dependencies;
+import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.model.GitHubRepositoryDetails;
-import io.fabric8.updatebot.model.PushVersionDetails;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Files;
@@ -49,7 +49,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
     @Parameter(description = "The git repository to clone from for the source code", required = true)
     private String cloneUrl;
 
-    private List<PushVersionDetails> pushVersionsSteps;
+    private List<DependencyVersionChange> pushVersionsSteps;
     private LocalRepository sourceRepository;
 
     public PushSourceChanges() {
@@ -98,20 +98,20 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
             LOG.info("Ignoring repository " + repository.getCloneUrl() + " as this is the source repository!");
             return false;
         }
-        List<PushVersionDetails> steps = getPushVersionsSteps(context);
+        List<DependencyVersionChange> steps = getPushVersionsSteps(context);
 
-        return pushVersions(new PushSourceChangesContext(context, this, sourceRepository), steps);
+        return pushVersionsWithChecks(new PushSourceChangesContext(context, this, sourceRepository), steps);
     }
 
-    public List<PushVersionDetails> getPushVersionsSteps(CommandContext context) throws IOException {
+    public List<DependencyVersionChange> getPushVersionsSteps(CommandContext context) throws IOException {
         if (pushVersionsSteps == null) {
             pushVersionsSteps = loadPushVersionSteps(context);
         }
         return pushVersionsSteps;
     }
 
-    protected List<PushVersionDetails> loadPushVersionSteps(CommandContext context) {
-        List<PushVersionDetails> list = new ArrayList<>();
+    protected List<DependencyVersionChange> loadPushVersionSteps(CommandContext context) {
+        List<DependencyVersionChange> list = new ArrayList<>();
         validateCloneUrl();
         this.sourceRepository = findLocalRepository();
         GitHubRepositoryDetails repositoryDetails = sourceRepository.getRepo().getRepositoryDetails();

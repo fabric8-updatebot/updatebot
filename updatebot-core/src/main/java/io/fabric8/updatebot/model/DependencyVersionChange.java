@@ -1,0 +1,109 @@
+/*
+ * Copyright 2016 Red Hat, Inc.
+ *
+ * Red Hat licenses this file to you under the Apache License, version
+ * 2.0 (the "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied.  See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+package io.fabric8.updatebot.model;
+
+import io.fabric8.updatebot.kind.Kind;
+import io.fabric8.utils.Objects;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * Represents the update of a dependency version with an optional scope
+ */
+public class DependencyVersionChange {
+    private final Kind kind;
+    private final String dependency;
+    private final String version;
+    private final String scope;
+
+    public DependencyVersionChange(Kind kind, String dependency, String version) {
+        this(kind, dependency, version, null);
+    }
+
+
+    public DependencyVersionChange(Kind kind, String dependency, String version, String scope) {
+        this.kind = kind;
+        this.dependency = dependency;
+        this.version = version;
+        this.scope = scope;
+    }
+
+    public static String describe(List<DependencyVersionChange> changes) {
+        return changes.stream().map(c -> c.getDependency() + " => " + c.getVersion()).collect(Collectors.joining(", "));
+    }
+
+    public static boolean hasDependency(List<DependencyVersionChange> changes, DependencyVersionChange change) {
+        return changes.stream().anyMatch(c -> c.matches(change));
+    }
+
+    @Override
+    public String toString() {
+        return "DependencyVersionChange{" +
+                "kind=" + kind +
+                ", dependency='" + dependency + '\'' +
+                ", version='" + version + '\'' +
+                ", scope='" + scope + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DependencyVersionChange that = (DependencyVersionChange) o;
+
+        if (kind != that.kind) return false;
+        if (!dependency.equals(that.dependency)) return false;
+        if (!version.equals(that.version)) return false;
+        return scope != null ? scope.equals(that.scope) : that.scope == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = kind.hashCode();
+        result = 31 * result + dependency.hashCode();
+        result = 31 * result + version.hashCode();
+        result = 31 * result + (scope != null ? scope.hashCode() : 0);
+        return result;
+    }
+
+    /**
+     * Returns true if the given change is for the same kind and dependency
+     */
+    public boolean matches(DependencyVersionChange that) {
+        return Objects.equal(this.kind, that.kind) && Objects.equal(this.dependency, that.dependency);
+    }
+
+
+    public Kind getKind() {
+        return kind;
+    }
+
+    public String getDependency() {
+        return dependency;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getScope() {
+        return scope;
+    }
+
+}

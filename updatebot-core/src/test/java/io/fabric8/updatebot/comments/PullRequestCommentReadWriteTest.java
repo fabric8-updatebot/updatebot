@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  */
-public class CommentReadWriteTest {
+public class PullRequestCommentReadWriteTest {
     protected File testDir = Tests.getTestDataDir(getClass());
     protected CommandContext parentContext;
     protected UpdatePullRequests updatePullRequests = new UpdatePullRequests();

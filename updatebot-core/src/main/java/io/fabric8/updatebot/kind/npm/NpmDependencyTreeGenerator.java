@@ -13,15 +13,13 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot.support;
+package io.fabric8.updatebot.kind.npm;
+
+import io.fabric8.updatebot.commands.CommandContext;
 
 /**
+ * The strategy used to generate the npm dependency tree
  */
-public class PullRequests {
-
-    public static final String COMMAND_COMMENT_PREFIX = Markdown.UPDATEBOT_ICON + " commands:";
-    public static final String COMMAND_COMMENT_PREFIX_SEPARATOR = "\n\n";
-    public static final String COMMAND_COMMENT_INDENT = "    " + Markdown.UPDATEBOT + " ";
-
-    ;
+public interface NpmDependencyTreeGenerator {
+    void generateDependencyTree(CommandContext context, String dependencyFileName);
 }

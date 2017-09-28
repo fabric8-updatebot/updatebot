@@ -20,7 +20,7 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.CommandNames;
 import io.fabric8.updatebot.kind.Kind;
-import io.fabric8.updatebot.model.PushVersionDetails;
+import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.repository.LocalRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,8 +93,8 @@ public class PushVersionChanges extends ModifyFilesCommandSupport {
             String propertyName = values.get(i);
             String version = values.get(i + 1);
 
-            PushVersionDetails step = new PushVersionDetails(Kind.NPM, propertyName, version);
-            if (pushVersion(context, step)) {
+            DependencyVersionChange step = new DependencyVersionChange(Kind.NPM, propertyName, version);
+            if (pushVersionsWithChecks(context, Arrays.asList(step))) {
                 answer = true;
             }
         }

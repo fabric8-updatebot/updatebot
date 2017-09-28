@@ -18,7 +18,7 @@ package io.fabric8.updatebot.kind;
 import io.fabric8.updatebot.commands.CommandContext;
 import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.model.Dependencies;
-import io.fabric8.updatebot.model.PushVersionDetails;
+import io.fabric8.updatebot.model.DependencyVersionChange;
 
 import java.io.IOException;
 import java.util.List;
@@ -68,7 +68,7 @@ public class CompositeUpdater implements Updater {
     }
 
     @Override
-    public void addPushVersionsSteps(CommandContext context, Dependencies dependencyConfig, List<PushVersionDetails> list) {
+    public void addPushVersionsSteps(CommandContext context, Dependencies dependencyConfig, List<DependencyVersionChange> list) {
         Kind[] kinds = Kind.values();
         for (Kind kind : kinds) {
             Updater updater = kind.getUpdater();
@@ -76,5 +76,20 @@ public class CompositeUpdater implements Updater {
                 updater.addPushVersionsSteps(context, dependencyConfig, list);
             }
         }
+    }
+
+    @Override
+    public KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> changes) {
+        // TODO does not handle differnet kinds!!!
+        KindDependenciesCheck answer = new KindDependenciesCheck();
+        Kind[] kinds = Kind.values();
+        for (Kind kind : kinds) {
+            Updater updater = kind.getUpdater();
+            if (updater.isApplicable(context)) {
+                KindDependenciesCheck result = updater.checkDependencies(context, changes);
+                answer.append(result);
+            }
+        }
+        return answer;
     }
 }

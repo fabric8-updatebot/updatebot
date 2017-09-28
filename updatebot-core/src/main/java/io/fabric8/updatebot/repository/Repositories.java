@@ -52,7 +52,7 @@ public class Repositories {
     public static List<LocalRepository> cloneOrPullRepositories(CommandSupport command, Configuration configuration, Projects projects) throws IOException {
         List<LocalRepository> repositories = findRepositories(command, configuration, projects);
         for (LocalRepository repository : repositories) {
-            cloneOrPull(repository);
+            cloneOrPull(configuration, repository);
         }
         return repositories;
     }
@@ -67,14 +67,16 @@ public class Repositories {
         return false;
     }
 
-    private static void cloneOrPull(LocalRepository repository) {
+    private static void cloneOrPull(Configuration configuration, LocalRepository repository) {
         File dir = repository.getDir();
         File gitDir = new File(dir, ".git");
         if (gitDir.exists()) {
             if (Commands.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
                 if (Commands.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
-                    LOG.info("Pulling: " + dir + " repo: " + repository.getCloneUrl());
-                    Commands.runCommandIgnoreOutput(dir, "git", "pull");
+                    if (!configuration.isPullDisabled()) {
+                        LOG.info("Pulling: " + dir + " repo: " + repository.getCloneUrl());
+                        Commands.runCommandIgnoreOutput(dir, "git", "pull");
+                    }
                 }
             }
         } else {

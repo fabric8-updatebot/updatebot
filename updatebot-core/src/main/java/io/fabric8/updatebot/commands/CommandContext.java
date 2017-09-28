@@ -17,10 +17,10 @@ package io.fabric8.updatebot.commands;
 
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.kind.Kind;
-import io.fabric8.updatebot.model.PushVersionDetails;
+import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.support.GitHubHelpers;
-import io.fabric8.updatebot.support.PullRequests;
+import io.fabric8.updatebot.support.Markdown;
 import org.kohsuke.github.GHRepository;
 
 import java.io.File;
@@ -108,23 +108,27 @@ public class CommandContext {
 
     // TODO inline or remove?? should use the Command rather than context?
     public PushVersionChangesContext updateVersion(Kind kind, String name, String version) {
-        return new PushVersionChangesContext(this, new PushVersionDetails(kind, name, version));
+        return new PushVersionChangesContext(this, new DependencyVersionChange(kind, name, version));
     }
 
-    public String createTitle() {
+    public String createPullRequestTitle() {
         CommandContext child = firstChild();
         if (child != null) {
-            return child.createTitle();
+            return child.createPullRequestTitle();
         }
         return "Pulling new versions";
     }
 
-    public String createTitlePrefix() {
+    public String createIssueTitlePrefix() {
+        return "UpdateBot has pending version changes";
+    }
+
+    public String createPullRequestTitlePrefix() {
         CommandContext child = firstChild();
         if (child != null) {
-            return child.createTitlePrefix();
+            return child.createPullRequestTitlePrefix();
         }
-        return createTitle();
+        return createPullRequestTitle();
     }
 
     public String createCommit() {
@@ -132,7 +136,7 @@ public class CommandContext {
         if (child != null) {
             return child.createCommit();
         }
-        return createTitle();
+        return createPullRequestTitle();
     }
 
 
@@ -141,7 +145,7 @@ public class CommandContext {
         if (child != null) {
             return child.createPullRequestBody();
         }
-        return PullRequests.GENERATED_BY;
+        return Markdown.GENERATED_BY;
     }
 
     protected void addChild(CommandContext child) {
@@ -161,5 +165,4 @@ public class CommandContext {
         }
         return null;
     }
-
 }
