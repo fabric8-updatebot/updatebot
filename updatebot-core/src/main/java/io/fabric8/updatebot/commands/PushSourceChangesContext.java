@@ -16,8 +16,8 @@
 package io.fabric8.updatebot.commands;
 
 import io.fabric8.updatebot.repository.LocalRepository;
+import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.updatebot.support.Markdown;
-import io.fabric8.updatebot.support.Strings;
 
 /**
  */
@@ -39,16 +39,10 @@ public class PushSourceChangesContext extends CommandContext {
     public String createPullRequestBody() {
         String gitUrl = command.getCloneUrl();
         String ref = command.getRef();
-        String gitUrlText = "`" + gitUrl + "`";
+        String linkText = Repositories.getRepositoryLink(this.sourceRepository, gitUrl);
 
-        if (sourceRepository != null) {
-            String htmlUrl = sourceRepository.getRepo().getHtmlUrl();
-            if (Strings.notEmpty(htmlUrl)) {
-                gitUrlText = "[" + gitUrl + "](" + htmlUrl + ")";
-            }
-        }
         return Markdown.UPDATEBOT_ICON + " pushed version changes from the source code in repository: " +
-                gitUrlText +
+                linkText +
                 " ref: `" + ref + "`\n";
     }
 

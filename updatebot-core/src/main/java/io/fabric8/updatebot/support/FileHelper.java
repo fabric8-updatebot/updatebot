@@ -33,12 +33,14 @@ public class FileHelper {
 
     public static Object getRelativePathToCurrentDir(File dir) {
         File currentDir = new File(System.getProperty("user.dir", "."));
-        Object relativePath;
         try {
-            relativePath = Files.getRelativePath(currentDir, dir);
+            String relativePath = Files.getRelativePath(currentDir, dir);
+            if (relativePath.startsWith("/")) {
+                return relativePath.substring(1);
+            }
+            return relativePath;
         } catch (IOException e) {
-            relativePath = dir;
+            return dir;
         }
-        return relativePath;
     }
 }

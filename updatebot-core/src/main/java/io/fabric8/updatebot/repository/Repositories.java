@@ -170,4 +170,35 @@ public class Repositories {
         }
         return null;
     }
+
+
+    /**
+     * Returns the link to the repository
+     */
+    public static String getRepositoryLink(LocalRepository repository) {
+        return getRepositoryLink(repository, repository.getFullName());
+    }
+
+    /**
+     * Returns the link to the repository
+     */
+    public static String getRepositoryLink(LocalRepository repository, String label) {
+        return getRepositoryLink(repository, label, "`" + label + "`");
+    }
+
+    /**
+     * Returns the link to the repository
+     */
+    public static String getRepositoryLink(LocalRepository repository, String label, String defaultValue) {
+        if (repository != null) {
+            String htmlUrl = repository.getRepo().getHtmlUrl();
+            if (Strings.notEmpty(htmlUrl)) {
+                return "[" + label + "](" + htmlUrl + ")";
+            }
+        }
+        if (Strings.notEmpty(defaultValue)) {
+            return defaultValue;
+        }
+        return label;
+    }
 }

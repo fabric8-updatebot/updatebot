@@ -241,9 +241,10 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
                 }
                 return;
             }
+            String operationDescrption = getOperationDescription(context);
             if (currentPendingChanges.isEmpty()) {
-                LOG.info("Closing issue as we have no further pending issues");
-                issue.comment("No more pending issues");
+                LOG.info("Closing issue as we have no further pending issues " + issue.getHtmlUrl());
+                issue.comment(Issues.CLOSE_MESSAGE + operationDescrption);
                 issue.close();
                 return;
             }
@@ -253,10 +254,14 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             } else {
                 LOG.info("Modifying issue " + issue.getHtmlUrl());
             }
-            Issues.addPendingChangesComment(issue, currentPendingChanges);
+            Issues.addPendingChangesComment(issue, currentPendingChanges, operationDescrption);
         } else {
             // TODO what to do with vanilla git repos?
         }
+    }
+
+    protected String getOperationDescription(CommandContext context) {
+        return "pushing versions";
     }
 
     private List<DependencyVersionChange> combinePendingChanges(List<DependencyVersionChange> changes, List<DependencyVersionChange> pendingChanges) {

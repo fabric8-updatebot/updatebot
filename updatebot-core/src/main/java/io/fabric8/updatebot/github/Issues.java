@@ -41,9 +41,11 @@ import static io.fabric8.updatebot.github.GitHubHelpers.retryGithub;
 /**
  */
 public class Issues {
-    public static final String BODY = "Dependency versions cannot yet be applied until other projects are released with new dependencies\n\n" + Markdown.GENERATED_BY;
+    public static final String BODY = Markdown.UPDATEBOT_ICON + " cannot update some dependency versions until other projects are released to fix dependency conflicts.\n\n" +
+            "This issue is used to coordinate version changes on this repository coming from other repositories and will be closed once all the version conflicts are resolved.";
+    public static final String CLOSE_MESSAGE = Markdown.UPDATEBOT_ICON + " closing as no more dependency conflicts while ";
+    public static final String PENDING_CHANGE_COMMENT_PREFIX = Markdown.UPDATEBOT_ICON + " detected conflicts while ";
     private static final transient Logger LOG = LoggerFactory.getLogger(Issues.class);
-    public static String PENDING_CHANGE_COMMENT_PREFIX = Markdown.UPDATEBOT_ICON + " pending changes:";
 
     public static List<GHIssue> getOpenIssues(GHRepository ghRepository, Configuration configuration) throws IOException {
         String label = configuration.getGithubPullRequestLabel();
@@ -134,8 +136,8 @@ public class Issues {
     }
 
 
-    public static void addPendingChangesComment(GHIssue issue, List<DependencyVersionChange> pendingChanges) throws IOException {
-        String comment = PENDING_CHANGE_COMMENT_PREFIX + "\n" + createPendingChangesCommentCommand(pendingChanges);
+    public static void addPendingChangesComment(GHIssue issue, List<DependencyVersionChange> pendingChanges, String operationDescription) throws IOException {
+        String comment = PENDING_CHANGE_COMMENT_PREFIX + operationDescription + "\n" + createPendingChangesCommentCommand(pendingChanges);
         issue.comment(comment);
     }
 
