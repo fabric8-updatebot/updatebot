@@ -108,9 +108,13 @@ public abstract class CommandSupport {
     public void run(Configuration configuration) throws IOException {
         List<LocalRepository> repositories = cloneOrPullRepositories(configuration);
         for (LocalRepository repository : repositories) {
-            CommandContext context = new CommandContext(repository, configuration);
+            CommandContext context = createCommandContext(repository, configuration);
             run(context);
         }
+    }
+
+    protected CommandContext createCommandContext(LocalRepository repository, Configuration configuration) {
+        return new CommandContext(repository, configuration);
     }
 
     public abstract void run(CommandContext context) throws IOException;

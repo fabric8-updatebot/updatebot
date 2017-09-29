@@ -122,7 +122,7 @@ public class CommandContext {
     }
 
     public String createIssueTitlePrefix() {
-        return "UpdateBot has pending version changes";
+        return "UpdateBot found version conflicts";
     }
 
     public String createPullRequestTitlePrefix() {

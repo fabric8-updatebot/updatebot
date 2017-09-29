@@ -29,6 +29,7 @@ import io.fabric8.updatebot.support.GitHelper;
 import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHCommitPointer;
 import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 import org.slf4j.Logger;
@@ -115,8 +116,10 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             LOG.info("Created pull request " + pullRequest.getHtmlUrl());
 
             pullRequest.comment(commandComment);
+            addIssueClosedCommentIfRequired(context, pullRequest, true);
             pullRequest.setLabels(configuration.getGithubPullRequestLabel());
         } else {
+            addIssueClosedCommentIfRequired(context, pullRequest, false);
             String oldTitle = pullRequest.getTitle();
             if (Objects.equal(oldTitle, title)) {
                 // lets check if we need to rebase
@@ -147,6 +150,32 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
                 LOG.warn("Failed to push branch " + localBranch + " to existing github branch " + remoteRef + " for " + pullRequest.getHtmlUrl());
             }
             LOG.info("Updated PR " + pullRequest.getHtmlUrl());
+        }
+    }
+
+    private void addIssueClosedCommentIfRequired(CommandContext context, GHPullRequest pullRequest, boolean create) {
+        GHIssue issue = context.getIssue();
+        if (issue == null) {
+            return;
+        }
+        if (!create) {
+            // avoid duplicate comment
+            try {
+                List<GHIssueComment> comments = pullRequest.getComments();
+                for (GHIssueComment comment : comments) {
+                    String body = comment.getBody();
+                    if (body != null && body.startsWith(PullRequests.ISSUE_LINK_COMMENT)) {
+                        return;
+                    }
+                }
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+        try {
+            pullRequest.comment(PullRequests.ISSUE_LINK_COMMENT + " " + issue.getHtmlUrl() + PullRequests.ISSUE_LINK_COMMENT_SUFFIX);
+        } catch (IOException e) {
+            // ignore
         }
     }
 
@@ -243,13 +272,16 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             }
             String operationDescrption = getOperationDescription(context);
             if (currentPendingChanges.isEmpty()) {
-                LOG.info("Closing issue as we have no further pending issues " + issue.getHtmlUrl());
-                issue.comment(Issues.CLOSE_MESSAGE + operationDescrption);
-                issue.close();
+                if (issue != null) {
+                    LOG.info("Closing issue as we have no further pending issues " + issue.getHtmlUrl());
+                    issue.comment(Issues.CLOSE_MESSAGE + operationDescrption);
+                    issue.close();
+                }
                 return;
             }
             if (issue == null) {
                 issue = Issues.createIssue(context, ghRepository);
+                context.setIssue(issue);
                 LOG.info("Created issue " + issue.getHtmlUrl());
             } else {
                 LOG.info("Modifying issue " + issue.getHtmlUrl());

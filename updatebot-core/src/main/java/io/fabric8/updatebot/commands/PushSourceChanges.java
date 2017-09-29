@@ -18,6 +18,7 @@ package io.fabric8.updatebot.commands;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.CommandNames;
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.kind.CompositeUpdater;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.DependencyVersionChange;
@@ -114,7 +115,13 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
             sourceFullName = sourceRepository.getFullName();
         }
         LOG.info("pushing " + sourceFullName + " on " + context.getRepositoryFullName() + " has version changes " + DependencyVersionChange.describe(steps));
-        return pushVersionsWithChecks(new PushSourceChangesContext(context, this, sourceRepository), steps);
+        return pushVersionsWithChecks(context, steps);
+    }
+
+    @Override
+    protected CommandContext createCommandContext(LocalRepository repository, Configuration configuration) {
+        return new PushSourceChangesContext(repository, configuration, this, getSourceRepository());
+
     }
 
     public LocalRepository getSourceRepository() {

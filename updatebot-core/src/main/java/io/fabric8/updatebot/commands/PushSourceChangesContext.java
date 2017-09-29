@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.commands;
 
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.updatebot.support.Markdown;
@@ -24,6 +25,12 @@ import io.fabric8.updatebot.support.Markdown;
 public class PushSourceChangesContext extends CommandContext {
     private final PushSourceChanges command;
     private final LocalRepository sourceRepository;
+
+    public PushSourceChangesContext(LocalRepository repository, Configuration configuration, PushSourceChanges command, LocalRepository sourceRepository) {
+        super(repository, configuration);
+        this.command = command;
+        this.sourceRepository = sourceRepository;
+    }
 
     public PushSourceChangesContext(CommandContext parentContext, PushSourceChanges command, LocalRepository sourceRepository) {
         super(parentContext);

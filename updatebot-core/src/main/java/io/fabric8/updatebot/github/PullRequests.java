@@ -36,6 +36,8 @@ public class PullRequests {
     public static final String COMMAND_COMMENT_PREFIX_SEPARATOR = "\n\n";
     public static final String COMMAND_COMMENT_INDENT = "    " + Markdown.UPDATEBOT + " ";
     private static final transient Logger LOG = LoggerFactory.getLogger(PullRequests.class);
+    public static String ISSUE_LINK_COMMENT = Markdown.UPDATEBOT_ICON + " raised issue ";
+    public static String ISSUE_LINK_COMMENT_SUFFIX = " to manage version conflicts";
 
     public static List<GHPullRequest> getOpenPullRequests(GHRepository ghRepository, Configuration configuration) throws IOException {
         return getOpenPullRequests(ghRepository, configuration.getGithubPullRequestLabel());
