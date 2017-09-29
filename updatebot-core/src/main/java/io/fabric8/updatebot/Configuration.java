@@ -25,6 +25,7 @@ import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.RateLimitHandler;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -37,7 +38,7 @@ public class Configuration {
     private boolean dryRun = Systems.isConfigFlag(EnvironmentVariables.DRY_RUN);
     private GitHub github;
     @Parameter(names = {"--config", "-c"}, description = "Location of the UpdateBot YAML configuration file")
-    private String configFile = Systems.getConfigValue(EnvironmentVariables.CONFIG_FILE, "updatebot.yml");
+    private String configFile = Systems.getConfigValue(EnvironmentVariables.CONFIG_FILE, ".updatebot.yml");
     @Parameter(names = {"--dir", "-d"}, description = "Directory where the git repositories are cloned")
     private String workDir = Systems.getConfigValue(EnvironmentVariables.WORK_DIR, "./.updatebot-repos");
     @Parameter(names = {"--github-username", "-ghu"}, description = "GitHub Username")
@@ -52,6 +53,7 @@ public class Configuration {
 
     private NpmDependencyTreeGenerator npmDependencyTreeGenerator = new DefaultNpmDependencyTreeGenerator();
     private boolean pullDisabled;
+    private File sourceDir;
 
     public GitHub getGithub() throws IOException {
         if (github == null) {
@@ -166,5 +168,13 @@ public class Configuration {
      */
     public void setPullDisabled(boolean pullDisabled) {
         this.pullDisabled = pullDisabled;
+    }
+
+    public File getSourceDir() {
+        return sourceDir;
+    }
+
+    public void setSourceDir(File sourceDir) {
+        this.sourceDir = sourceDir;
     }
 }

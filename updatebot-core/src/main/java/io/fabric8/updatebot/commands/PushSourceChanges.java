@@ -16,6 +16,7 @@
 package io.fabric8.updatebot.commands;
 
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.CommandNames;
 import io.fabric8.updatebot.Configuration;
@@ -34,6 +35,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,32 +52,63 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
     @Parameter(names = {"--ref", "-r"}, description = "The git repository ref (sha, branch or tag) to clone the source repository from for the source code")
     private String ref = "master";
 
-    @Parameter(description = "The git repository to clone from for the source code", required = true)
+    @Parameter(description = "The git repository to clone from for the source code")
     private String cloneUrl;
 
+    @Parameter(names = {"--dir", "-d"}, description = "The directory containing the git clone of the source to process")
+    private String path;
+
     private LocalRepository sourceRepository;
+    private File dir;
 
     public PushSourceChanges() {
+    }
+
+    public String getPath() {
+        if (path == null) {
+            File file = getDir();
+            if (file != null) {
+                path = file.getPath();
+            }
+        }
+        return path;
     }
 
     /**
      * Defaults the git URL and ref from a local directory
      */
-    @Parameter(names = {"--dir", "-d"}, description = "The directory containing the git clone of the source to process")
+    public void setPath(String path) {
+        if (path == null || path.length() == 0) {
+            path = ".";
+        }
+        setDir(new File(path));
+    }
+
+    public File getDir() {
+        if (dir == null) {
+            if (path == null) {
+                path = ".";
+            }
+            dir = new File(path);
+            if (!dir.exists()) {
+                // lets check for a URI instead from Jenkins
+                URI uri = null;
+                try {
+                    uri = new URI(path);
+                } catch (URISyntaxException e) {
+                    // ignore
+                }
+                if (uri != null) {
+                    dir = new File(uri);
+                }
+            }
+        }
+        return dir;
+    }
+
     public void setDir(File dir) {
-        if (!Files.isDirectory(dir)) {
-            throw new IllegalArgumentException("Directory does not exist " + dir);
-        }
-        String url;
-        try {
-            url = GitHelpers.extractGitUrl(dir);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Could not find the git clone URL in " + dir + ". " + e, e);
-        }
-        if (url != null) {
-            setCloneUrl(url);
-        }
-        validateCloneUrl();
+        this.dir = dir;
+        this.path = null;
     }
 
     public String getRef() {
@@ -116,6 +150,32 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
         }
         LOG.info("pushing " + sourceFullName + " on " + context.getRepositoryFullName() + " has version changes " + DependencyVersionChange.describe(steps));
         return pushVersionsWithChecks(context, steps);
+    }
+
+    @Override
+    protected void validateConfiguration(Configuration configuration) {
+        File dir = getDir();
+        if (this.cloneUrl == null) {
+            if (dir != null) {
+                if (!Files.isDirectory(dir)) {
+                    throw new ParameterException("Directory does not exist " + dir);
+                }
+                String url;
+                try {
+                    url = GitHelpers.extractGitUrl(dir);
+                } catch (IOException e) {
+                    throw new ParameterException("Could not find the git clone URL in " + dir + ". " + e, e);
+                }
+                if (url != null) {
+                    setCloneUrl(url);
+                }
+            }
+        }
+        validateCloneUrl();
+
+        if (dir != null) {
+            configuration.setSourceDir(dir);
+        }
     }
 
     @Override

@@ -27,6 +27,7 @@ import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHCommitState;
 import org.kohsuke.github.GHCommitStatus;
+import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueComment;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
@@ -39,6 +40,7 @@ import java.util.List;
 
 import static io.fabric8.updatebot.github.GitHubHelpers.getLastCommitStatus;
 import static io.fabric8.updatebot.github.Issues.getLabels;
+import static io.fabric8.updatebot.github.Issues.isOpen;
 import static io.fabric8.updatebot.support.Markdown.UPDATEBOT;
 
 /**
@@ -53,12 +55,22 @@ public class UpdatePullRequests extends CommandSupport {
 
     @Override
     public void run(CommandContext context) throws IOException {
+        Status contextStatus = Status.COMPLETE;
         GHRepository ghRepository = context.gitHubRepository();
         if (ghRepository != null) {
+
+            // lets look for a pending issue
+            GHIssue issue = getOrFindIssue(context, ghRepository);
+            if (issue != null && isOpen(issue)) {
+                contextStatus = Status.PENDING;
+            }
+
             List<GHPullRequest> pullRequests = PullRequests.getOpenPullRequests(ghRepository, context.getConfiguration());
             for (GHPullRequest pullRequest : pullRequests) {
                 Configuration configuration = context.getConfiguration();
                 if (GitHubHelpers.hasLabel(getLabels(pullRequest), configuration.getGithubPullRequestLabel())) {
+                    context.setPullRequest(pullRequest);
+
                     if (!GitHubHelpers.isMergeable(pullRequest)) {
                         // lets re-run the update commands we can find on the PR
                         CompositeCommand commands = loadCommandsFromPullRequest(context, ghRepository, pullRequest);
@@ -81,10 +93,13 @@ public class UpdatePullRequests extends CommandSupport {
                             LOG.warn("Failed to find last commit status for PR " + pullRequest.getHtmlUrl() + " " + e, e);
                         }
                     }
-
+                    if (isOpen(pullRequest)) {
+                        contextStatus = Status.PENDING;
+                    }
                 }
             }
         }
+        context.setStatus(contextStatus);
     }
 
     /**

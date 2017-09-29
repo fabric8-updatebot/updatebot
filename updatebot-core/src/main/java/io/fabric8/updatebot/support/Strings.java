@@ -61,4 +61,11 @@ public class Strings {
         }
         return answer;
     }
+
+    public static String toString(Object value) {
+        if (value != null) {
+            return value.toString();
+        }
+        return null;
+    }
 }

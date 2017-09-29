@@ -16,18 +16,25 @@
 package io.fabric8.updatebot;
 
 import com.beust.jcommander.JCommander;
+import io.fabric8.updatebot.commands.CommandContext;
 import io.fabric8.updatebot.commands.CommandSupport;
 import io.fabric8.updatebot.commands.Help;
+import io.fabric8.updatebot.commands.ParentContext;
 import io.fabric8.updatebot.commands.PullVersionChanges;
+import io.fabric8.updatebot.commands.PushSourceChanges;
 import io.fabric8.updatebot.commands.PushVersionChanges;
 import io.fabric8.updatebot.commands.UpdatePullRequests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static io.fabric8.updatebot.CommandNames.HELP;
 import static io.fabric8.updatebot.CommandNames.PULL;
+import static io.fabric8.updatebot.CommandNames.PUSH_SOURCE;
 import static io.fabric8.updatebot.CommandNames.PUSH_VERSION;
 import static io.fabric8.updatebot.CommandNames.UPDATE;
 
@@ -36,11 +43,13 @@ import static io.fabric8.updatebot.CommandNames.UPDATE;
 public class UpdateBot {
     private static final transient Logger LOG = LoggerFactory.getLogger(UpdateBot.class);
 
+    private Configuration config = new Configuration();
+    private CommandSupport lastCommend;
+    private UpdatePullRequests updatePullRequests = new UpdatePullRequests();
+
     public static void main(String[] args) {
         try {
-            Configuration config = new Configuration();
-            CommandSupport command = parseCommand(args, config, true);
-            command.run(config);
+            new UpdateBot().run(args);
         } catch (IOException e) {
             System.err.println("Failed: " + e);
             e.printStackTrace();
@@ -57,6 +66,7 @@ public class UpdateBot {
      * Parses the command from the given command line arguments or returns null if there is no command found
      */
     public static CommandSupport parseCommand(String[] args, Configuration config, boolean defaultToHelp) {
+        PushSourceChanges pushSourceChanges = new PushSourceChanges();
         PushVersionChanges pushVersionChanges = new PushVersionChanges();
         PullVersionChanges pullVersionChanges = new PullVersionChanges();
         UpdatePullRequests updatePullRequests = new UpdatePullRequests();
@@ -66,6 +76,7 @@ public class UpdateBot {
                 .addObject(config)
                 .addCommand(HELP, help)
                 .addCommand(PULL, pullVersionChanges)
+                .addCommand(PUSH_SOURCE, pushSourceChanges)
                 .addCommand(PUSH_VERSION, pushVersionChanges)
                 .addCommand(UPDATE, updatePullRequests)
                 .build();
@@ -84,6 +95,9 @@ public class UpdateBot {
                 case PULL:
                     return pullVersionChanges;
 
+                case PUSH_SOURCE:
+                    return pushSourceChanges;
+
                 case PUSH_VERSION:
                     return pushVersionChanges;
 
@@ -95,5 +109,42 @@ public class UpdateBot {
             return help;
         }
         return null;
+    }
+
+    public Configuration getConfig() {
+        return config;
+    }
+
+    public void setConfig(Configuration config) {
+        this.config = config;
+    }
+
+    /**
+     * Runs a command
+     */
+    public CommandSupport run(String[] args) throws IOException {
+        CommandSupport command = parseCommand(args, config, true);
+        this.lastCommend = command;
+        command.run(config);
+        return command;
+    }
+
+    /**
+     * Returns the list of PullRequests / Issues and their status from the previous command
+     */
+    public List<Map<String, String>> poll() throws IOException {
+        List<Map<String, String>> answer = new ArrayList<>();
+
+        ParentContext context = updatePullRequests.run(getConfig());
+        List<CommandContext> children = context.getChildren();
+        for (CommandContext child : children) {
+            Map<String, String> map = child.createStatusMap();
+            answer.add(map);
+        }
+        return answer;
+    }
+
+    public CommandSupport getLastCommend() {
+        return lastCommend;
     }
 }

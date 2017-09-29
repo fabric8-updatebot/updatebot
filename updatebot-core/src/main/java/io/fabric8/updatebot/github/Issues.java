@@ -252,4 +252,12 @@ public class Issues {
     public static Collection<GHLabel> getLabels(GHIssue issue) throws IOException {
         return retryGithub(() -> issue.getLabels());
     }
+
+    public static boolean isOpen(GHIssue issue) {
+        GHIssueState state = issue.getState();
+        if (state == null) {
+            return true;
+        }
+        return state == GHIssueState.OPEN;
+    }
 }

@@ -113,12 +113,15 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
                 return;
             }
             pullRequest = ghRepository.createPullRequest(title, head, "master", body);
+            context.setPullRequest(pullRequest);
             LOG.info("Created pull request " + pullRequest.getHtmlUrl());
 
             pullRequest.comment(commandComment);
             addIssueClosedCommentIfRequired(context, pullRequest, true);
             pullRequest.setLabels(configuration.getGithubPullRequestLabel());
         } else {
+            context.setPullRequest(pullRequest);
+
             addIssueClosedCommentIfRequired(context, pullRequest, false);
             String oldTitle = pullRequest.getTitle();
             if (Objects.equal(oldTitle, title)) {
@@ -258,12 +261,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
         List<DependencyVersionChange> currentPendingChanges = check.getInvalidChanges();
         GHRepository ghRepository = context.gitHubRepository();
         if (ghRepository != null) {
-            GHIssue issue = context.getIssue();
-            if (issue == null) {
-                List<GHIssue> issues = Issues.getOpenIssues(ghRepository, context.getConfiguration());
-                issue = Issues.findIssue(context, issues);
-                context.setIssue(issue);
-            }
+            GHIssue issue = getOrFindIssue(context, ghRepository);
             if (currentPendingChanges.equals(pendingChanges)) {
                 if (issue != null) {
                     LOG.debug("Pending changes unchanged so not modifying the issue");

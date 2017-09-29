@@ -36,8 +36,9 @@ public class Help extends CommandSupport {
 
 
     @Override
-    public void run(Configuration configuration) throws IOException {
+    public ParentContext run(Configuration configuration) throws IOException {
         showUsage();
+        return new ParentContext();
     }
 
     @Override

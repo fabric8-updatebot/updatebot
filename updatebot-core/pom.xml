@@ -120,7 +120,8 @@
           </includes>
           <excludes>
             <exclude>**/NpmUpdateBotTest.java</exclude>
-            <exclude>**/PushPRTest.java</exclude>
+            <exclude>**/Fork*Test.java</exclude>
+            <exclude>**/Push*Test.java</exclude>
           </excludes>
         </configuration>
       </plugin>

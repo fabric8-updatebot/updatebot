@@ -18,10 +18,14 @@ package io.fabric8.updatebot.commands;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.Configuration;
+import io.fabric8.updatebot.github.Issues;
 import io.fabric8.updatebot.model.Projects;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.repository.Repositories;
+import io.fabric8.utils.Files;
 import io.fabric8.utils.Strings;
+import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHRepository;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -105,12 +109,20 @@ public abstract class CommandSupport {
         }
     }
 
-    public void run(Configuration configuration) throws IOException {
+    public ParentContext run(Configuration configuration) throws IOException {
+        validateConfiguration(configuration);
+
+        ParentContext parentContext = new ParentContext();
         List<LocalRepository> repositories = cloneOrPullRepositories(configuration);
         for (LocalRepository repository : repositories) {
             CommandContext context = createCommandContext(repository, configuration);
+            parentContext.addChild(context);
             run(context);
         }
+        return parentContext;
+    }
+
+    protected void validateConfiguration(Configuration configuration) {
     }
 
     protected CommandContext createCommandContext(LocalRepository repository, Configuration configuration) {
@@ -134,7 +146,13 @@ public abstract class CommandSupport {
     protected Projects loadProjects(Configuration configuration) throws IOException {
         String configFile = configuration.getConfigFile();
         File file = new File(configFile);
-        if (!file.isFile() || !file.exists()) {
+        if (!Files.isFile(file)) {
+            File sourceDir = configuration.getSourceDir();
+            if (sourceDir != null) {
+                file = new File(sourceDir, configFile);
+            }
+        }
+        if (!Files.isFile(file)) {
             URL url = null;
             try {
                 url = new URL(configFile);
@@ -150,8 +168,18 @@ public abstract class CommandSupport {
             } catch (MalformedURLException e) {
                 // ignore
             }
-            throw new FileNotFoundException(configFile);
+            throw new FileNotFoundException(file.getCanonicalPath());
         }
         return loadYaml(file, Projects.class);
+    }
+
+    protected GHIssue getOrFindIssue(CommandContext context, GHRepository ghRepository) throws IOException {
+        GHIssue issue = context.getIssue();
+        if (issue == null) {
+            List<GHIssue> issues = Issues.getOpenIssues(ghRepository, context.getConfiguration());
+            issue = Issues.findIssue(context, issues);
+            context.setIssue(issue);
+        }
+        return issue;
     }
 }

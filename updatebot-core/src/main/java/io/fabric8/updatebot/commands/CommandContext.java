@@ -21,12 +21,16 @@ import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.support.Markdown;
+import io.fabric8.updatebot.support.Strings;
 import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -39,6 +43,8 @@ public class CommandContext {
     private final CommandContext parentContext;
     private List<CommandContext> children = new ArrayList<>();
     private GHIssue issue;
+    private GHPullRequest pullRequest;
+    private Status status = Status.PENDING;
 
     public CommandContext(LocalRepository repository, Configuration configuration) {
         this.repository = repository;
@@ -67,6 +73,35 @@ public class CommandContext {
 
     public LocalRepository getRepository() {
         return repository;
+    }
+
+
+    public GHIssue getIssue() {
+        return issue;
+    }
+
+    public void setIssue(GHIssue issue) {
+        this.issue = issue;
+    }
+
+    public GHPullRequest getPullRequest() {
+        return pullRequest;
+    }
+
+    public void setPullRequest(GHPullRequest pullRequest) {
+        this.pullRequest = pullRequest;
+    }
+
+    public String getRepositoryFullName() {
+        return repository.getRepo().getFullName();
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     /**
@@ -168,15 +203,18 @@ public class CommandContext {
         return null;
     }
 
-    public GHIssue getIssue() {
-        return issue;
+    public Map<String, String> createStatusMap() {
+        Map<String, String> answer = new HashMap<>();
+        if (status != null) {
+            answer.put("status", status.toString().toLowerCase());
+        }
+        if (issue != null) {
+            answer.put("issue", Strings.toString(issue.getHtmlUrl()));
+        }
+        if (pullRequest != null) {
+            answer.put("pr", Strings.toString(pullRequest.getHtmlUrl()));
+        }
+        return answer;
     }
 
-    public void setIssue(GHIssue issue) {
-        this.issue = issue;
-    }
-
-    public String getRepositoryFullName() {
-        return repository.getRepo().getFullName();
-    }
 }
