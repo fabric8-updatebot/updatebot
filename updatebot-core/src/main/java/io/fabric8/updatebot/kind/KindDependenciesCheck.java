@@ -19,9 +19,11 @@ import io.fabric8.updatebot.kind.npm.dependency.DependencyCheck;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Returns the set of changes that are valid or invalid
@@ -59,5 +61,30 @@ public class KindDependenciesCheck {
         this.validChanges.addAll(that.validChanges);
         this.invalidChanges.addAll(that.invalidChanges);
         this.failedChecks.putAll(that.failedChecks);
+    }
+
+    /**
+     * Returns the conflicts sorted in order of the given changes so that they are in the same order then
+     * add any checks not listed in the list
+     */
+    public List<DependencyCheck> getFailedChecksFor(List<DependencyVersionChange> changes) {
+        Set<String> processed = new HashSet<>();
+        List<DependencyCheck> answer = new ArrayList<>();
+        for (DependencyVersionChange change : changes) {
+            String dependency = change.getDependency();
+            DependencyCheck check = failedChecks.get(dependency);
+            if (check != null) {
+                processed.add(dependency);
+                answer.add(check);
+            }
+        }
+
+        // now lets add any checks not in the list of changes
+        for (Map.Entry<String, DependencyCheck> entry : failedChecks.entrySet()) {
+            if (!processed.contains(entry.getKey())) {
+                answer.add(entry.getValue());
+            }
+        }
+        return answer;
     }
 }

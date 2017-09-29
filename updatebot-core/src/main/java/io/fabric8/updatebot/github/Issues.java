@@ -17,7 +17,10 @@ package io.fabric8.updatebot.github;
 
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.commands.CommandContext;
+import io.fabric8.updatebot.kind.DependenciesCheck;
 import io.fabric8.updatebot.kind.Kind;
+import io.fabric8.updatebot.kind.KindDependenciesCheck;
+import io.fabric8.updatebot.kind.npm.dependency.DependencyCheck;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.support.Markdown;
 import io.fabric8.updatebot.support.Strings;
@@ -35,6 +38,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import static io.fabric8.updatebot.github.GitHubHelpers.retryGithub;
 
@@ -45,6 +49,10 @@ public class Issues {
             "This issue is used to coordinate version changes on this repository coming from other repositories and will be closed once all the version conflicts are resolved.";
     public static final String CLOSE_MESSAGE = Markdown.UPDATEBOT_ICON + " closing as no more dependency conflicts while ";
     public static final String PENDING_CHANGE_COMMENT_PREFIX = Markdown.UPDATEBOT_ICON + " detected conflicts while ";
+    public static final String HEADER_KIND = "## ";
+    public static final String CONFLICTS_HEADER = "### Conflicts";
+    public static final String CONFLICT_PREFIX = "* ";
+    public static final String PENDING_COMMAND_PREFIX = "    ";
     private static final transient Logger LOG = LoggerFactory.getLogger(Issues.class);
 
     public static List<GHIssue> getOpenIssues(GHRepository ghRepository, Configuration configuration) throws IOException {
@@ -83,46 +91,49 @@ public class Issues {
     public static List<DependencyVersionChange> parseUpdateBotIssuePendingChangesComment(String command) {
         String[] lines = command.split("\n");
         List<DependencyVersionChange> answer = new ArrayList<>();
+        Kind kind = null;
         for (String line : lines) {
+            boolean commandLine = line.startsWith(PENDING_COMMAND_PREFIX);
             String text = line.trim();
             if (Strings.notEmpty(text)) {
-                addChangeFromCommentLine(answer, text);
+                if (text.startsWith("#")) {
+                    String header = Strings.trimAllPrefix(text, "#").trim();
+                    Kind k = Kind.fromName(header);
+                    if (k != null) {
+                        kind = k;
+                    }
+                } else if (commandLine) {
+                    if (kind != null) {
+                        addChangeFromCommentLine(answer, kind, text);
+                    }
+                }
             }
         }
         return answer;
     }
 
-    protected static void addChangeFromCommentLine(List<DependencyVersionChange> answer, String text) {
+    protected static void addChangeFromCommentLine(List<DependencyVersionChange> answer, Kind kind, String text) {
         String[] words = text.split("\\s+");
-        if (words.length < 3) {
+        if (words.length < 2) {
             LOG.warn("Ignoring command: Not enough arguments: " + text);
             return;
         }
-        Kind kind = null;
-        try {
-            kind = Kind.fromName(words[0]);
-        } catch (IllegalArgumentException e) {
-            LOG.warn("Ignoring command: no such kind `" + words[0] + "` in: " + text);
-            return;
+        DependencyVersionChange change;
+        String dependency = words[0];
+        String version = words[1];
+        String scope = null;
+        if (words.length > 2) {
+            scope = words[2];
         }
-        if (kind != null) {
-            DependencyVersionChange change;
-            String dependency = words[1];
-            String version = words[2];
-            String scope = null;
-            if (words.length > 3) {
-                scope = words[3];
-            }
-            if (scope == null) {
-                change = new DependencyVersionChange(kind, dependency, version);
-            } else {
-                change = new DependencyVersionChange(kind, dependency, version, scope);
-            }
-            answer.add(change);
+        if (scope == null) {
+            change = new DependencyVersionChange(kind, dependency, version);
+        } else {
+            change = new DependencyVersionChange(kind, dependency, version, scope);
         }
+        answer.add(change);
     }
 
-    public static String createPendingChangesCommentCommand(List<DependencyVersionChange> changes) {
+    protected static String createPendingVersionChangeCommands(List<DependencyVersionChange> changes) {
         StringBuilder builder = new StringBuilder();
         for (DependencyVersionChange change : changes) {
             builder.append("\n    ");
@@ -130,15 +141,63 @@ public class Issues {
             if (scope == null) {
                 scope = "";
             }
-            builder.append(String.join(" ", change.getKind().toString(), change.getDependency(), change.getVersion(), scope));
+            builder.append(String.join(" ", change.getDependency(), change.getVersion(), scope));
         }
         return builder.toString();
     }
 
 
-    public static void addPendingChangesComment(GHIssue issue, List<DependencyVersionChange> pendingChanges, String operationDescription) throws IOException {
-        String comment = PENDING_CHANGE_COMMENT_PREFIX + operationDescription + "\n" + createPendingChangesCommentCommand(pendingChanges);
-        issue.comment(comment);
+    public static void addConflictsComment(GHIssue issue, List<DependencyVersionChange> pendingChanges, String operationDescription, DependenciesCheck check) throws IOException {
+        String prefix = PENDING_CHANGE_COMMENT_PREFIX + operationDescription + "\n";
+        String issueComment = prefix + conflictChangesComment(pendingChanges, check);
+        issue.comment(issueComment);
+    }
+
+    public static String conflictChangesComment(List<DependencyVersionChange> pendingChanges, DependenciesCheck check) {
+        StringBuilder builder = new StringBuilder();
+        Map<Kind, KindDependenciesCheck> failures = check.getFailures();
+        for (Map.Entry<Kind, KindDependenciesCheck> entry : failures.entrySet()) {
+            Kind kind = entry.getKey();
+            KindDependenciesCheck kindCheck = entry.getValue();
+            List<DependencyVersionChange> kindChanges = DependencyVersionChange.forKind(kind, pendingChanges);
+            List<DependencyCheck> kindConflicts = kindCheck.getFailedChecksFor(kindChanges);
+
+            boolean hasConflicts = kindConflicts.size() > 0;
+            boolean hasChanges = kindChanges.size() > 0;
+            if (hasConflicts && hasChanges) {
+                builder.append("\n\n");
+                builder.append(HEADER_KIND);
+                builder.append(kind.getName());
+                if (hasChanges) {
+                    builder.append("\n");
+                    builder.append(createPendingVersionChangeCommands(kindChanges));
+                }
+                if (hasConflicts) {
+                    builder.append("\n\n");
+                    builder.append(CONFLICTS_HEADER);
+                    builder.append("\n\n");
+                    builder.append(createConflictComments(kindConflicts));
+                }
+            }
+        }
+        return builder.toString();
+    }
+
+    private static String createConflictComments(List<DependencyCheck> conflicts) {
+        StringBuilder builder = new StringBuilder();
+        for (DependencyCheck conflict : conflicts) {
+            if (conflict.isValid()) {
+                continue;
+            }
+            String message = conflict.getMessage();
+            String dependency = conflict.getDependency();
+            builder.append(CONFLICT_PREFIX + "`" + dependency + "` " + message + "\n");
+        }
+        return builder.toString();
+    }
+
+    protected static String createConfictIssueComment(DependenciesCheck check) {
+        return null;
     }
 
 

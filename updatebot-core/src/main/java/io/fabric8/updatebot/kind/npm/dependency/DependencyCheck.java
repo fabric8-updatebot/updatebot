@@ -47,4 +47,12 @@ public class DependencyCheck {
     public DependencyInfo getDependencyInfo() {
         return dependencyInfo;
     }
+
+    public String getDependency() {
+        return dependencyInfo.getDependency();
+    }
+
+    public String getVersion() {
+        return dependencyInfo.getVersion();
+    }
 }

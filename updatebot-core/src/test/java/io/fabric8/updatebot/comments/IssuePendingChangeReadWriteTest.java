@@ -16,12 +16,19 @@
 package io.fabric8.updatebot.comments;
 
 import io.fabric8.updatebot.github.Issues;
+import io.fabric8.updatebot.kind.DependenciesCheck;
 import io.fabric8.updatebot.kind.Kind;
+import io.fabric8.updatebot.kind.KindDependenciesCheck;
+import io.fabric8.updatebot.kind.npm.dependency.DependencyCheck;
+import io.fabric8.updatebot.kind.npm.dependency.DependencyInfo;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,16 +37,42 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class IssuePendingChangeReadWriteTest {
     @Test
     public void testGenerateAndParsePendingChanges() throws Exception {
-        DependencyVersionChange dependency1 = new DependencyVersionChange(Kind.NPM, "ngx-base", "1.3.0");
-        DependencyVersionChange dependency2 = new DependencyVersionChange(Kind.NPM, "ngx-fabric8-wit", "2.3.4", "devDependencies");
-        List<DependencyVersionChange> expectedChanges = Arrays.asList(dependency1, dependency2);
+        String dependency1 = "ngx-base";
+        String dependency2 = "ngx-fabric8-wit";
+        String dependency3 = "something-random";
 
-        String command = Issues.createPendingChangesCommentCommand(expectedChanges);
+        String version1 = "1.3.0";
+        String version2 = "2.3.4";
+        String version3 = "4.0.0";
+
+        DependencyVersionChange change1 = new DependencyVersionChange(Kind.NPM, dependency1, version1);
+        DependencyVersionChange change2 = new DependencyVersionChange(Kind.NPM, dependency2, version2, "devDependencies");
+        List<DependencyVersionChange> expectedChanges = Arrays.asList(change1, change2);
+
+        ArrayList<DependencyVersionChange> validChanges = new ArrayList<>();
+        Map<Kind, KindDependenciesCheck> failureMap = new HashMap<>();
+        Map<String, DependencyCheck> failedChecks = new HashMap<>();
+        addFailedCheck(failedChecks, dependency1, version1);
+        addFailedCheck(failedChecks, dependency2, version2);
+        addFailedCheck(failedChecks, dependency3, version3);
+        KindDependenciesCheck npmFailures = new KindDependenciesCheck(validChanges, expectedChanges, failedChecks);
+        failureMap.put(Kind.NPM, npmFailures);
+        DependenciesCheck check = new DependenciesCheck(validChanges, expectedChanges, failureMap);
+
+        String command = Issues.conflictChangesComment(expectedChanges, check);
 
         System.out.println("Generated pending comment command: " + command);
 
         List<DependencyVersionChange> changes = Issues.parseUpdateBotIssuePendingChangesComment(command);
         assertThat(changes).describedAs("Parsed changes " + changes).hasSize(2).isEqualTo(expectedChanges);
+    }
+
+    private void addFailedCheck(Map<String, DependencyCheck> failedChecks, String dependency, String version) {
+        String message = "multiple versions found " + version + " and 3.0.0";
+        DependencyInfo dependencyInfo = new DependencyInfo(dependency);
+        dependencyInfo.setVersion(version);
+        DependencyCheck check = new DependencyCheck(false, message, dependencyInfo);
+        failedChecks.put(dependency, check);
     }
 
 

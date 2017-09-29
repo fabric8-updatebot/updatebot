@@ -286,7 +286,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             } else {
                 LOG.info("Modifying issue " + issue.getHtmlUrl());
             }
-            Issues.addPendingChangesComment(issue, currentPendingChanges, operationDescrption);
+            Issues.addConflictsComment(issue, currentPendingChanges, operationDescrption, check);
         } else {
             // TODO what to do with vanilla git repos?
         }

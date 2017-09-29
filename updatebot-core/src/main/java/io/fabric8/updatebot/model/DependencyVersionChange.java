@@ -50,6 +50,13 @@ public class DependencyVersionChange {
         return changes.stream().anyMatch(c -> c.matches(change));
     }
 
+    /**
+     * Returns the dependency version changes for the given kind
+     */
+    public static List<DependencyVersionChange> forKind(Kind kind, List<DependencyVersionChange> list) {
+        return list.stream().filter(d -> kind.equals(d.getKind())).collect(Collectors.toList());
+    }
+
     @Override
     public String toString() {
         return "DependencyVersionChange{" +
@@ -89,7 +96,6 @@ public class DependencyVersionChange {
         return Objects.equal(this.kind, that.kind) && Objects.equal(this.dependency, that.dependency);
     }
 
-
     public Kind getKind() {
         return kind;
     }
@@ -105,5 +111,4 @@ public class DependencyVersionChange {
     public String getScope() {
         return scope;
     }
-
 }

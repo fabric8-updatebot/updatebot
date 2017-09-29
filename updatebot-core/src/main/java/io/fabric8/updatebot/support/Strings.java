@@ -50,4 +50,15 @@ public class Strings {
         }
         return false;
     }
+
+    /**
+     * Trim all prefixes on the given text of the given prefix
+     */
+    public static String trimAllPrefix(String text, String prefix) {
+        String answer = text;
+        while (answer.startsWith(prefix)) {
+            answer = answer.substring(prefix.length());
+        }
+        return answer;
+    }
 }
