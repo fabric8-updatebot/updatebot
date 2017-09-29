@@ -80,7 +80,14 @@ public class Repositories {
     }
 
     protected static List<LocalRepository> findRepositories(CommandSupport updateBot, Configuration configuration, Projects projects) throws IOException {
-        File workDir = new File(configuration.getWorkDir());
+        String workDirPath = configuration.getWorkDir();
+        File workDir = new File(workDirPath);
+        if (!workDir.isAbsolute()) {
+            File sourceDir = configuration.getSourceDir();
+            if (io.fabric8.utils.Files.isDirectory(sourceDir)) {
+                workDir = new File(sourceDir, workDirPath);
+            }
+        }
         workDir.mkdirs();
 
         Map<String, LocalRepository> map = new LinkedHashMap<>();
