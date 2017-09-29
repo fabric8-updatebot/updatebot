@@ -56,7 +56,7 @@ public class PushSourceDependenciesTest {
         assertThat(sourceRepo).describedAs("Could not find repository with name: " + sourceRepoName).isNotNull();
 
         // lets find the cloned repo...
-        pushSourceChanges.setDir(sourceRepo.getDir());
+        configuration.setSourceDir(sourceRepo.getDir());
 
         // lets close all open PRs
         GitHubHelpers.closeOpenUpdateBotIssuesAndPullRequests(configuration.getGithubPullRequestLabel(), localRepositories);

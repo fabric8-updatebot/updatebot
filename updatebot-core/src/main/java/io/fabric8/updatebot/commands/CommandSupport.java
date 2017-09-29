@@ -122,7 +122,7 @@ public abstract class CommandSupport {
         return parentContext;
     }
 
-    protected void validateConfiguration(Configuration configuration) {
+    protected void validateConfiguration(Configuration configuration) throws IOException {
     }
 
     protected CommandContext createCommandContext(LocalRepository repository, Configuration configuration) {
@@ -132,12 +132,14 @@ public abstract class CommandSupport {
     public abstract void run(CommandContext context) throws IOException;
 
     public List<LocalRepository> cloneOrPullRepositories(Configuration configuration) throws IOException {
-        Projects projects = loadProjects(configuration);
-        this.localRepositories = Repositories.cloneOrPullRepositories(this, configuration, projects);
-        return localRepositories;
+        return getLocalRepositories(configuration);
     }
 
-    public List<LocalRepository> getLocalRepositories() {
+    public List<LocalRepository> getLocalRepositories(Configuration configuration) throws IOException {
+        if (localRepositories == null) {
+            Projects projects = loadProjects(configuration);
+            this.localRepositories = Repositories.cloneOrPullRepositories(this, configuration, projects);
+        }
         return localRepositories;
     }
 
@@ -145,12 +147,10 @@ public abstract class CommandSupport {
     //-------------------------------------------------------------------------
     protected Projects loadProjects(Configuration configuration) throws IOException {
         String configFile = configuration.getConfigFile();
+        File sourceDir = configuration.getSourceDir();
         File file = new File(configFile);
-        if (!Files.isFile(file)) {
-            File sourceDir = configuration.getSourceDir();
-            if (sourceDir != null) {
-                file = new File(sourceDir, configFile);
-            }
+        if (Files.isDirectory(sourceDir) && !file.isAbsolute()) {
+            file = new File(sourceDir, configFile);
         }
         if (!Files.isFile(file)) {
             URL url = null;

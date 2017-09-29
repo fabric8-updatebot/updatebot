@@ -35,8 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,60 +53,9 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
     @Parameter(description = "The git repository to clone from for the source code")
     private String cloneUrl;
 
-    @Parameter(names = {"--dir", "-d"}, description = "The directory containing the git clone of the source to process")
-    private String path;
-
     private LocalRepository sourceRepository;
-    private File dir;
 
     public PushSourceChanges() {
-    }
-
-    public String getPath() {
-        if (path == null) {
-            File file = getDir();
-            if (file != null) {
-                path = file.getPath();
-            }
-        }
-        return path;
-    }
-
-    /**
-     * Defaults the git URL and ref from a local directory
-     */
-    public void setPath(String path) {
-        if (path == null || path.length() == 0) {
-            path = ".";
-        }
-        setDir(new File(path));
-    }
-
-    public File getDir() {
-        if (dir == null) {
-            if (path == null) {
-                path = ".";
-            }
-            dir = new File(path);
-            if (!dir.exists()) {
-                // lets check for a URI instead from Jenkins
-                URI uri = null;
-                try {
-                    uri = new URI(path);
-                } catch (URISyntaxException e) {
-                    // ignore
-                }
-                if (uri != null) {
-                    dir = new File(uri);
-                }
-            }
-        }
-        return dir;
-    }
-
-    public void setDir(File dir) {
-        this.dir = dir;
-        this.path = null;
     }
 
     public String getRef() {
@@ -153,8 +100,8 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
     }
 
     @Override
-    protected void validateConfiguration(Configuration configuration) {
-        File dir = getDir();
+    protected void validateConfiguration(Configuration configuration) throws IOException {
+        File dir = configuration.getSourceDir();
         if (this.cloneUrl == null) {
             if (dir != null) {
                 if (!Files.isDirectory(dir)) {
@@ -173,6 +120,19 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
         }
         validateCloneUrl();
 
+        if (sourceRepository == null) {
+            sourceRepository = findLocalRepository(configuration);
+        }
+        if (sourceRepository == null) {
+            File sourceDir = configuration.getSourceDir();
+            if (sourceDir != null) {
+                GitRepository repo = new GitRepository(dir.getName());
+                // TODO create a GitHubRepository if we can figure that out
+                repo.setCloneUrl(getCloneUrl());
+                this.sourceRepository = new LocalRepository(repo, dir);
+            }
+        }
+
         if (dir != null) {
             configuration.setSourceDir(dir);
         }
@@ -185,17 +145,13 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
     }
 
     public LocalRepository getSourceRepository() {
-        if (this.sourceRepository == null) {
-            this.sourceRepository = findLocalRepository();
-        }
         return sourceRepository;
     }
 
-    protected List<DependencyVersionChange> loadPushVersionSteps(CommandContext context) {
+    protected List<DependencyVersionChange> loadPushVersionSteps(CommandContext context) throws IOException {
+        Configuration configuration = context.getConfiguration();
         List<DependencyVersionChange> list = new ArrayList<>();
-        validateCloneUrl();
-        LocalRepository sourceRepository = getSourceRepository();
-        if (this.sourceRepository == null) {
+        if (sourceRepository == null) {
             LOG.warn("No source repository for " + context.getDir());
             return list;
         }
@@ -205,16 +161,17 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
             return list;
         }
         GitHubRepositoryDetails repositoryDetails = repo.getRepositoryDetails();
+        Dependencies push = null;
         if (repositoryDetails == null) {
             LOG.warn("No repository details found for repository " + sourceRepository);
-            return list;
+        } else {
+            push = repositoryDetails.getPush();
         }
-        Dependencies push = repositoryDetails.getPush();
         if (push == null) {
             LOG.debug("No push version details found for repository " + sourceRepository + " for configuration " + repositoryDetails);
             push = new Dependencies();
         }
-        CommandContext sourceContext = new CommandContext(sourceRepository, context.getConfiguration());
+        CommandContext sourceContext = new CommandContext(sourceRepository, configuration);
         CompositeUpdater updater = new CompositeUpdater();
         updater.addPushVersionsSteps(sourceContext, push, list);
         return list;
@@ -230,10 +187,12 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
     /**
      * Lets find the repository for the given directory so that we can extract any extra configuration like the
      * {@link GitHubRepositoryDetails} for a local repository
+     *
+     * @param configuration
      */
-    protected LocalRepository findLocalRepository() {
+    protected LocalRepository findLocalRepository(Configuration configuration) throws IOException {
         String cloneUrl = getCloneUrl();
-        List<LocalRepository> localRepositories = getLocalRepositories();
+        List<LocalRepository> localRepositories = getLocalRepositories(configuration);
         for (LocalRepository localRepository : localRepositories) {
             if (localRepository.hasCloneUrl(cloneUrl)) {
                 return localRepository;

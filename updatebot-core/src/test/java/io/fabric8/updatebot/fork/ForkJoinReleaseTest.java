@@ -113,7 +113,7 @@ public class ForkJoinReleaseTest {
         PushSourceChanges pushSourceChanges = new PushSourceChanges();
 
         // lets find the cloned repo...
-        pushSourceChanges.setDir(dir);
+        configuration.setSourceDir(dir);
 
         LOG.info("Pushing source changes from " + FileHelper.getRelativePathToCurrentDir(dir));
         pushSourceChanges.run(configuration);

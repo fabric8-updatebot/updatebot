@@ -27,6 +27,8 @@ import org.kohsuke.github.RateLimitHandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Common configuration parameters
@@ -39,7 +41,7 @@ public class Configuration {
     private GitHub github;
     @Parameter(names = {"--config", "-c"}, description = "Location of the UpdateBot YAML configuration file")
     private String configFile = Systems.getConfigValue(EnvironmentVariables.CONFIG_FILE, ".updatebot.yml");
-    @Parameter(names = {"--dir", "-d"}, description = "Directory where the git repositories are cloned")
+    @Parameter(names = {"--work-dir", "-wd"}, description = "The work directory where other downstream projects are cloned")
     private String workDir = Systems.getConfigValue(EnvironmentVariables.WORK_DIR, "./.updatebot-repos");
     @Parameter(names = {"--github-username", "-ghu"}, description = "GitHub Username")
     private String githubUsername = Systems.getConfigValue(EnvironmentVariables.GITHUB_USER);
@@ -49,11 +51,13 @@ public class Configuration {
     private String githubToken = Systems.getConfigValue(EnvironmentVariables.GITHUB_TOKEN);
     @Parameter(names = "--check", description = "Whether or not we should check dependencies are valid before submitting Pull Requests", arity = 1)
     private boolean checkDependencies = true;
-    private boolean rebaseMode = true;
+    @Parameter(names = {"--dir", "-d"}, description = "The source directory containing the git clone of the source to process")
+    private String sourcePath;
 
+    private File sourceDir;
+    private boolean rebaseMode = true;
     private NpmDependencyTreeGenerator npmDependencyTreeGenerator = new DefaultNpmDependencyTreeGenerator();
     private boolean pullDisabled;
-    private File sourceDir;
 
     public GitHub getGithub() throws IOException {
         if (github == null) {
@@ -170,7 +174,33 @@ public class Configuration {
         this.pullDisabled = pullDisabled;
     }
 
+    public String getSourcePath() {
+        return sourcePath;
+    }
+
+    public void setSourcePath(String sourcePath) {
+        this.sourcePath = sourcePath;
+    }
+
     public File getSourceDir() {
+        if (sourceDir == null) {
+            if (sourcePath == null) {
+                sourcePath = ".";
+            }
+            sourceDir = new File(sourcePath);
+            if (!sourceDir.exists()) {
+                // lets check for a URI instead from Jenkins
+                URI uri = null;
+                try {
+                    uri = new URI(sourcePath);
+                } catch (URISyntaxException e) {
+                    // ignore
+                }
+                if (uri != null) {
+                    sourceDir = new File(uri);
+                }
+            }
+        }
         return sourceDir;
     }
 
