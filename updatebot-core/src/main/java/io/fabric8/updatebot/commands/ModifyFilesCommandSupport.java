@@ -238,7 +238,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
                 List<DependencyVersionChange> validChanges = check.getValidChanges();
                 if (invalidChanges.size() > 0) {
                     // lets revert the current changes
-                    revertCurrentChanges(context);
+                    GitHelper.revertChanges(context.getDir());
                     if (validChanges.size() > 0) {
                         // lets perform just the valid changes
                         if (!pushVersionChangesWithoutChecks(context, validChanges)) {
@@ -322,14 +322,6 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             // TODO what to do with vanilla git repos?
         }
         return new ArrayList<>();
-    }
-
-
-    protected void revertCurrentChanges(CommandContext context) throws IOException {
-        File dir = context.getDir();
-        if (Commands.runCommandIgnoreOutput(dir, "git", "stash") != 0) {
-            throw new IOException("Failed to stash old changes!");
-        }
     }
 
 

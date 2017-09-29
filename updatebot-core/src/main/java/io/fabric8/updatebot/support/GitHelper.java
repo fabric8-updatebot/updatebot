@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  */
@@ -42,5 +43,11 @@ public class GitHelper {
         }
         LOG.warn("Failed to checkout master in " + dir);
         return false;
+    }
+
+    public static void revertChanges(File dir) throws IOException {
+        if (Commands.runCommandIgnoreOutput(dir, "git", "stash") != 0) {
+            throw new IOException("Failed to stash old changes!");
+        }
     }
 }
