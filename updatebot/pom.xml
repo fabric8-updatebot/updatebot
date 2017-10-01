@@ -36,6 +36,12 @@
       <artifactId>updatebot-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j-api.version}</version>
+    </dependency>
+
 
     <!--
     TODO no idea why this is required but oddness occurs when using transitive dependencies for jackson

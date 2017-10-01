@@ -26,8 +26,10 @@ import io.fabric8.updatebot.commands.PushVersionChanges;
 import io.fabric8.updatebot.commands.UpdatePullRequests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.impl.UpdateBotLogConfiguration;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,8 +43,6 @@ import static io.fabric8.updatebot.CommandNames.UPDATE;
 /**
  */
 public class UpdateBot {
-    private static final transient Logger LOG = LoggerFactory.getLogger(UpdateBot.class);
-
     private Configuration config = new Configuration();
     private CommandSupport lastCommend;
     private UpdatePullRequests updatePullRequests = new UpdatePullRequests();
@@ -117,6 +117,14 @@ public class UpdateBot {
 
     public void setConfig(Configuration config) {
         this.config = config;
+    }
+
+    public void setLoggerOutput(PrintStream out) {
+        UpdateBotLogConfiguration config = new UpdateBotLogConfiguration(out);
+        config.init();
+
+        Logger LOG = LoggerFactory.getLogger(UpdateBot.class);
+        LOG.debug("Configured custom logger");
     }
 
     /**
