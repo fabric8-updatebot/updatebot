@@ -163,7 +163,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
         GitHubRepositoryDetails repositoryDetails = repo.getRepositoryDetails();
         Dependencies push = null;
         if (repositoryDetails == null) {
-            LOG.warn("No repository details found for repository " + sourceRepository);
+            LOG.debug("No push repository details found for repository " + sourceRepository);
         } else {
             push = repositoryDetails.getPush();
         }

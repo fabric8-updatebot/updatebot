@@ -46,6 +46,7 @@ public class UpdateBot {
     private Configuration config = new Configuration();
     private CommandSupport lastCommend;
     private UpdatePullRequests updatePullRequests = new UpdatePullRequests();
+    private Logger LOG;
 
     public static void main(String[] args) {
         try {
@@ -123,7 +124,7 @@ public class UpdateBot {
         UpdateBotLogConfiguration config = new UpdateBotLogConfiguration(out);
         config.init();
 
-        Logger LOG = LoggerFactory.getLogger(UpdateBot.class);
+        LOG = LoggerFactory.getLogger(UpdateBot.class);
         LOG.debug("Configured custom logger");
     }
 
@@ -149,7 +150,16 @@ public class UpdateBot {
             Map<String, String> map = child.createStatusMap();
             answer.add(map);
         }
+
+        getLOG().info("Polled " + answer);
         return answer;
+    }
+
+    public Logger getLOG() {
+        if (LOG == null) {
+            LOG = LoggerFactory.getLogger(UpdateBot.class);
+        }
+        return LOG;
     }
 
     public CommandSupport getLastCommend() {

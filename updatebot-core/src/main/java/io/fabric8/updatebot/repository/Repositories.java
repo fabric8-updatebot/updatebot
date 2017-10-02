@@ -65,7 +65,7 @@ public class Repositories {
             if (Commands.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
                 if (Commands.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
                     if (!configuration.isPullDisabled()) {
-                        LOG.info("Pulling: " + dir + " repo: " + repository.getCloneUrl());
+                        LOG.debug("Pulling: " + dir + " repo: " + repository.getCloneUrl());
                         Commands.runCommandIgnoreOutput(dir, "git", "pull");
                     }
                 }

@@ -39,7 +39,7 @@ public class DefaultNpmDependencyTreeGenerator implements NpmDependencyTreeGener
         if (Commands.runCommand(dir, outputFile, errorFile, "npm", "list", "-json") != 0) {
             LOG.warn("Failed to generate dependencies file " + outputFile);
         } else {
-            LOG.info("Generate dependencies file " + outputFile);
+            LOG.debug("Generate dependencies file " + outputFile);
         }
 
     }

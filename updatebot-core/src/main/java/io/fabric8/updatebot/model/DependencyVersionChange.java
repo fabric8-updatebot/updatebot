@@ -43,6 +43,9 @@ public class DependencyVersionChange {
     }
 
     public static String describe(List<DependencyVersionChange> changes) {
+        if (changes.isEmpty()) {
+            return "no changes";
+        }
         return changes.stream().map(c -> c.getDependency() + " => " + c.getVersion()).collect(Collectors.joining(", "));
     }
 
