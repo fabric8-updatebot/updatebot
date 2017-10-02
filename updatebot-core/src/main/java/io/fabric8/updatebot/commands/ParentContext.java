@@ -15,6 +15,9 @@
  */
 package io.fabric8.updatebot.commands;
 
+import org.kohsuke.github.GHIssue;
+import org.kohsuke.github.GHPullRequest;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,5 +32,28 @@ public class ParentContext {
 
     public List<CommandContext> getChildren() {
         return children;
+    }
+
+
+    public List<GHPullRequest> getPullRequests() {
+        List<GHPullRequest> answer = new ArrayList<>();
+        for (CommandContext child : children) {
+            GHPullRequest pullRequest = child.getPullRequest();
+            if (pullRequest != null) {
+                answer.add(pullRequest);
+            }
+        }
+        return answer;
+    }
+
+    public List<GHIssue> getIssues() {
+        List<GHIssue> answer = new ArrayList<>();
+        for (CommandContext child : children) {
+            GHIssue issue = child.getIssue();
+            if (issue != null) {
+                answer.add(issue);
+            }
+        }
+        return answer;
     }
 }

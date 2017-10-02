@@ -71,8 +71,12 @@ public class CompositeCommand extends CommandSupport {
     }
 
 
+    /**
+     * Invoked from a polling/update command
+     */
     public void run(CommandContext context, GHRepository ghRepository, GHPullRequest pullRequest) throws IOException {
         for (CommandSupport command : getCommands()) {
+            command.validateConfiguration(context.getConfiguration());
             if (command instanceof ModifyFilesCommandSupport) {
                 ModifyFilesCommandSupport modifyCommand = (ModifyFilesCommandSupport) command;
                 modifyCommand.run(context, ghRepository, pullRequest);

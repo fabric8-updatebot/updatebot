@@ -16,15 +16,18 @@
 package io.fabric8.updatebot;
 
 
+import io.fabric8.updatebot.commands.ParentContext;
 import io.fabric8.updatebot.commands.PushVersionChanges;
 import io.fabric8.updatebot.commands.UpdatePullRequests;
 import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.repository.LocalRepository;
+import io.fabric8.updatebot.test.GithubAssertions;
 import io.fabric8.updatebot.test.NpmTests;
 import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
+import org.kohsuke.github.GHPullRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +35,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  */
@@ -74,11 +79,24 @@ public class PushVersionPRUpdateAndRebasePRTest {
 
             // now lets try a second update to the same PR
             updateBot.values(dependency, secondVersion);
-            updateBot.run(configuration);
+            ParentContext context = updateBot.run(configuration);
 
 
             // lets do some dummy commits that force existing PRs to not be mergeable
             NpmTests.generateDummyPackageJsonCommit(localRepositories, oldVersion, "devDependencies", dependency);
+
+            List<GHPullRequest> pullRequests = context.getPullRequests();
+            assertThat(pullRequests).describedAs("Should have found a PullRequest").isNotEmpty();
+            GHPullRequest pullRequest = pullRequests.get(0);
+
+            GithubAssertions.assertWaitForPullRequestMergable(pullRequest, false);
+
+            // lets pause a little for the github REST API to return up to date merge status
+            try {
+                Thread.sleep(2000L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
 
             // now lets rebase
             updatePullRequests.run(configuration);

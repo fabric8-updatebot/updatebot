@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.test;
 
+import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.github.Issues;
 import io.fabric8.updatebot.github.PullRequests;
 import org.kohsuke.github.GHIssue;
@@ -39,5 +40,15 @@ public class GithubAssertions {
         List<GHIssue> openIssues = Issues.getOpenIssues(repository, label);
         assertThat(openIssues).describedAs("open github issues with label " + label + ": " + openIssues).hasSize(expectedIssueCount);
         return openIssues;
+    }
+
+    /**
+     * Waits for the mergable state to be available on the given pull request (which can take some time due to caching)
+     */
+    public static void assertWaitForPullRequestMergable(GHPullRequest pullRequest, boolean expectedMergable) throws IOException {
+        Boolean mergable = GitHubHelpers.waitForPullRequestToHaveMergable(pullRequest, 1000L, 30000L);
+        assertThat(mergable).describedAs("Should have found a mergable for PullRequest " + pullRequest.getHtmlUrl()).isNotNull().isEqualTo(expectedMergable);
+
+        assertThat(GitHubHelpers.isMergeable(pullRequest)).describedAs("should not be mergable!").isEqualTo(expectedMergable);
     }
 }

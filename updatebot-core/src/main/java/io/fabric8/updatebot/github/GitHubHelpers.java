@@ -93,7 +93,16 @@ public class GitHubHelpers {
     public static boolean isMergeable(GHPullRequest pullRequest) throws IOException {
         boolean canMerge = false;
         Boolean mergeable = pullRequest.getMergeable();
-        if (mergeable != null && !mergeable.booleanValue()) {
+        GHPullRequest single = null;
+        if (mergeable == null) {
+            single = pullRequest.getRepository().getPullRequest(pullRequest.getNumber());
+            mergeable = single.getMergeable();
+        }
+        if (mergeable == null) {
+            LOG.warn("Mergable flag is still null on pull request " + pullRequest.getHtmlUrl() + " assuming its still mergable. Probably a caching issue and this flag may appear again later");
+            return true;
+        }
+        if (mergeable != null && mergeable.booleanValue()) {
             canMerge = true;
         }
         return canMerge;
@@ -168,5 +177,29 @@ public class GitHubHelpers {
             }
         }
         return null;
+    }
+
+    public static Boolean waitForPullRequestToHaveMergable(GHPullRequest pullRequest, long sleepMS, long maximumTimeMS) throws IOException {
+        long end = System.currentTimeMillis() + maximumTimeMS;
+        while (true) {
+            Boolean mergeable = pullRequest.getMergeable();
+            if (mergeable == null) {
+                GHRepository repository = pullRequest.getRepository();
+                int number = pullRequest.getNumber();
+                pullRequest = repository.getPullRequest(number);
+                mergeable = pullRequest.getMergeable();
+            }
+            if (mergeable != null) {
+                return mergeable;
+            }
+            if (System.currentTimeMillis() > end) {
+                return null;
+            }
+            try {
+                Thread.sleep(sleepMS);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
     }
 }

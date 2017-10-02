@@ -77,7 +77,7 @@
     <fabric8.version>2.2.95</fabric8.version>
 
 
-    <kohsuke.github-api.version>1.84</kohsuke.github-api.version>
+    <kohsuke.github-api.version>1.89</kohsuke.github-api.version>
     <jackson.version>2.9.1</jackson.version>
     <slf4j-api.version>1.7.25</slf4j-api.version>
     <slf4j-log4j12.version>1.7.21</slf4j-log4j12.version>
