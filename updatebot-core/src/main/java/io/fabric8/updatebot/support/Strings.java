@@ -52,6 +52,24 @@ public class Strings {
     }
 
     /**
+     * Returns true if the actual value matches any of the String representations of the given values.
+     * <p>
+     * So can match against String or URL objects etc
+     */
+    public static boolean equalAnyValue(String actual, Iterable<?> values) {
+        for (Object value : values) {
+            if (value != null) {
+                String text = value.toString();
+                if (Objects.equal(text, actual)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    /**
      * Trim all prefixes on the given text of the given prefix
      */
     public static String trimAllPrefix(String text, String prefix) {

@@ -17,24 +17,23 @@ package io.fabric8.updatebot.model;
 
 /**
  */
-public class Dependencies {
-    private NpmDependencies npm;
-    private MavenDependencies maven;
+public class MavenDependencySet {
+    private DependencySet groupId = new DependencySet();
+    private DependencySet artifactId = new DependencySet();
 
-    public NpmDependencies getNpm() {
-        return npm;
+    public DependencySet getGroupId() {
+        return groupId;
     }
 
-    public void setNpm(NpmDependencies npm) {
-        this.npm = npm;
+    public void setGroupId(DependencySet groupId) {
+        this.groupId = groupId;
     }
 
-
-    public MavenDependencies getMaven() {
-        return maven;
+    public DependencySet getArtifactId() {
+        return artifactId;
     }
 
-    public void setMaven(MavenDependencies maven) {
-        this.maven = maven;
+    public void setArtifactId(DependencySet artifactId) {
+        this.artifactId = artifactId;
     }
 }

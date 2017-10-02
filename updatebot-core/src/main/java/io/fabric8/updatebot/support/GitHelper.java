@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  */
@@ -49,5 +51,20 @@ public class GitHelper {
         if (Commands.runCommandIgnoreOutput(dir, "git", "stash") != 0) {
             throw new IOException("Failed to stash old changes!");
         }
+    }
+
+    public static List<String> getGitHubCloneUrls(String gitHubHost, String orgName, String repository) {
+        List<String> answer = new ArrayList<>();
+        answer.add("https://" + gitHubHost + "/" + orgName + "/" + repository);
+        answer.add("git@" + gitHubHost + ":" + orgName + "/" + repository);
+
+        // now lets add the .git versions
+        List<String> copy = new ArrayList<>(answer);
+        for (String url : copy) {
+            if (!url.endsWith(".git")) {
+                answer.add(url + ".git");
+            }
+        }
+        return answer;
     }
 }

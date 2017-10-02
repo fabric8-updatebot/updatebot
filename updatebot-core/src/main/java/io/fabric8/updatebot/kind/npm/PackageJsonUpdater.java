@@ -67,7 +67,7 @@ public class PackageJsonUpdater implements Updater {
             JsonNode dependencies = tree.get(dependencyKey);
             if (dependencies instanceof ObjectNode) {
                 ObjectNode objectNode = (ObjectNode) dependencies;
-                if (updateDependencyVersion(dependencyKey, objectNode, context)) {
+                if (doPushVersionChange(dependencyKey, objectNode, context)) {
                     answer = true;
                 }
             }
@@ -205,7 +205,7 @@ public class PackageJsonUpdater implements Updater {
     }
 
 
-    protected boolean updateDependencyVersion(String dependencyKey, ObjectNode dependencies, PushVersionChangesContext context) {
+    protected boolean doPushVersionChange(String dependencyKey, ObjectNode dependencies, PushVersionChangesContext context) {
         String name = context.getName();
         String value = context.getValue();
         JsonNode dependency = dependencies.get(name);

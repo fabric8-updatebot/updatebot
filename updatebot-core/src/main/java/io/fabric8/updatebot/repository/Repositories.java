@@ -27,6 +27,7 @@ import io.fabric8.updatebot.model.Projects;
 import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.support.Strings;
+import io.fabric8.utils.Files;
 import io.fabric8.utils.Filter;
 import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHPerson;
@@ -36,13 +37,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+
+import static io.fabric8.updatebot.support.MarkupHelper.loadYaml;
 
 /**
  */
@@ -207,5 +214,34 @@ public class Repositories {
             return defaultValue;
         }
         return label;
+    }
+
+    /**
+     * Returns the UpdateBot project configurations from the given configFile (File or URL) and source directory
+     */
+    public static Projects loadProjects(String configFile, File sourceDir) throws IOException {
+        File file = new File(configFile);
+        if (Files.isDirectory(sourceDir) && !file.isAbsolute()) {
+            file = new File(sourceDir, configFile);
+        }
+        if (!Files.isFile(file)) {
+            URL url = null;
+            try {
+                url = new URL(configFile);
+                InputStream in = null;
+                try {
+                    in = url.openStream();
+                } catch (IOException e) {
+                    throw new IOException("Failed to open URL " + configFile + ". " + e, e);
+                }
+                if (in != null) {
+                    return loadYaml(in, Projects.class);
+                }
+            } catch (MalformedURLException e) {
+                // ignore
+            }
+            throw new FileNotFoundException(file.getCanonicalPath());
+        }
+        return loadYaml(file, Projects.class);
     }
 }
