@@ -213,7 +213,7 @@ public class CommandContext {
         StringBuilder builder = new StringBuilder();
         String cloneUrl = getRepository().getCloneUrl();
         builder.append(cloneUrl);
-        
+
         Map<String, String> answer = new HashMap<>();
         if (status != null) {
             builder.append(" ");

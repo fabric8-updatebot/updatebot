@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -61,7 +60,7 @@ public class Configuration {
     private boolean rebaseMode = true;
     private NpmDependencyTreeGenerator npmDependencyTreeGenerator = new DefaultNpmDependencyTreeGenerator();
     private boolean pullDisabled;
-    private Map<String,String> pollStatusCache = new TreeMap<>();
+    private Map<String, String> pollStatusCache = new TreeMap<>();
 
     public GitHub getGithub() throws IOException {
         if (github == null) {
