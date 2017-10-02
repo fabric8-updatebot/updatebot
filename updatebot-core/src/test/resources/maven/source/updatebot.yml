@@ -1,0 +1,7 @@
+github:
+  organisations:
+  - name: jstrachan-testing
+    repositories:
+    - name: updatebot
+    - name: updatebot-plugin
+

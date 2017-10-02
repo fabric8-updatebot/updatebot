@@ -22,25 +22,19 @@ import io.fabric8.updatebot.github.Issues;
 import io.fabric8.updatebot.model.Projects;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.repository.Repositories;
-import io.fabric8.utils.Files;
 import io.fabric8.utils.Strings;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHRepository;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 
 import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_INDENT;
 import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_PREFIX;
 import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_PREFIX_SEPARATOR;
-import static io.fabric8.updatebot.support.MarkupHelper.loadYaml;
 import static io.fabric8.updatebot.support.ReflectionHelper.findFieldsAnnotatedWith;
 import static io.fabric8.updatebot.support.ReflectionHelper.getFieldValue;
 
@@ -148,29 +142,7 @@ public abstract class CommandSupport {
     protected Projects loadProjects(Configuration configuration) throws IOException {
         String configFile = configuration.getConfigFile();
         File sourceDir = configuration.getSourceDir();
-        File file = new File(configFile);
-        if (Files.isDirectory(sourceDir) && !file.isAbsolute()) {
-            file = new File(sourceDir, configFile);
-        }
-        if (!Files.isFile(file)) {
-            URL url = null;
-            try {
-                url = new URL(configFile);
-                InputStream in = null;
-                try {
-                    in = url.openStream();
-                } catch (IOException e) {
-                    throw new IOException("Failed to open URL " + configFile + ". " + e, e);
-                }
-                if (in != null) {
-                    return loadYaml(in, Projects.class);
-                }
-            } catch (MalformedURLException e) {
-                // ignore
-            }
-            throw new FileNotFoundException(file.getCanonicalPath());
-        }
-        return loadYaml(file, Projects.class);
+        return Repositories.loadProjects(configFile, sourceDir);
     }
 
     protected GHIssue getOrFindIssue(CommandContext context, GHRepository ghRepository) throws IOException {

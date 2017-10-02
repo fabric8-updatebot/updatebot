@@ -15,6 +15,9 @@
  */
 package io.fabric8.updatebot.model;
 
+import io.fabric8.updatebot.support.GitHelper;
+import io.fabric8.updatebot.support.Strings;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +44,16 @@ public class GithubOrganisation extends FilterSupport {
     }
 
     public GitHubRepositoryDetails getRepositoryDetails(String cloneUrl) {
-        // TODO we don't cache the repos yet...
+        for (GitHubRepositoryDetails repository : repositories) {
+            if (hasCloneUrl(repository, cloneUrl)) {
+                return repository;
+            }
+        }
         return null;
+    }
+
+    protected boolean hasCloneUrl(GitHubRepositoryDetails repository, String cloneUrl) {
+        List<String> gitUrls = GitHelper.getGitHubCloneUrls("github.com", getName(), repository.getName());
+        return Strings.equalAnyValue(cloneUrl, gitUrls);
     }
 }

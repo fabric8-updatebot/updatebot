@@ -15,26 +15,29 @@
  */
 package io.fabric8.updatebot.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  */
-public class Dependencies {
-    private NpmDependencies npm;
-    private MavenDependencies maven;
+public class MavenDependencies {
+    private List<MavenDependencyFilter> plugins = new ArrayList();
+    private List<MavenDependencyFilter> dependencies = new ArrayList();
 
-    public NpmDependencies getNpm() {
-        return npm;
+
+    public List<MavenDependencyFilter> getPlugins() {
+        return plugins;
     }
 
-    public void setNpm(NpmDependencies npm) {
-        this.npm = npm;
+    public void setPlugins(List<MavenDependencyFilter> plugins) {
+        this.plugins = plugins;
     }
 
-
-    public MavenDependencies getMaven() {
-        return maven;
+    public List<MavenDependencyFilter> getDependencies() {
+        return dependencies;
     }
 
-    public void setMaven(MavenDependencies maven) {
-        this.maven = maven;
+    public void setDependencies(List<MavenDependencyFilter> dependencies) {
+        this.dependencies = dependencies;
     }
 }

@@ -13,7 +13,7 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot;
+package io.fabric8.updatebot.filter;
 
 import io.fabric8.updatebot.model.GithubOrganisation;
 import io.fabric8.utils.Filter;
@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  */
-public class FilterTest {
+public class FilterOrganisationTest {
     GithubOrganisation organisation = new GithubOrganisation();
 
     @Test
@@ -31,19 +31,19 @@ public class FilterTest {
         organisation.include("foo-*", "bar");
         organisation.exclude("cheese", "foo-x*");
 
-        assertFilter(true, organisation, "foo-", "foo-bar");
-        assertFilter(false, organisation, "cheese", "foo-x");
+        assertFilterOrganisation(true, organisation, "foo-", "foo-bar");
+        assertFilterOrganisation(false, organisation, "cheese", "foo-x");
     }
 
     @Test
     public void testIncludeOnly() throws Exception {
         organisation.include("spring-boot-camel*");
 
-        assertFilter(true, organisation, "spring-boot-camel", "spring-boot-camel-xml");
-        assertFilter(false, organisation, "spring-boot-amq", "vertx");
+        assertFilterOrganisation(true, organisation, "spring-boot-camel", "spring-boot-camel-xml");
+        assertFilterOrganisation(false, organisation, "spring-boot-amq", "vertx");
     }
 
-    private void assertFilter(boolean expected, GithubOrganisation organisation, String... values) {
+    private void assertFilterOrganisation(boolean expected, GithubOrganisation organisation, String... values) {
         Filter<String> filter = organisation.createFilter();
         for (String value : values) {
             boolean actual = filter.matches(value);

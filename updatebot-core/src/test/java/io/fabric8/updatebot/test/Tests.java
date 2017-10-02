@@ -16,13 +16,20 @@
 package io.fabric8.updatebot.test;
 
 import io.fabric8.updatebot.Configuration;
+import io.fabric8.updatebot.model.GitHubProjects;
+import io.fabric8.updatebot.model.GitHubRepositoryDetails;
+import io.fabric8.updatebot.model.GithubOrganisation;
+import io.fabric8.updatebot.model.Projects;
+import io.fabric8.updatebot.support.MarkupHelper;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Files;
+import org.assertj.core.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
@@ -106,5 +113,29 @@ public class Tests {
         }
         LOG.info("Disabling this test case as we do not have a github username and password/token defined via environment variables");
         return false;
+    }
+
+    public static Projects assertLoadProjects(File config) throws IOException {
+        Projects projects = MarkupHelper.loadYaml(config, Projects.class);
+        assertThat(projects).describedAs("projects").isNotNull();
+        return projects;
+    }
+
+    public static GitHubRepositoryDetails assertGithubRepositoryFindByName(Projects projects, String repoName) {
+        GitHubProjects github = projects.getGithub();
+        assertThat(github).describedAs("github").isNotNull();
+
+        List<GithubOrganisation> organisations = github.getOrganisations();
+        assertThat(organisations).describedAs("github organisations").isNotNull();
+        for (GithubOrganisation organisation : organisations) {
+            List<GitHubRepositoryDetails> repositories = organisation.getRepositories();
+            for (GitHubRepositoryDetails repository : repositories) {
+                if (repoName.equals(repository.getName())) {
+                    return repository;
+                }
+            }
+        }
+        Assertions.fail("Could not find github repository called " + repoName + " in project: " + github);
+        return null;
     }
 }
