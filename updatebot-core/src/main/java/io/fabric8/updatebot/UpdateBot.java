@@ -151,7 +151,7 @@ public class UpdateBot {
             answer.add(map);
         }
 
-        getLOG().info("Polled " + answer);
+        getLOG().debug("Polled " + answer);
         return answer;
     }
 

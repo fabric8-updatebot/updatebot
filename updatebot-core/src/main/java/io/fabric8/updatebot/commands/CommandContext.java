@@ -22,11 +22,15 @@ import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.support.Markdown;
 import io.fabric8.updatebot.support.Strings;
+import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +41,8 @@ import java.util.TreeSet;
 /**
  */
 public class CommandContext {
+    private static final transient Logger LOG = LoggerFactory.getLogger(CommandContext.class);
+
     private final LocalRepository repository;
     private final Configuration configuration;
     private final Set<File> updatedFiles = new TreeSet<>();
@@ -204,15 +210,32 @@ public class CommandContext {
     }
 
     public Map<String, String> createStatusMap() {
+        StringBuilder builder = new StringBuilder();
+        String cloneUrl = getRepository().getCloneUrl();
+        builder.append(cloneUrl);
+        
         Map<String, String> answer = new HashMap<>();
         if (status != null) {
+            builder.append(" ");
+            builder.append(status);
             answer.put("status", status.toString().toLowerCase());
         }
         if (issue != null) {
-            answer.put("issue", Strings.toString(issue.getHtmlUrl()));
+            URL htmlUrl = issue.getHtmlUrl();
+            builder.append(" issue: ");
+            builder.append(htmlUrl);
+            answer.put("issue", Strings.toString(htmlUrl));
         }
         if (pullRequest != null) {
-            answer.put("pr", Strings.toString(pullRequest.getHtmlUrl()));
+            URL htmlUrl = pullRequest.getHtmlUrl();
+            builder.append(" pull request: ");
+            builder.append(htmlUrl);
+            answer.put("pr", Strings.toString(htmlUrl));
+        }
+        String message = builder.toString();
+        String oldMessage = getConfiguration().getPollStatusCache().put(cloneUrl, message);
+        if (oldMessage == null && !Objects.equal(oldMessage, message)) {
+            LOG.info(message);
         }
         return answer;
     }

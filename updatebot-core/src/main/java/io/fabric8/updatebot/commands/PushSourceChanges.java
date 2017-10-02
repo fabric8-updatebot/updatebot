@@ -95,7 +95,14 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
         if (sourceRepository != null) {
             sourceFullName = sourceRepository.getFullName();
         }
-        LOG.info("pushing " + sourceFullName + " on " + context.getRepositoryFullName() + " has version changes " + DependencyVersionChange.describe(steps));
+        String message = "push source changes from " + sourceFullName + " to " + context.getRepositoryFullName();
+        String stepDescription = " changes found: " + DependencyVersionChange.describe(steps);
+        if (steps.isEmpty()) {
+            stepDescription = " no changes found";
+            LOG.debug(message + stepDescription);
+        } else {
+            LOG.info(message + stepDescription);
+        }
         return pushVersionsWithChecks(context, steps);
     }
 

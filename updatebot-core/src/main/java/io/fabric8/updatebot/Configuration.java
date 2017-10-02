@@ -29,6 +29,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Common configuration parameters
@@ -58,6 +61,7 @@ public class Configuration {
     private boolean rebaseMode = true;
     private NpmDependencyTreeGenerator npmDependencyTreeGenerator = new DefaultNpmDependencyTreeGenerator();
     private boolean pullDisabled;
+    private Map<String,String> pollStatusCache = new TreeMap<>();
 
     public GitHub getGithub() throws IOException {
         if (github == null) {
@@ -206,5 +210,12 @@ public class Configuration {
 
     public void setSourceDir(File sourceDir) {
         this.sourceDir = sourceDir;
+    }
+
+    /**
+     * Returns a cache indexed by the cloneUrl of the polling status for each repository
+     */
+    public Map<String, String> getPollStatusCache() {
+        return pollStatusCache;
     }
 }
