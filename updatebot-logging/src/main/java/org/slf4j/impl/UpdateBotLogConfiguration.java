@@ -33,5 +33,6 @@ public class UpdateBotLogConfiguration extends SimpleLoggerConfiguration {
         SimpleLogger.CONFIG_PARAMS = this;
         super.init();
         this.outputChoice = new OutputChoice(out);
+        this.showThreadName = false;
     }
 }
