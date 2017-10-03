@@ -20,8 +20,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.repository.LocalRepository;
-import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.MarkupHelper;
+import io.fabric8.updatebot.support.ProcessHelper;
 import io.fabric8.utils.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,17 +50,17 @@ public class NpmTests {
                 File dir = repository.getDir();
 
                 String localBranch = "updatebot-test-" + UUID.randomUUID().toString();
-                Commands.runCommand(dir, "git", "checkout", "master");
-                Commands.runCommand(dir, "git", "checkout", "-b", localBranch);
+                ProcessHelper.runCommand(dir, "git", "checkout", "master");
+                ProcessHelper.runCommand(dir, "git", "checkout", "-b", localBranch);
 
                 boolean changed = false;
                 if (generateDummyChangePackageJson(dir, value, paths)) {
                     changed = true;
                 }
                 if (changed) {
-                    Commands.runCommand(dir, "git", "add", "*");
-                    if (Commands.runCommand(dir, "git", "commit", "-m", "Dummy commit to test rebase at " + new Date()) == 0) {
-                        if (Commands.runCommand(dir, "git", "push", "origin", localBranch + ":master") == 0) {
+                    ProcessHelper.runCommand(dir, "git", "add", "*");
+                    if (ProcessHelper.runCommand(dir, "git", "commit", "-m", "Dummy commit to test rebase at " + new Date()) == 0) {
+                        if (ProcessHelper.runCommand(dir, "git", "push", "origin", localBranch + ":master") == 0) {
                             break;
                         }
                     }

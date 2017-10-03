@@ -16,7 +16,7 @@
 package io.fabric8.updatebot.kind.npm;
 
 import io.fabric8.updatebot.commands.CommandContext;
-import io.fabric8.updatebot.support.Commands;
+import io.fabric8.updatebot.support.ProcessHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,11 +32,11 @@ public class DefaultNpmDependencyTreeGenerator implements NpmDependencyTreeGener
         File dir = context.getDir();
         LOG.info("Generating dependency tree file " + dependencyFileName + " in " + dir);
 
-        Commands.runCommandIgnoreOutput(dir, "npm", "install");
+        ProcessHelper.runCommandIgnoreOutput(dir, "npm", "install");
 
         File outputFile = new File(dir, dependencyFileName);
         File errorFile = new File(dir, "npm-list-errors.log");
-        if (Commands.runCommand(dir, outputFile, errorFile, "npm", "list", "-json") != 0) {
+        if (ProcessHelper.runCommand(dir, outputFile, errorFile, "npm", "list", "-json") != 0) {
             LOG.warn("Failed to generate dependencies file " + outputFile);
         } else {
             LOG.debug("Generate dependencies file " + outputFile);

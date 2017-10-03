@@ -28,10 +28,10 @@ import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.DependencySet;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.model.NpmDependencies;
-import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.support.JsonNodes;
 import io.fabric8.updatebot.support.MarkupHelper;
+import io.fabric8.updatebot.support.ProcessHelper;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Files;
 import io.fabric8.utils.Filter;
@@ -197,7 +197,7 @@ public class PackageJsonUpdater implements Updater {
     @Override
     public boolean pullVersions(CommandContext context) throws IOException {
         File dir = context.getRepository().getDir();
-        int status = Commands.runCommand(dir, "ncu", "--upgrade");
+        int status = ProcessHelper.runCommand(dir, "ncu", "--upgrade");
         if (status == 0) {
             return true;
         }

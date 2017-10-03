@@ -24,8 +24,8 @@ import io.fabric8.updatebot.model.GitRepositoryConfig;
 import io.fabric8.updatebot.model.GithubOrganisation;
 import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.model.RepositoryConfig;
-import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.FileHelper;
+import io.fabric8.updatebot.support.ProcessHelper;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Filter;
 import org.kohsuke.github.GHPerson;
@@ -61,11 +61,11 @@ public class Repositories {
         File dir = repository.getDir();
         File gitDir = new File(dir, ".git");
         if (gitDir.exists()) {
-            if (Commands.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
-                if (Commands.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
+            if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
+                if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
                     if (!configuration.isPullDisabled()) {
                         LOG.debug("Pulling: " + dir + " repo: " + repository.getCloneUrl());
-                        Commands.runCommandIgnoreOutput(dir, "git", "pull");
+                        ProcessHelper.runCommandIgnoreOutput(dir, "git", "pull");
                     }
                 }
             }
@@ -74,7 +74,7 @@ public class Repositories {
             parentDir.mkdirs();
 
             LOG.info("Cloning: " + repository.getFullName() + " to " + FileHelper.getRelativePathToCurrentDir(dir));
-            Commands.runCommand(parentDir, "git", "clone", repository.getCloneUrl(), dir.getName());
+            ProcessHelper.runCommand(parentDir, "git", "clone", repository.getCloneUrl(), dir.getName());
         }
     }
 

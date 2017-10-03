@@ -17,8 +17,8 @@ package io.fabric8.updatebot.filter;
 
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.GitRepositoryConfig;
-import io.fabric8.updatebot.model.MavenDependencies;
 import io.fabric8.updatebot.model.MavenArtifactKey;
+import io.fabric8.updatebot.model.MavenDependencies;
 import io.fabric8.updatebot.model.MavenDependencyFilter;
 import io.fabric8.updatebot.model.RepositoryConfig;
 import io.fabric8.updatebot.test.Tests;

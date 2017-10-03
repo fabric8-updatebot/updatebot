@@ -32,8 +32,8 @@ public class GitHelper {
     private static final transient Logger LOG = LoggerFactory.getLogger(GitHelper.class);
 
     public static boolean gitAddAndCommit(File dir, String commitComment) {
-        if (Commands.runCommandIgnoreOutput(dir, "git", "add", "*") == 0) {
-            if (Commands.runCommand(dir, "git", "commit", "-m", commitComment) == 0) {
+        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "add", "*") == 0) {
+            if (ProcessHelper.runCommand(dir, "git", "commit", "-m", commitComment) == 0) {
                 return true;
             }
         }
@@ -41,8 +41,8 @@ public class GitHelper {
     }
 
     public static boolean gitStashAndCheckoutMaster(File dir) {
-        if (Commands.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
-            if (Commands.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
+        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
+            if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
                 return true;
             }
         }
@@ -51,7 +51,7 @@ public class GitHelper {
     }
 
     public static void revertChanges(File dir) throws IOException {
-        if (Commands.runCommandIgnoreOutput(dir, "git", "stash") != 0) {
+        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "stash") != 0) {
             throw new IOException("Failed to stash old changes!");
         }
     }

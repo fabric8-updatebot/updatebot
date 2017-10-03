@@ -17,16 +17,15 @@ package io.fabric8.updatebot.kind.maven;
 
 import io.fabric8.updatebot.commands.CommandContext;
 import io.fabric8.updatebot.commands.PushVersionChangesContext;
-import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.kind.KindDependenciesCheck;
 import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.model.MavenArtifactVersionChange;
 import io.fabric8.updatebot.model.MavenArtifactVersionChanges;
-import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.support.MarkupHelper;
+import io.fabric8.updatebot.support.ProcessHelper;
 import io.fabric8.utils.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -45,6 +43,14 @@ public class MavenUpdater implements Updater {
 
     // TODO load dynamically!
     String updateBotPluginVersion = "1.0-SNAPSHOT";
+
+    public static boolean runCommandAndLogOutput(CommandContext context, String... commands) {
+        if (ProcessHelper.runCommandAndLogOutput(context.getDir(), commands)) {
+            // TODO check if we have changed the source at all
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public boolean isApplicable(CommandContext context) {
@@ -83,7 +89,6 @@ public class MavenUpdater implements Updater {
         }
     }
 
-
     @Override
     public boolean pushVersions(PushVersionChangesContext context) throws IOException {
         File file = context.file("pom.xml");
@@ -113,14 +118,6 @@ public class MavenUpdater implements Updater {
 
     protected File createVersionsYamlFile(CommandContext context) {
         return new File(context.getDir(), "target/updatebot-versions.yaml");
-    }
-
-    public static boolean runCommandAndLogOutput(CommandContext context, String... commands) {
-        if (Commands.runCommandAndLogOutput(context.getDir(), commands)) {
-            // TODO check if we have changed the source at all
-            return true;
-        }
-        return false;
     }
 
     @Override

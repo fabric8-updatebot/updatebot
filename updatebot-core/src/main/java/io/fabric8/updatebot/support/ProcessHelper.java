@@ -15,7 +15,6 @@
  */
 package io.fabric8.updatebot.support;
 
-import io.fabric8.updatebot.kind.maven.MavenUpdater;
 import io.fabric8.utils.IOHelpers;
 import io.fabric8.utils.Strings;
 import org.slf4j.Logger;
@@ -26,8 +25,8 @@ import java.io.IOException;
 
 /**
  */
-public class Commands {
-    private static final transient Logger LOG = LoggerFactory.getLogger(Commands.class);
+public class ProcessHelper {
+    private static final transient Logger LOG = LoggerFactory.getLogger(ProcessHelper.class);
 
     public static int runCommand(File dir, String... commands) {
         return runCommand(dir, true, commands);
@@ -93,7 +92,7 @@ public class Commands {
                 for (String line : lines) {
                     if (error) {
                         LOG.error(line);
-                    }  else {
+                    } else {
                         LOG.info(line);
                     }
                 }
