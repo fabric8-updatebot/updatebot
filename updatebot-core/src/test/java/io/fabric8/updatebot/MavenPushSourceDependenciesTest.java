@@ -41,7 +41,7 @@ public class MavenPushSourceDependenciesTest {
     protected PushSourceChanges pushSourceChanges = new PushSourceChanges();
     protected List<LocalRepository> localRepositories;
     protected Configuration configuration = new Configuration();
-    protected String sourceRepoName = "updatebot";
+    protected String sourceRepoName = "kubernetes-client";
 
     @Before
     public void init() throws IOException {
@@ -51,6 +51,10 @@ public class MavenPushSourceDependenciesTest {
         configuration.setConfigFile(configFile);
         configuration.setWorkDir(workDirPath);
 
+        if (System.getProperty("updatebot.disable.pull", "false").equals("true")) {
+            LOG.info("Disabling pull to speed up tests");
+            configuration.setPullDisabled(true);
+        }
         localRepositories = pushSourceChanges.cloneOrPullRepositories(configuration);
 
         LocalRepository sourceRepo = LocalRepository.findRepository(localRepositories, sourceRepoName);

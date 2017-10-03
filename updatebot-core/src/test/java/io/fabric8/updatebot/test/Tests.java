@@ -99,7 +99,12 @@ public class Tests {
     public static String getCleanWorkDir(Class<?> clazz) {
         File testDataDir = getTestDataDir(clazz);
         System.out.println("Using workDir: " + testDataDir);
-        Files.recursiveDelete(testDataDir);
+        String property = System.getProperty("updatebot.preserve.testdir", "false");
+        if (property.equals("true")) {
+            LOG.info("Preserving contents of " + testDataDir + " to speed up test");
+        } else {
+            Files.recursiveDelete(testDataDir);
+        }
         return testDataDir.getPath();
     }
 

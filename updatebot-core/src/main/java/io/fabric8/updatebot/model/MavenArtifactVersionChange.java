@@ -15,7 +15,6 @@
  */
 package io.fabric8.updatebot.model;
 
-import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.kind.Kind;
 
 /**

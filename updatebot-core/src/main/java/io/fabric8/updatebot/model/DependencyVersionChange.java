@@ -119,6 +119,20 @@ public class DependencyVersionChange {
         return Objects.equal(this.kind, that.kind) && Objects.equal(this.dependency, that.dependency);
     }
 
+    /**
+     * Returns true if this change matches the given artifact key
+     */
+    public boolean matches(String groupId, String artifactId) {
+        return matches(new MavenArtifactKey(groupId, artifactId));
+    }
+
+    /**
+     * Returns true if this change matches the given artifact key
+     */
+    public boolean matches(MavenArtifactKey artifactKey) {
+        return Objects.equal(this.dependency, artifactKey.toString());
+    }
+
     public Kind getKind() {
         return kind;
     }
@@ -134,4 +148,5 @@ public class DependencyVersionChange {
     public String getScope() {
         return scope;
     }
+
 }

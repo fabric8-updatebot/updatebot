@@ -24,7 +24,6 @@ import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.model.MavenArtifactVersionChange;
 import io.fabric8.updatebot.model.MavenArtifactVersionChanges;
 import io.fabric8.updatebot.support.FileHelper;
-import io.fabric8.updatebot.support.GitHelper;
 import io.fabric8.updatebot.support.MarkupHelper;
 import io.fabric8.updatebot.support.ProcessHelper;
 import io.fabric8.utils.Files;
@@ -100,6 +99,12 @@ public class MavenUpdater implements Updater {
         File file = context.file("pom.xml");
         boolean answer = false;
         if (Files.isFile(file)) {
+            if (PomHelper.updatePomVersionsInPoms(context.getDir(), changes)) {
+                return true;
+            }
+
+/*
+
             MavenArtifactVersionChanges mavenChanges = new MavenArtifactVersionChanges();
             for (DependencyVersionChange change : changes) {
                 mavenChanges.addChange(change);
@@ -120,6 +125,7 @@ public class MavenUpdater implements Updater {
                     return GitHelper.hasChangedFiles(context.getDir());
                 }
             }
+*/
         }
         return answer;
 

@@ -17,7 +17,6 @@ package io.fabric8.updatebot.kind;
 
 import io.fabric8.updatebot.commands.CommandContext;
 import io.fabric8.updatebot.commands.PushVersionChangesContext;
-import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 
 import java.io.IOException;

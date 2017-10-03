@@ -16,7 +16,6 @@
 package io.fabric8.updatebot.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.fabric8.updatebot.commands.PushVersionChangesContext;
 
 import java.util.ArrayList;
 import java.util.Collection;

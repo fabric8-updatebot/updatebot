@@ -15,19 +15,20 @@
  */
 package io.fabric8.updatebot.maven;
 
+import io.fabric8.updatebot.kind.maven.MavenScopes;
+import io.fabric8.updatebot.maven.support.MavenHelper;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.GitRepositoryConfig;
+import io.fabric8.updatebot.model.MavenArtifactKey;
 import io.fabric8.updatebot.model.MavenArtifactVersionChange;
 import io.fabric8.updatebot.model.MavenArtifactVersionChanges;
 import io.fabric8.updatebot.model.MavenDependencies;
-import io.fabric8.updatebot.model.MavenArtifactKey;
 import io.fabric8.updatebot.model.MavenDependencyFilter;
 import io.fabric8.updatebot.model.RepositoryConfig;
 import io.fabric8.updatebot.model.RepositoryConfigs;
 import io.fabric8.updatebot.support.MarkupHelper;
 import io.fabric8.utils.Filter;
 import io.fabric8.utils.Filters;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -39,11 +40,9 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TreeMap;
 
 /**
@@ -64,6 +63,10 @@ public class ExportVersionsMojo extends AbstractMojo {
     protected File destFile;
 
     private RepositoryConfig repositoryConfig;
+
+    protected static void addArtifact(Map<MavenArtifactKey, MavenArtifactVersionChange> exportVersions, MavenArtifactKey artifactKey, String version, String scope) {
+        exportVersions.put(artifactKey, new MavenArtifactVersionChange(artifactKey, version, scope));
+    }
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -101,17 +104,19 @@ public class ExportVersionsMojo extends AbstractMojo {
         List<MavenProject> projects = project.getCollectedProjects();
         for (MavenProject project : projects) {
             MavenArtifactKey artifactKey = new MavenArtifactKey(project.getGroupId(), project.getArtifactId());
-            addArtifact(exportVersions, artifactKey, project.getVersion(), "artifact");
+            addArtifact(exportVersions, artifactKey, project.getVersion(), MavenScopes.ARTIFACT);
 
             log.debug("Collected project : " + project);
             List<Dependency> dependencies = project.getDependencies();
             for (Dependency dependency : dependencies) {
-                MavenArtifactKey dependencyKey = toMavenDependency(dependency);
+                MavenArtifactKey dependencyKey = MavenHelper.toMavenDependency(dependency);
                 if (dependencyFilter.matches(dependencyKey)) {
                     log.debug("    dependency: " + dependency);
-                    addArtifact(exportVersions, dependencyKey, dependency.getVersion(), "dependency");
+                    addArtifact(exportVersions, dependencyKey, dependency.getVersion(), MavenScopes.DEPENDENCY);
                 }
             }
+
+            // TODO we don't add the plugins!
         }
 
         destFile.getParentFile().mkdirs();
@@ -123,14 +128,6 @@ public class ExportVersionsMojo extends AbstractMojo {
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to write to " + destFile + ". " + e, e);
         }
-    }
-
-    protected static void addArtifact(Map<MavenArtifactKey, MavenArtifactVersionChange> exportVersions, MavenArtifactKey artifactKey, String version, String scope) {
-        exportVersions.put(artifactKey, new MavenArtifactVersionChange(artifactKey, version, scope));
-    }
-
-    protected static MavenArtifactKey toMavenDependency(Dependency dependency) {
-        return new MavenArtifactKey(dependency.getGroupId(), dependency.getArtifactId());
     }
 
 
