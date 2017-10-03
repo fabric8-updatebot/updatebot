@@ -24,6 +24,7 @@ import org.kohsuke.github.AbuseLimitHandler;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.RateLimitHandler;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -226,5 +227,31 @@ public class Configuration {
 
     public void setPrintStream(PrintStream printStream) {
         this.printStream = printStream;
+    }
+
+
+    public void info(Logger log, String message) {
+        if (printStream != null) {
+            printStream.println(message);
+        } else {
+            log.info(message);
+        }
+    }
+
+    public void warn(Logger log, String message) {
+        if (printStream != null) {
+            printStream.println("WARNING: "+ message);
+        } else {
+            log.warn(message);
+        }
+    }
+
+    public void warn(Logger log, String message, Throwable e) {
+        if (printStream != null) {
+            printStream.println("WARNING: "+ message + " " + e);
+            e.printStackTrace(printStream);
+        } else {
+            log.warn(message, e);
+        }
     }
 }

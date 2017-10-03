@@ -65,7 +65,7 @@ public class Repositories {
                 if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
                     if (!configuration.isPullDisabled()) {
                         LOG.debug("Pulling: " + dir + " repo: " + repository.getCloneUrl());
-                        ProcessHelper.runCommandIgnoreOutput(dir, "git", "pull");
+                        ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "pull");
                     }
                 }
             }
@@ -73,8 +73,8 @@ public class Repositories {
             File parentDir = dir.getParentFile();
             parentDir.mkdirs();
 
-            LOG.info("Cloning: " + repository.getFullName() + " to " + FileHelper.getRelativePathToCurrentDir(dir));
-            ProcessHelper.runCommand(parentDir, "git", "clone", repository.getCloneUrl(), dir.getName());
+            configuration.info(LOG, "Cloning: " + repository.getFullName() + " to " + FileHelper.getRelativePathToCurrentDir(dir));
+            ProcessHelper.runCommandAndLogOutput(configuration, LOG, parentDir, "git", "clone", repository.getCloneUrl(), dir.getName());
         }
     }
 

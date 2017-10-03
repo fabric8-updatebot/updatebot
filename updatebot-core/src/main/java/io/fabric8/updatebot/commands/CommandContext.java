@@ -241,30 +241,14 @@ public class CommandContext {
     }
 
     public void info(Logger log, String message) {
-        PrintStream out = getConfiguration().getPrintStream();
-        if (out != null) {
-            out.println(message);
-        } else {
-            log.info(message);
-        }
+        getConfiguration().info(log, message);
     }
 
     public void warn(Logger log, String message) {
-        PrintStream out = getConfiguration().getPrintStream();
-        if (out != null) {
-            out.println("WARNING: "+ message);
-        } else {
-            log.warn(message);
-        }
+        getConfiguration().warn(log, message);
     }
 
     public void warn(Logger log, String message, Throwable e) {
-        PrintStream out = getConfiguration().getPrintStream();
-        if (out != null) {
-            out.println("WARNING: "+ message + " " + e);
-            e.printStackTrace(out);
-        } else {
-            log.warn(message, e);
-        }
+        getConfiguration().warn(log, message, e);
     }
 }

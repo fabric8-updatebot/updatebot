@@ -30,14 +30,14 @@ public class DefaultNpmDependencyTreeGenerator implements NpmDependencyTreeGener
     @Override
     public void generateDependencyTree(CommandContext context, String dependencyFileName) {
         File dir = context.getDir();
-        LOG.info("Generating dependency tree file " + dependencyFileName + " in " + dir);
+        context.info(LOG, "Generating dependency tree file " + dependencyFileName + " in " + dir);
 
         ProcessHelper.runCommandIgnoreOutput(dir, "npm", "install");
 
         File outputFile = new File(dir, dependencyFileName);
         File errorFile = new File(dir, "npm-list-errors.log");
         if (ProcessHelper.runCommand(dir, outputFile, errorFile, "npm", "list", "-json") != 0) {
-            LOG.warn("Failed to generate dependencies file " + outputFile);
+            context.warn(LOG, "Failed to generate dependencies file " + outputFile);
         } else {
             LOG.debug("Generate dependencies file " + outputFile);
         }

@@ -108,7 +108,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             //String head = getGithubUsername() + ":" + localBranch;
             String head = localBranch;
 
-            if (ProcessHelper.runCommand(dir, "git", "push", "-f", "origin", localBranch) != 0) {
+            if (!ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "push", "-f", "origin", localBranch)) {
                 context.warn(LOG, "Failed to push branch " + localBranch + " for " + context.getCloneUrl());
                 return;
             }
@@ -149,7 +149,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
 
             doCommit(context, dir, localBranch);
 
-            if (ProcessHelper.runCommand(dir, "git", "push", "-f", "origin", localBranch + ":" + remoteRef) != 0) {
+            if (!ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "push", "-f", "origin", localBranch + ":" + remoteRef)) {
                 context.warn(LOG, "Failed to push branch " + localBranch + " to existing github branch " + remoteRef + " for " + pullRequest.getHtmlUrl());
             }
             context.info(LOG, "Updated PR " + pullRequest.getHtmlUrl());
