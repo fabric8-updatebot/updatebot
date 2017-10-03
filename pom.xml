@@ -27,7 +27,7 @@
 
   <groupId>io.fabric8.updatebot</groupId>
   <artifactId>parent</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.7</version>
   <packaging>pom</packaging>
   <name>updatebot</name>
 
