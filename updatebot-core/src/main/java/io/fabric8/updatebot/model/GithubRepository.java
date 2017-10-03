@@ -35,7 +35,7 @@ public class GithubRepository extends GitRepository {
         setCloneUrl(repository.getGitTransportUrl());
     }
 
-    public GithubRepository(GHRepository ghRepository, GitHubRepositoryDetails details) {
+    public GithubRepository(GHRepository ghRepository, GitRepositoryConfig details) {
         this(ghRepository);
         setRepositoryDetails(details);
     }

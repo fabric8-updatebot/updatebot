@@ -1,0 +1,7 @@
+github:
+  organisations:
+  - name: jstrachan
+    repositories:
+    - name: updatebot
+    - name: updatebot-plugin
+

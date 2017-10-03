@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class GithubOrganisation extends FilterSupport {
     private String name;
-    private List<GitHubRepositoryDetails> repositories = new ArrayList<>();
+    private List<GitRepositoryConfig> repositories = new ArrayList<>();
 
     public String getName() {
         return name;
@@ -35,16 +35,16 @@ public class GithubOrganisation extends FilterSupport {
         this.name = name;
     }
 
-    public List<GitHubRepositoryDetails> getRepositories() {
+    public List<GitRepositoryConfig> getRepositories() {
         return repositories;
     }
 
-    public void setRepositories(List<GitHubRepositoryDetails> repositories) {
+    public void setRepositories(List<GitRepositoryConfig> repositories) {
         this.repositories = repositories;
     }
 
-    public GitHubRepositoryDetails getRepositoryDetails(String cloneUrl) {
-        for (GitHubRepositoryDetails repository : repositories) {
+    public GitRepositoryConfig getRepositoryDetails(String cloneUrl) {
+        for (GitRepositoryConfig repository : repositories) {
             if (hasCloneUrl(repository, cloneUrl)) {
                 return repository;
             }
@@ -52,7 +52,7 @@ public class GithubOrganisation extends FilterSupport {
         return null;
     }
 
-    protected boolean hasCloneUrl(GitHubRepositoryDetails repository, String cloneUrl) {
+    protected boolean hasCloneUrl(GitRepositoryConfig repository, String cloneUrl) {
         List<String> gitUrls = GitHelper.getGitHubCloneUrls("github.com", getName(), repository.getName());
         return Strings.equalAnyValue(cloneUrl, gitUrls);
     }

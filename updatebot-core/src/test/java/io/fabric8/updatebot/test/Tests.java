@@ -17,9 +17,9 @@ package io.fabric8.updatebot.test;
 
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.model.GitHubProjects;
-import io.fabric8.updatebot.model.GitHubRepositoryDetails;
+import io.fabric8.updatebot.model.GitRepositoryConfig;
 import io.fabric8.updatebot.model.GithubOrganisation;
-import io.fabric8.updatebot.model.Projects;
+import io.fabric8.updatebot.model.RepositoryConfig;
 import io.fabric8.updatebot.support.MarkupHelper;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Files;
@@ -99,7 +99,12 @@ public class Tests {
     public static String getCleanWorkDir(Class<?> clazz) {
         File testDataDir = getTestDataDir(clazz);
         System.out.println("Using workDir: " + testDataDir);
-        Files.recursiveDelete(testDataDir);
+        String property = System.getProperty("updatebot.preserve.testdir", "false");
+        if (property.equals("true")) {
+            LOG.info("Preserving contents of " + testDataDir + " to speed up test");
+        } else {
+            Files.recursiveDelete(testDataDir);
+        }
         return testDataDir.getPath();
     }
 
@@ -115,21 +120,21 @@ public class Tests {
         return false;
     }
 
-    public static Projects assertLoadProjects(File config) throws IOException {
-        Projects projects = MarkupHelper.loadYaml(config, Projects.class);
-        assertThat(projects).describedAs("projects").isNotNull();
-        return projects;
+    public static RepositoryConfig assertLoadProjects(File config) throws IOException {
+        RepositoryConfig repositoryConfig = MarkupHelper.loadYaml(config, RepositoryConfig.class);
+        assertThat(repositoryConfig).describedAs("projects").isNotNull();
+        return repositoryConfig;
     }
 
-    public static GitHubRepositoryDetails assertGithubRepositoryFindByName(Projects projects, String repoName) {
-        GitHubProjects github = projects.getGithub();
+    public static GitRepositoryConfig assertGithubRepositoryFindByName(RepositoryConfig repositoryConfig, String repoName) {
+        GitHubProjects github = repositoryConfig.getGithub();
         assertThat(github).describedAs("github").isNotNull();
 
         List<GithubOrganisation> organisations = github.getOrganisations();
         assertThat(organisations).describedAs("github organisations").isNotNull();
         for (GithubOrganisation organisation : organisations) {
-            List<GitHubRepositoryDetails> repositories = organisation.getRepositories();
-            for (GitHubRepositoryDetails repository : repositories) {
+            List<GitRepositoryConfig> repositories = organisation.getRepositories();
+            for (GitRepositoryConfig repository : repositories) {
                 if (repoName.equals(repository.getName())) {
                     return repository;
                 }

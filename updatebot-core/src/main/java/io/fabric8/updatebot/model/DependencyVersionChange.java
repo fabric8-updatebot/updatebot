@@ -18,7 +18,10 @@ package io.fabric8.updatebot.model;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.utils.Objects;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -60,6 +63,23 @@ public class DependencyVersionChange {
         return list.stream().filter(d -> kind.equals(d.getKind())).collect(Collectors.toList());
     }
 
+    /**
+     * Returns the dependency version changes by kind
+     */
+    public static Map<Kind, List<DependencyVersionChange>> byKind(List<DependencyVersionChange> list) {
+        Map<Kind, List<DependencyVersionChange>> answer = new LinkedHashMap<>();
+        for (DependencyVersionChange change : list) {
+            Kind key = change.getKind();
+            List<DependencyVersionChange> changes = answer.get(key);
+            if (changes == null) {
+                changes = new ArrayList<>();
+                answer.put(key, changes);
+            }
+            changes.add(change);
+        }
+        return answer;
+    }
+
     @Override
     public String toString() {
         return "DependencyVersionChange{" +
@@ -99,6 +119,20 @@ public class DependencyVersionChange {
         return Objects.equal(this.kind, that.kind) && Objects.equal(this.dependency, that.dependency);
     }
 
+    /**
+     * Returns true if this change matches the given artifact key
+     */
+    public boolean matches(String groupId, String artifactId) {
+        return matches(new MavenArtifactKey(groupId, artifactId));
+    }
+
+    /**
+     * Returns true if this change matches the given artifact key
+     */
+    public boolean matches(MavenArtifactKey artifactKey) {
+        return Objects.equal(this.dependency, artifactKey.toString());
+    }
+
     public Kind getKind() {
         return kind;
     }
@@ -114,4 +148,5 @@ public class DependencyVersionChange {
     public String getScope() {
         return scope;
     }
+
 }

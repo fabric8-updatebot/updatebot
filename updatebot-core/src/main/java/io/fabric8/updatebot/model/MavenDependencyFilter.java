@@ -52,10 +52,10 @@ public class MavenDependencyFilter {
         return FilterHelpers.and(includeFilter, excludeFilter);
     }
 
-    public static Filter<MavenDependency> createFilter(List<MavenDependencyFilter> dependencies) {
-        List<Filter<MavenDependency>> filters = new ArrayList<>();
+    public static Filter<MavenArtifactKey> createFilter(List<MavenDependencyFilter> dependencies) {
+        List<Filter<MavenArtifactKey>> filters = new ArrayList<>();
         for (MavenDependencyFilter dependency : dependencies) {
-            Filter<MavenDependency> filter = dependency.createFilter();
+            Filter<MavenArtifactKey> filter = dependency.createFilter();
             filters.add(filter);
         }
         if (filters.isEmpty()) {
@@ -97,12 +97,12 @@ public class MavenDependencyFilter {
         this.artifactExclude = artifactExclude;
     }
 
-    public Filter<MavenDependency> createFilter() {
+    public Filter<MavenArtifactKey> createFilter() {
         final Filter<String> groupFilter = createStringFilter(groupInclude, groupExclude);
         final Filter<String> artifactFilter = createStringFilter(artifactInclude, artifactExclude);
 
         final MavenDependencyFilter that = this;
-        return new Filter<MavenDependency>() {
+        return new Filter<MavenArtifactKey>() {
 
             @Override
             public String toString() {
@@ -110,8 +110,8 @@ public class MavenDependencyFilter {
             }
 
             @Override
-            public boolean matches(MavenDependency mavenDependency) {
-                return groupFilter.matches(mavenDependency.getGroupId()) && artifactFilter.matches(mavenDependency.getArtifactId());
+            public boolean matches(MavenArtifactKey mavenArtifactKey) {
+                return groupFilter.matches(mavenArtifactKey.getGroupId()) && artifactFilter.matches(mavenArtifactKey.getArtifactId());
             }
         };
     }

@@ -15,11 +15,21 @@
  */
 package io.fabric8.updatebot.model;
 
+import io.fabric8.updatebot.support.Strings;
+
 /**
  */
 public class Dependencies {
     private NpmDependencies npm;
     private MavenDependencies maven;
+
+    @Override
+    public String toString() {
+        String mavenText = "maven=" + maven;
+        String npmText = "npm=" + npm;
+        return "Dependencies{" +
+                Strings.joinNotEmpty(", ", mavenText, npmText) + '}';
+    }
 
     public NpmDependencies getNpm() {
         return npm;
@@ -28,7 +38,6 @@ public class Dependencies {
     public void setNpm(NpmDependencies npm) {
         this.npm = npm;
     }
-
 
     public MavenDependencies getMaven() {
         return maven;

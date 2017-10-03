@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  */
-public class Projects {
+public class RepositoryConfig {
     private GitHubProjects github;
     private List<GitRepository> git = new ArrayList<>();
 
@@ -43,8 +43,8 @@ public class Projects {
     }
 
 
-    public GitHubRepositoryDetails getRepositoryDetails(String cloneUrl) {
-        GitHubRepositoryDetails answer = github.getRepositoryDetails(cloneUrl);
+    public GitRepositoryConfig getRepositoryDetails(String cloneUrl) {
+        GitRepositoryConfig answer = github.getRepositoryDetails(cloneUrl);
         if (answer == null) {
             for (GitRepository gitRepository : git) {
                 if (Objects.equal(cloneUrl, gitRepository.getCloneUrl())) {

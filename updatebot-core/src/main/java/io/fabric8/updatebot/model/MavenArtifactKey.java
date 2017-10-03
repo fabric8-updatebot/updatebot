@@ -17,11 +17,11 @@ package io.fabric8.updatebot.model;
 
 /**
  */
-public class MavenDependency {
+public class MavenArtifactKey implements Comparable<MavenArtifactKey> {
     private final String groupId;
     private final String artifactId;
 
-    public MavenDependency(String groupId, String artifactId) {
+    public MavenArtifactKey(String groupId, String artifactId) {
         this.groupId = groupId;
         this.artifactId = artifactId;
     }
@@ -29,17 +29,44 @@ public class MavenDependency {
     /**
      * Returns a maven dependency from the given string using <code>:</code> to separate the group id and artifact
      */
-    public static MavenDependency fromString(String value) {
+    public static MavenArtifactKey fromString(String value) {
         int idx = value.indexOf(':');
         if (idx < 0) {
             throw new IllegalArgumentException("No `:` character in the maven dependency: " + value);
         }
-        return new MavenDependency(value.substring(0, idx), value.substring(idx + 1));
+        return new MavenArtifactKey(value.substring(0, idx), value.substring(idx + 1));
     }
 
     @Override
     public String toString() {
         return groupId + ":" + artifactId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MavenArtifactKey that = (MavenArtifactKey) o;
+
+        if (!groupId.equals(that.groupId)) return false;
+        return artifactId.equals(that.artifactId);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = groupId.hashCode();
+        result = 31 * result + artifactId.hashCode();
+        return result;
+    }
+
+    @Override
+    public int compareTo(MavenArtifactKey that) {
+        int answer = this.groupId.compareTo(that.groupId);
+        if (answer == 0) {
+            answer = this.artifactId.compareTo(that.artifactId);
+        }
+        return answer;
     }
 
     public String getGroupId() {

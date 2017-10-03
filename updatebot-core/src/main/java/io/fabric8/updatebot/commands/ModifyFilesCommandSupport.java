@@ -24,8 +24,8 @@ import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.kind.KindDependenciesCheck;
 import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.model.DependencyVersionChange;
-import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.GitHelper;
+import io.fabric8.updatebot.support.ProcessHelper;
 import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHCommitPointer;
 import org.kohsuke.github.GHIssue;
@@ -94,7 +94,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
         String title = context.createPullRequestTitle();
         String remoteURL = "git@github.com:" + ghRepository.getOwnerName() + "/" + ghRepository.getName();
         File dir = context.getDir();
-        if (Commands.runCommandIgnoreOutput(dir, "git", "remote", "set-url", "origin", remoteURL) != 0) {
+        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "remote", "set-url", "origin", remoteURL) != 0) {
             LOG.warn("Could not set the remote URL of " + remoteURL);
         }
 
@@ -108,7 +108,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             //String head = getGithubUsername() + ":" + localBranch;
             String head = localBranch;
 
-            if (Commands.runCommand(dir, "git", "push", "-f", "origin", localBranch) != 0) {
+            if (ProcessHelper.runCommand(dir, "git", "push", "-f", "origin", localBranch) != 0) {
                 LOG.warn("Failed to push branch " + localBranch + " for " + context.getCloneUrl());
                 return;
             }
@@ -145,11 +145,11 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             String localBranch = remoteRef;
 
             // lets remove any local branches of this name
-            Commands.runCommandIgnoreOutput(dir, "git", "branch", "-D", localBranch);
+            ProcessHelper.runCommandIgnoreOutput(dir, "git", "branch", "-D", localBranch);
 
             doCommit(context, dir, localBranch);
 
-            if (Commands.runCommand(dir, "git", "push", "-f", "origin", localBranch + ":" + remoteRef) != 0) {
+            if (ProcessHelper.runCommand(dir, "git", "push", "-f", "origin", localBranch + ":" + remoteRef) != 0) {
                 LOG.warn("Failed to push branch " + localBranch + " to existing github branch " + remoteRef + " for " + pullRequest.getHtmlUrl());
             }
             LOG.info("Updated PR " + pullRequest.getHtmlUrl());
@@ -184,7 +184,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
 
     private boolean doCommit(CommandContext context, File dir, String branch) {
         String commitComment = context.createCommit();
-        if (Commands.runCommandIgnoreOutput(dir, "git", "checkout", "-b", branch) == 0) {
+        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "checkout", "-b", branch) == 0) {
             return GitHelper.gitAddAndCommit(dir, commitComment);
         }
         return false;
@@ -208,26 +208,17 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
 
     protected boolean pushVersionChangesWithoutChecks(CommandContext parentContext, List<DependencyVersionChange> steps) throws IOException {
         boolean answer = false;
-        for (DependencyVersionChange step : steps) {
-            if (pushSingleVersionChangeWithoutChecks(parentContext, step)) {
+        Map<Kind, List<DependencyVersionChange>> map = DependencyVersionChange.byKind(steps);
+        for (Map.Entry<Kind, List<DependencyVersionChange>> entry : map.entrySet()) {
+            Kind kind = entry.getKey();
+            List<DependencyVersionChange> changes = entry.getValue();
+            Updater updater = kind.getUpdater();
+            // lets reuse the parent context for title etc?
+            if (updater.pushVersions(parentContext, changes)) {
                 answer = true;
             }
         }
         return answer;
-    }
-
-    protected boolean pushSingleVersionChangeWithoutChecks(CommandContext parentContext, DependencyVersionChange step) throws IOException {
-        Kind kind = step.getKind();
-        Updater updater = kind.getUpdater();
-        PushVersionChangesContext context = new PushVersionChangesContext(parentContext, step);
-        if (updater.isApplicable(context)) {
-            boolean updated = updater.pushVersions(context);
-            if (!updated) {
-                parentContext.removeChild(context);
-            }
-            return updated;
-        }
-        return false;
     }
 
     protected boolean pushVersionsWithChecks(CommandContext context, List<DependencyVersionChange> originalSteps) throws IOException {

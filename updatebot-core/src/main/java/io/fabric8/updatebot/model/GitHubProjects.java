@@ -30,10 +30,10 @@ public class GitHubProjects extends DtoSupport {
         this.organisations = organisations;
     }
 
-    public GitHubRepositoryDetails getRepositoryDetails(String cloneUrl) {
+    public GitRepositoryConfig getRepositoryDetails(String cloneUrl) {
         if (organisations != null) {
             for (GithubOrganisation organisation : organisations) {
-                GitHubRepositoryDetails answer = organisation.getRepositoryDetails(cloneUrl);
+                GitRepositoryConfig answer = organisation.getRepositoryDetails(cloneUrl);
                 if (answer != null) {
                     return answer;
                 }

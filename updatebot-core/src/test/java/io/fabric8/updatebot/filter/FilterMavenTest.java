@@ -16,11 +16,11 @@
 package io.fabric8.updatebot.filter;
 
 import io.fabric8.updatebot.model.Dependencies;
-import io.fabric8.updatebot.model.GitHubRepositoryDetails;
+import io.fabric8.updatebot.model.GitRepositoryConfig;
+import io.fabric8.updatebot.model.MavenArtifactKey;
 import io.fabric8.updatebot.model.MavenDependencies;
-import io.fabric8.updatebot.model.MavenDependency;
 import io.fabric8.updatebot.model.MavenDependencyFilter;
-import io.fabric8.updatebot.model.Projects;
+import io.fabric8.updatebot.model.RepositoryConfig;
 import io.fabric8.updatebot.test.Tests;
 import io.fabric8.utils.Filter;
 import org.junit.Test;
@@ -39,13 +39,13 @@ public class FilterMavenTest {
         File config = Tests.testFile(Tests.getBasedir(), "src/test/resources/maven/filter/updatebot.yml");
 
 
-        Projects projects = Tests.assertLoadProjects(config);
+        RepositoryConfig repositoryConfig = Tests.assertLoadProjects(config);
 
         String cloneUrl = "https://github.com/jstrachan-testing/updatebot.git";
-        GitHubRepositoryDetails updateBotDetails = projects.getRepositoryDetails(cloneUrl);
+        GitRepositoryConfig updateBotDetails = repositoryConfig.getRepositoryDetails(cloneUrl);
         assertThat(updateBotDetails).describedAs("Should have found project details from cloneUrl " + cloneUrl).isNotNull();
 
-        GitHubRepositoryDetails repository = Tests.assertGithubRepositoryFindByName(projects, "updatebot");
+        GitRepositoryConfig repository = Tests.assertGithubRepositoryFindByName(repositoryConfig, "updatebot");
 
         Dependencies push = repository.getPush();
         assertThat(push).describedAs("push configuration for " + repository).isNotNull();
@@ -62,9 +62,9 @@ public class FilterMavenTest {
     }
 
     private void assertFilterDependency(boolean expected, List<MavenDependencyFilter> dependencies, String... values) {
-        Filter<MavenDependency> filter = MavenDependencyFilter.createFilter(dependencies);
+        Filter<MavenArtifactKey> filter = MavenDependencyFilter.createFilter(dependencies);
         for (String value : values) {
-            MavenDependency dependency = MavenDependency.fromString(value);
+            MavenArtifactKey dependency = MavenArtifactKey.fromString(value);
             boolean actual = filter.matches(dependency);
             assertThat(actual).
                     describedAs("Dependency " + dependency + " with Filter " + filter + " from  " + dependencies).

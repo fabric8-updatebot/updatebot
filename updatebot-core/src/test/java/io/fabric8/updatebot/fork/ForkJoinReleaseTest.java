@@ -22,7 +22,6 @@ import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.github.Issues;
 import io.fabric8.updatebot.github.PullRequests;
 import io.fabric8.updatebot.repository.LocalRepository;
-import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.test.GithubAssertions;
 import io.fabric8.updatebot.test.NpmTests;
@@ -148,7 +147,7 @@ public class ForkJoinReleaseTest {
     }
 
     protected LocalRepository assertLocalRepository(String repoName) {
-        LocalRepository repository = Repositories.findRepository(localRepositories, repoName);
+        LocalRepository repository = LocalRepository.findRepository(localRepositories, repoName);
         assertThat(repository).describedAs("Could not find LocalRepository for name: " + repoName).isNotNull();
         return repository;
     }

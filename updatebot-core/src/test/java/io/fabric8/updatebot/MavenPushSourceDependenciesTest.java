@@ -18,8 +18,9 @@ package io.fabric8.updatebot;
 
 import io.fabric8.updatebot.commands.PushSourceChanges;
 import io.fabric8.updatebot.github.GitHubHelpers;
+import io.fabric8.updatebot.model.GitRepositoryConfig;
+import io.fabric8.updatebot.model.RepositoryConfigs;
 import io.fabric8.updatebot.repository.LocalRepository;
-import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class MavenPushSourceDependenciesTest {
     protected PushSourceChanges pushSourceChanges = new PushSourceChanges();
     protected List<LocalRepository> localRepositories;
     protected Configuration configuration = new Configuration();
-    protected String sourceRepoName = "updatebot";
+    protected String sourceRepoName = "kubernetes-client";
 
     @Before
     public void init() throws IOException {
@@ -50,17 +51,27 @@ public class MavenPushSourceDependenciesTest {
         configuration.setConfigFile(configFile);
         configuration.setWorkDir(workDirPath);
 
-        localRepositories = pushSourceChanges.cloneOrPullRepositories(configuration);
+        if (System.getProperty("updatebot.disable.pull", "false").equals("true")) {
+            LOG.info("Disabling pull to speed up tests");
+            configuration.setPullDisabled(true);
+        }
+        if (Tests.canTestWithGithubAPI(configuration)) {
 
-        LocalRepository sourceRepo = Repositories.findRepository(localRepositories, sourceRepoName);
-        assertThat(sourceRepo).describedAs("Could not find repository with name: " + sourceRepoName).isNotNull();
+            localRepositories = pushSourceChanges.cloneOrPullRepositories(configuration);
 
-        // lets find the cloned repo...
-        configuration.setSourceDir(sourceRepo.getDir());
+            LocalRepository sourceRepo = LocalRepository.findRepository(localRepositories, sourceRepoName);
+            assertThat(sourceRepo).describedAs("Could not find repository with name: " + sourceRepoName).isNotNull();
 
-        // lets close all open PRs
-        GitHubHelpers.closeOpenUpdateBotIssuesAndPullRequests(configuration.getGithubPullRequestLabel(), localRepositories);
-        GitHubHelpers.deleteUpdateBotBranches(localRepositories);
+            GitRepositoryConfig sourceRepoDetails = RepositoryConfigs.getGitHubRepositoryDetails(pushSourceChanges.getRepositoryConfig(configuration), sourceRepo.getDir());
+            assertThat(sourceRepoDetails).describedAs("should have found git repo config").isNotNull();
+
+            // lets find the cloned repo...
+            configuration.setSourceDir(sourceRepo.getDir());
+
+            // lets close all open PRs
+            GitHubHelpers.closeOpenUpdateBotIssuesAndPullRequests(configuration.getGithubPullRequestLabel(), localRepositories);
+            GitHubHelpers.deleteUpdateBotBranches(localRepositories);
+        }
     }
 
     @Test

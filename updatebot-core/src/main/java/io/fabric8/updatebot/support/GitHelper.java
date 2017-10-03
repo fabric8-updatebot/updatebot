@@ -15,11 +15,14 @@
  */
 package io.fabric8.updatebot.support;
 
+import io.fabric8.utils.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +32,8 @@ public class GitHelper {
     private static final transient Logger LOG = LoggerFactory.getLogger(GitHelper.class);
 
     public static boolean gitAddAndCommit(File dir, String commitComment) {
-        if (Commands.runCommandIgnoreOutput(dir, "git", "add", "*") == 0) {
-            if (Commands.runCommand(dir, "git", "commit", "-m", commitComment) == 0) {
+        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "add", "*") == 0) {
+            if (ProcessHelper.runCommand(dir, "git", "commit", "-m", commitComment) == 0) {
                 return true;
             }
         }
@@ -38,8 +41,8 @@ public class GitHelper {
     }
 
     public static boolean gitStashAndCheckoutMaster(File dir) {
-        if (Commands.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
-            if (Commands.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
+        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
+            if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
                 return true;
             }
         }
@@ -48,7 +51,7 @@ public class GitHelper {
     }
 
     public static void revertChanges(File dir) throws IOException {
-        if (Commands.runCommandIgnoreOutput(dir, "git", "stash") != 0) {
+        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "stash") != 0) {
             throw new IOException("Failed to stash old changes!");
         }
     }
@@ -57,6 +60,7 @@ public class GitHelper {
         List<String> answer = new ArrayList<>();
         answer.add("https://" + gitHubHost + "/" + orgName + "/" + repository);
         answer.add("git@" + gitHubHost + ":" + orgName + "/" + repository);
+        answer.add("git://" + gitHubHost + "/" + orgName + "/" + repository);
 
         // now lets add the .git versions
         List<String> copy = new ArrayList<>(answer);
@@ -66,5 +70,67 @@ public class GitHelper {
             }
         }
         return answer;
+    }
+
+    /**
+     * Parses the git URL string and determines the host and organisation string
+     */
+    public static GitRepositoryInfo parseGitRepositoryInfo(String gitUrl) {
+        if (Strings.isNullOrBlank(gitUrl)) {
+            return null;
+        }
+        try {
+            URI url = new URI(gitUrl);
+            String host = url.getHost();
+            String userInfo = url.getUserInfo();
+            String path = url.getPath();
+            path = stripSlashesAndGit(path);
+            if (Strings.notEmpty(userInfo)) {
+                return new GitRepositoryInfo(host, userInfo, path);
+            } else {
+                if (Strings.notEmpty(path)) {
+                    String[] paths = path.split("/", 2);
+                    if (paths.length > 1) {
+                        return new GitRepositoryInfo(host, paths[0], paths[1]);
+                    }
+                }
+                return null;
+            }
+        } catch (URISyntaxException e) {
+            // ignore
+        }
+        String prefix = "git@";
+        if (gitUrl.startsWith(prefix)) {
+            String path = Strings.stripPrefix(gitUrl, prefix);
+            path = stripSlashesAndGit(path);
+            String[] paths = path.split(":|/", 3);
+            if (paths.length == 3) {
+                return new GitRepositoryInfo(paths[0], paths[1], paths[2]);
+            }
+        }
+        return null;
+    }
+
+    protected static String stripSlashesAndGit(String path) {
+        path = Strings.stripPrefix(path, "/");
+        path = Strings.stripPrefix(path, "/");
+        path = Strings.stripSuffix(path, "/");
+        path = Strings.stripSuffix(path, ".git");
+        return path;
+    }
+
+    /**
+     * Returns true if the given directory has modified files
+     */
+    public static boolean hasChangedFiles(File dir) {
+        try {
+            String output = ProcessHelper.runCommandCaptureOutput(dir, "git", "status", "-s");
+            if (output != null) {
+                output = output.trim();
+            }
+            return Strings.notEmpty(output);
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

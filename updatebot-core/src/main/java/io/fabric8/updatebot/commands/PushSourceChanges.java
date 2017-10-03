@@ -23,10 +23,9 @@ import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.kind.CompositeUpdater;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.DependencyVersionChange;
-import io.fabric8.updatebot.model.GitHubRepositoryDetails;
 import io.fabric8.updatebot.model.GitRepository;
+import io.fabric8.updatebot.model.GitRepositoryConfig;
 import io.fabric8.updatebot.repository.LocalRepository;
-import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Files;
 import io.fabric8.utils.GitHelpers;
@@ -77,7 +76,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
     protected String getOperationDescription(CommandContext context) {
         LocalRepository sourceRepository = getSourceRepository();
         if (sourceRepository != null) {
-            return "pushing versions from " + Repositories.getRepositoryLink(sourceRepository);
+            return "pushing versions from " + LocalRepository.getRepositoryLink(sourceRepository);
         }
         return super.getOperationDescription(context);
     }
@@ -89,7 +88,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
             LOG.debug("Ignoring repository " + repository.getCloneUrl() + " as this is the source repository!");
             return false;
         }
-        List<DependencyVersionChange> steps = loadPushVersionSteps(context);
+        List<DependencyVersionChange> steps = loadVersionChangesFromSource(context);
         String sourceFullName = getCloneUrl();
         LocalRepository sourceRepository = getSourceRepository();
         if (sourceRepository != null) {
@@ -155,7 +154,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
         return sourceRepository;
     }
 
-    protected List<DependencyVersionChange> loadPushVersionSteps(CommandContext context) throws IOException {
+    protected List<DependencyVersionChange> loadVersionChangesFromSource(CommandContext context) throws IOException {
         Configuration configuration = context.getConfiguration();
         List<DependencyVersionChange> list = new ArrayList<>();
         if (sourceRepository == null) {
@@ -167,7 +166,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
             LOG.warn("No git repo for " + sourceRepository + " " + context.getDir());
             return list;
         }
-        GitHubRepositoryDetails repositoryDetails = repo.getRepositoryDetails();
+        GitRepositoryConfig repositoryDetails = repo.getRepositoryDetails();
         Dependencies push = null;
         if (repositoryDetails == null) {
             LOG.debug("No push repository details found for repository " + sourceRepository);
@@ -180,7 +179,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
         }
         CommandContext sourceContext = new CommandContext(sourceRepository, configuration);
         CompositeUpdater updater = new CompositeUpdater();
-        updater.addPushVersionsSteps(sourceContext, push, list);
+        updater.addVersionChangesFromSource(sourceContext, push, list);
         return list;
     }
 
@@ -193,7 +192,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
 
     /**
      * Lets find the repository for the given directory so that we can extract any extra configuration like the
-     * {@link GitHubRepositoryDetails} for a local repository
+     * {@link GitRepositoryConfig} for a local repository
      *
      * @param configuration
      */

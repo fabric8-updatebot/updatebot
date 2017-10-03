@@ -22,16 +22,17 @@ import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.kind.KindDependenciesCheck;
 import io.fabric8.updatebot.kind.Updater;
+import io.fabric8.updatebot.kind.UpdaterSupport;
 import io.fabric8.updatebot.kind.npm.dependency.DependencyCheck;
 import io.fabric8.updatebot.kind.npm.dependency.DependencyTree;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.DependencySet;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.model.NpmDependencies;
-import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.support.JsonNodes;
 import io.fabric8.updatebot.support.MarkupHelper;
+import io.fabric8.updatebot.support.ProcessHelper;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Files;
 import io.fabric8.utils.Filter;
@@ -49,7 +50,7 @@ import java.util.TreeMap;
 
 /**
  */
-public class PackageJsonUpdater implements Updater {
+public class PackageJsonUpdater extends UpdaterSupport implements Updater {
 
     private static final transient Logger LOG = LoggerFactory.getLogger(PackageJsonUpdater.class);
 
@@ -79,12 +80,13 @@ public class PackageJsonUpdater implements Updater {
         return answer;
     }
 
+
     /**
      * Adds the list of possible dependency update steps from the given source context that we can then apply to
      * other repositories
      */
     @Override
-    public void addPushVersionsSteps(CommandContext context, Dependencies dependencyConfig, List<DependencyVersionChange> list) {
+    public void addVersionChangesFromSource(CommandContext context, Dependencies dependencyConfig, List<DependencyVersionChange> list) {
         NpmDependencies dependencies = dependencyConfig.getNpm();
         JsonNode tree = getPackageJsonTree(context);
         if (tree != null) {
@@ -197,7 +199,7 @@ public class PackageJsonUpdater implements Updater {
     @Override
     public boolean pullVersions(CommandContext context) throws IOException {
         File dir = context.getRepository().getDir();
-        int status = Commands.runCommand(dir, "ncu", "--upgrade");
+        int status = ProcessHelper.runCommand(dir, "ncu", "--upgrade");
         if (status == 0) {
             return true;
         }

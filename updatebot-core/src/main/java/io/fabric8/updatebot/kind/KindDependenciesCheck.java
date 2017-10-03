@@ -39,6 +39,12 @@ public class KindDependenciesCheck {
         this.failedChecks = new LinkedHashMap<>();
     }
 
+    public KindDependenciesCheck(List<DependencyVersionChange> validChanges) {
+        this.validChanges = validChanges;
+        this.invalidChanges = new ArrayList<>();
+        this.failedChecks = new LinkedHashMap<>();
+    }
+
     public KindDependenciesCheck(List<DependencyVersionChange> validChanges, List<DependencyVersionChange> invalidChanges, Map<String, DependencyCheck> failedChecks) {
         this.validChanges = validChanges;
         this.invalidChanges = invalidChanges;
