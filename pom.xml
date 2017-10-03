@@ -174,7 +174,6 @@
   </dependencyManagement>
 
   <modules>
-    <module>updatebot-logging</module>
     <module>updatebot-core</module>
     <module>updatebot-maven-plugin</module>
     <module>updatebot</module>

@@ -21,10 +21,8 @@ import java.io.PrintStream;
  * Replaces the simple logging configuration with a custom stream
  */
 public class UpdateBotLogConfiguration extends SimpleLoggerConfiguration {
-    private final PrintStream out;
-
     public UpdateBotLogConfiguration(PrintStream out) {
-        this.out = out;
+        PrintStreamHolder.setPrintStream(out);
     }
 
     public void init() {
@@ -32,7 +30,13 @@ public class UpdateBotLogConfiguration extends SimpleLoggerConfiguration {
         SimpleLogger.lazyInit();
         SimpleLogger.CONFIG_PARAMS = this;
         super.init();
-        this.outputChoice = new OutputChoice(out);
+        this.outputChoice = new OutputChoice(OutputChoice.OutputChoiceType.CACHED_SYS_ERR) {
+            @Override
+            PrintStream getTargetPrintStream() {
+                return PrintStreamHolder.getPrintStream();
+
+            }
+        };
         this.showThreadName = false;
     }
 }

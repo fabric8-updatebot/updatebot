@@ -100,7 +100,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
             stepDescription = " no changes found";
             LOG.debug(message + stepDescription);
         } else {
-            LOG.info(message + stepDescription);
+            context.info(LOG, message + stepDescription);
         }
         return pushVersionsWithChecks(context, steps);
     }
@@ -158,12 +158,12 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
         Configuration configuration = context.getConfiguration();
         List<DependencyVersionChange> list = new ArrayList<>();
         if (sourceRepository == null) {
-            LOG.warn("No source repository for " + context.getDir());
+            context.warn(LOG, "No source repository for " + context.getDir());
             return list;
         }
         GitRepository repo = sourceRepository.getRepo();
         if (repo == null) {
-            LOG.warn("No git repo for " + sourceRepository + " " + context.getDir());
+            context.warn(LOG, "No git repo for " + sourceRepository + " " + context.getDir());
             return list;
         }
         GitRepositoryConfig repositoryDetails = repo.getRepositoryDetails();

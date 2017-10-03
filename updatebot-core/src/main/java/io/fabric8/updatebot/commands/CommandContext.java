@@ -30,6 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -212,11 +214,9 @@ public class CommandContext {
     public Map<String, String> createStatusMap() {
         StringBuilder builder = new StringBuilder();
         String cloneUrl = getRepository().getCloneUrl();
-        builder.append(cloneUrl);
 
         Map<String, String> answer = new HashMap<>();
         if (status != null) {
-            builder.append(" ");
             builder.append(status);
             answer.put("status", status.toString().toLowerCase());
         }
@@ -235,9 +235,36 @@ public class CommandContext {
         String message = builder.toString();
         String oldMessage = getConfiguration().getPollStatusCache().put(cloneUrl, message);
         if (oldMessage == null && !Objects.equal(oldMessage, message)) {
-            LOG.info(message);
+            info(LOG, message);
         }
         return answer;
     }
 
+    public void info(Logger log, String message) {
+        PrintStream out = getConfiguration().getPrintStream();
+        if (out != null) {
+            out.println(message);
+        } else {
+            log.info(message);
+        }
+    }
+
+    public void warn(Logger log, String message) {
+        PrintStream out = getConfiguration().getPrintStream();
+        if (out != null) {
+            out.println("WARNING: "+ message);
+        } else {
+            log.warn(message);
+        }
+    }
+
+    public void warn(Logger log, String message, Throwable e) {
+        PrintStream out = getConfiguration().getPrintStream();
+        if (out != null) {
+            out.println("WARNING: "+ message + " " + e);
+            e.printStackTrace(out);
+        } else {
+            log.warn(message, e);
+        }
+    }
 }
