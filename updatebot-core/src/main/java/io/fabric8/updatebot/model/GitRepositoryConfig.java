@@ -16,17 +16,17 @@
 package io.fabric8.updatebot.model;
 
 /**
- * Represents a named repository inside an organisation along with any optional configuration
+ * Represents the configuration of a git repository
  */
-public class GitHubRepositoryDetails extends DtoSupport {
+public class GitRepositoryConfig extends DtoSupport {
     private String name;
     private Dependencies push;
     private Dependencies pull;
 
-    public GitHubRepositoryDetails() {
+    public GitRepositoryConfig() {
     }
 
-    public GitHubRepositoryDetails(String name) {
+    public GitRepositoryConfig(String name) {
         this.name = name;
     }
 

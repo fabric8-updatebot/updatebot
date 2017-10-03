@@ -18,8 +18,9 @@ package io.fabric8.updatebot;
 
 import io.fabric8.updatebot.commands.PushSourceChanges;
 import io.fabric8.updatebot.github.GitHubHelpers;
+import io.fabric8.updatebot.model.GitRepositoryConfig;
+import io.fabric8.updatebot.model.RepositoryConfigs;
 import io.fabric8.updatebot.repository.LocalRepository;
-import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,8 +53,11 @@ public class MavenPushSourceDependenciesTest {
 
         localRepositories = pushSourceChanges.cloneOrPullRepositories(configuration);
 
-        LocalRepository sourceRepo = Repositories.findRepository(localRepositories, sourceRepoName);
+        LocalRepository sourceRepo = LocalRepository.findRepository(localRepositories, sourceRepoName);
         assertThat(sourceRepo).describedAs("Could not find repository with name: " + sourceRepoName).isNotNull();
+
+        GitRepositoryConfig sourceRepoDetails = RepositoryConfigs.getGitHubRepositoryDetails(pushSourceChanges.getRepositoryConfig(configuration), sourceRepo.getDir());
+        assertThat(sourceRepoDetails).describedAs("should have found git repo config").isNotNull();
 
         // lets find the cloned repo...
         configuration.setSourceDir(sourceRepo.getDir());

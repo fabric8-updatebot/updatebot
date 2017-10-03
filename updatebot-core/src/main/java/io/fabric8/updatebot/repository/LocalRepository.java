@@ -16,8 +16,11 @@
 package io.fabric8.updatebot.repository;
 
 import io.fabric8.updatebot.model.GitRepository;
+import io.fabric8.updatebot.support.Strings;
+import io.fabric8.utils.Objects;
 
 import java.io.File;
+import java.util.List;
 
 /**
  */
@@ -35,6 +38,53 @@ public class LocalRepository {
      */
     public static LocalRepository fromDirectory(File dir) {
         return new LocalRepository(new GitRepository(dir.getName()), dir);
+    }
+
+    /**
+     * Returns the repository for the given name or null if it could not be found
+     */
+    public static LocalRepository findRepository(List<LocalRepository> localRepositories, String name) {
+        if (localRepositories != null) {
+            for (LocalRepository repository : localRepositories) {
+                GitRepository repo = repository.getRepo();
+                if (repo != null) {
+                    if (Objects.equal(name, repo.getName())) {
+                        return repository;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the link to the repository
+     */
+    public static String getRepositoryLink(LocalRepository repository) {
+        return getRepositoryLink(repository, repository.getFullName());
+    }
+
+    /**
+     * Returns the link to the repository
+     */
+    public static String getRepositoryLink(LocalRepository repository, String label) {
+        return getRepositoryLink(repository, label, "`" + label + "`");
+    }
+
+    /**
+     * Returns the link to the repository
+     */
+    public static String getRepositoryLink(LocalRepository repository, String label, String defaultValue) {
+        if (repository != null) {
+            String htmlUrl = repository.getRepo().getHtmlUrl();
+            if (Strings.notEmpty(htmlUrl)) {
+                return "[" + label + "](" + htmlUrl + ")";
+            }
+        }
+        if (Strings.notEmpty(defaultValue)) {
+            return defaultValue;
+        }
+        return label;
     }
 
     @Override

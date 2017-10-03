@@ -19,17 +19,15 @@ import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.commands.CommandSupport;
 import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.model.GitHubProjects;
-import io.fabric8.updatebot.model.GitHubRepositoryDetails;
+import io.fabric8.updatebot.model.GitRepositoryConfig;
 import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.GithubOrganisation;
 import io.fabric8.updatebot.model.GithubRepository;
-import io.fabric8.updatebot.model.Projects;
+import io.fabric8.updatebot.model.RepositoryConfig;
 import io.fabric8.updatebot.support.Commands;
 import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.support.Strings;
-import io.fabric8.utils.Files;
 import io.fabric8.utils.Filter;
-import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHPerson;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -37,11 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,8 +51,8 @@ public class Repositories {
     private static final transient Logger LOG = LoggerFactory.getLogger(Repositories.class);
 
 
-    public static List<LocalRepository> cloneOrPullRepositories(CommandSupport command, Configuration configuration, Projects projects) throws IOException {
-        List<LocalRepository> repositories = findRepositories(command, configuration, projects);
+    public static List<LocalRepository> cloneOrPullRepositories(CommandSupport command, Configuration configuration, RepositoryConfig repositoryConfig) throws IOException {
+        List<LocalRepository> repositories = findRepositories(command, configuration, repositoryConfig);
         for (LocalRepository repository : repositories) {
             cloneOrPull(configuration, repository);
         }
@@ -86,7 +80,7 @@ public class Repositories {
         }
     }
 
-    protected static List<LocalRepository> findRepositories(CommandSupport updateBot, Configuration configuration, Projects projects) throws IOException {
+    protected static List<LocalRepository> findRepositories(CommandSupport updateBot, Configuration configuration, RepositoryConfig repositoryConfig) throws IOException {
         String workDirPath = configuration.getWorkDir();
         File workDir = new File(workDirPath);
         if (!workDir.isAbsolute()) {
@@ -101,7 +95,7 @@ public class Repositories {
         File gitHubDir = new File(workDir, "github");
         File gitDir = new File(workDir, "git");
 
-        GitHubProjects githubProjects = projects.getGithub();
+        GitHubProjects githubProjects = repositoryConfig.getGithub();
         if (githubProjects != null) {
             List<GithubOrganisation> organisations = githubProjects.getOrganisations();
             if (organisations != null && !organisations.isEmpty()) {
@@ -111,7 +105,7 @@ public class Repositories {
                 }
             }
         }
-        List<GitRepository> gitRepositories = projects.getGit();
+        List<GitRepository> gitRepositories = repositoryConfig.getGit();
         if (gitRepositories != null) {
             for (GitRepository gitRepository : gitRepositories) {
                 addRepository(map, gitDir, gitRepository);
@@ -133,9 +127,9 @@ public class Repositories {
         if (person != null) {
             try {
                 Set<String> foundNames = new TreeSet<>();
-                List<GitHubRepositoryDetails> namedRepositories = organisation.getRepositories();
+                List<GitRepositoryConfig> namedRepositories = organisation.getRepositories();
                 if (namedRepositories != null) {
-                    for (GitHubRepositoryDetails namedRepository : namedRepositories) {
+                    for (GitRepositoryConfig namedRepository : namedRepositories) {
                         String name = namedRepository.getName();
                         if (Strings.notEmpty(name) && foundNames.add(name)) {
                             GHRepository ghRepository = null;
@@ -168,80 +162,5 @@ public class Repositories {
         }
     }
 
-    /**
-     * Returns the repository for the given name or null if it could not be found
-     */
-    public static LocalRepository findRepository(List<LocalRepository> localRepositories, String name) {
-        if (localRepositories != null) {
-            for (LocalRepository repository : localRepositories) {
-                GitRepository repo = repository.getRepo();
-                if (repo != null) {
-                    if (Objects.equal(name, repo.getName())) {
-                        return repository;
-                    }
-                }
-            }
-        }
-        return null;
-    }
 
-
-    /**
-     * Returns the link to the repository
-     */
-    public static String getRepositoryLink(LocalRepository repository) {
-        return getRepositoryLink(repository, repository.getFullName());
-    }
-
-    /**
-     * Returns the link to the repository
-     */
-    public static String getRepositoryLink(LocalRepository repository, String label) {
-        return getRepositoryLink(repository, label, "`" + label + "`");
-    }
-
-    /**
-     * Returns the link to the repository
-     */
-    public static String getRepositoryLink(LocalRepository repository, String label, String defaultValue) {
-        if (repository != null) {
-            String htmlUrl = repository.getRepo().getHtmlUrl();
-            if (Strings.notEmpty(htmlUrl)) {
-                return "[" + label + "](" + htmlUrl + ")";
-            }
-        }
-        if (Strings.notEmpty(defaultValue)) {
-            return defaultValue;
-        }
-        return label;
-    }
-
-    /**
-     * Returns the UpdateBot project configurations from the given configFile (File or URL) and source directory
-     */
-    public static Projects loadProjects(String configFile, File sourceDir) throws IOException {
-        File file = new File(configFile);
-        if (Files.isDirectory(sourceDir) && !file.isAbsolute()) {
-            file = new File(sourceDir, configFile);
-        }
-        if (!Files.isFile(file)) {
-            URL url = null;
-            try {
-                url = new URL(configFile);
-                InputStream in = null;
-                try {
-                    in = url.openStream();
-                } catch (IOException e) {
-                    throw new IOException("Failed to open URL " + configFile + ". " + e, e);
-                }
-                if (in != null) {
-                    return loadYaml(in, Projects.class);
-                }
-            } catch (MalformedURLException e) {
-                // ignore
-            }
-            throw new FileNotFoundException(file.getCanonicalPath());
-        }
-        return loadYaml(file, Projects.class);
-    }
 }

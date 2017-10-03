@@ -15,11 +15,14 @@
  */
 package io.fabric8.updatebot.support;
 
+import io.fabric8.utils.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +60,7 @@ public class GitHelper {
         List<String> answer = new ArrayList<>();
         answer.add("https://" + gitHubHost + "/" + orgName + "/" + repository);
         answer.add("git@" + gitHubHost + ":" + orgName + "/" + repository);
+        answer.add("git://" + gitHubHost + "/" + orgName + "/" + repository);
 
         // now lets add the .git versions
         List<String> copy = new ArrayList<>(answer);
@@ -66,5 +70,52 @@ public class GitHelper {
             }
         }
         return answer;
+    }
+
+    /**
+     * Parses the git URL string and determines the host and organisation string
+     */
+    public static GitRepositoryInfo parseGitRepositoryInfo(String gitUrl) {
+        if (Strings.isNullOrBlank(gitUrl)) {
+            return null;
+        }
+        try {
+            URI url = new URI(gitUrl);
+            String host = url.getHost();
+            String userInfo = url.getUserInfo();
+            String path = url.getPath();
+            path = stripSlashesAndGit(path);
+            if (Strings.notEmpty(userInfo)) {
+                return new GitRepositoryInfo(host, userInfo, path);
+            } else {
+                if (Strings.notEmpty(path)) {
+                    String[] paths = path.split("/", 2);
+                    if (paths.length > 1) {
+                        return new GitRepositoryInfo(host, paths[0], paths[1]);
+                    }
+                }
+                return null;
+            }
+        } catch (URISyntaxException e) {
+            // ignore
+        }
+        String prefix = "git@";
+        if (gitUrl.startsWith(prefix)) {
+            String path = Strings.stripPrefix(gitUrl, prefix);
+            path = stripSlashesAndGit(path);
+            String[] paths = path.split(":|/", 3);
+            if (paths.length == 3) {
+                return new GitRepositoryInfo(paths[0], paths[1], paths[2]);
+            }
+        }
+        return null;
+    }
+
+    protected static String stripSlashesAndGit(String path) {
+        path = Strings.stripPrefix(path, "/");
+        path = Strings.stripPrefix(path, "/");
+        path = Strings.stripSuffix(path, "/");
+        path = Strings.stripSuffix(path, ".git");
+        return path;
     }
 }

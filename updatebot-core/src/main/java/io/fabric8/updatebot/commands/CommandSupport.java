@@ -19,7 +19,8 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.github.Issues;
-import io.fabric8.updatebot.model.Projects;
+import io.fabric8.updatebot.model.RepositoryConfig;
+import io.fabric8.updatebot.model.RepositoryConfigs;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.utils.Strings;
@@ -42,6 +43,7 @@ import static io.fabric8.updatebot.support.ReflectionHelper.getFieldValue;
  */
 public abstract class CommandSupport {
     private List<LocalRepository> localRepositories;
+    private RepositoryConfig repositoryConfig;
 
     public String createPullRequestComment() {
         StringBuilder builder = new StringBuilder(COMMAND_COMMENT_PREFIX);
@@ -131,19 +133,23 @@ public abstract class CommandSupport {
 
     public List<LocalRepository> getLocalRepositories(Configuration configuration) throws IOException {
         if (localRepositories == null) {
-            Projects projects = loadProjects(configuration);
-            this.localRepositories = Repositories.cloneOrPullRepositories(this, configuration, projects);
+            RepositoryConfig repositoryConfig = getRepositoryConfig(configuration);
+            this.localRepositories = Repositories.cloneOrPullRepositories(this, configuration, repositoryConfig);
         }
         return localRepositories;
     }
 
+    public RepositoryConfig getRepositoryConfig(Configuration configuration) throws IOException {
+        if (repositoryConfig == null) {
+            String configFile = configuration.getConfigFile();
+            File sourceDir = configuration.getSourceDir();
+            repositoryConfig = RepositoryConfigs.loadRepositoryConfig(configFile, sourceDir);
+        }
+        return repositoryConfig;
+    }
+
     // Properties
     //-------------------------------------------------------------------------
-    protected Projects loadProjects(Configuration configuration) throws IOException {
-        String configFile = configuration.getConfigFile();
-        File sourceDir = configuration.getSourceDir();
-        return Repositories.loadProjects(configFile, sourceDir);
-    }
 
     protected GHIssue getOrFindIssue(CommandContext context, GHRepository ghRepository) throws IOException {
         GHIssue issue = context.getIssue();

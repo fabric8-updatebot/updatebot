@@ -19,7 +19,6 @@ package io.fabric8.updatebot;
 import io.fabric8.updatebot.commands.PushSourceChanges;
 import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.repository.LocalRepository;
-import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +51,7 @@ public class PushSourceDependenciesTest {
 
         localRepositories = pushSourceChanges.cloneOrPullRepositories(configuration);
 
-        LocalRepository sourceRepo = Repositories.findRepository(localRepositories, sourceRepoName);
+        LocalRepository sourceRepo = LocalRepository.findRepository(localRepositories, sourceRepoName);
         assertThat(sourceRepo).describedAs("Could not find repository with name: " + sourceRepoName).isNotNull();
 
         // lets find the cloned repo...

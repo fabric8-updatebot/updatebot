@@ -23,7 +23,7 @@ public class GitRepository extends DtoSupport {
     private String name;
     private String cloneUrl;
     private String htmlUrl;
-    private GitHubRepositoryDetails repositoryDetails;
+    private GitRepositoryConfig repositoryDetails;
 
     public GitRepository() {
     }
@@ -64,11 +64,11 @@ public class GitRepository extends DtoSupport {
         this.htmlUrl = htmlUrl;
     }
 
-    public GitHubRepositoryDetails getRepositoryDetails() {
+    public GitRepositoryConfig getRepositoryDetails() {
         return repositoryDetails;
     }
 
-    public void setRepositoryDetails(GitHubRepositoryDetails repositoryDetails) {
+    public void setRepositoryDetails(GitRepositoryConfig repositoryDetails) {
         this.repositoryDetails = repositoryDetails;
     }
 
