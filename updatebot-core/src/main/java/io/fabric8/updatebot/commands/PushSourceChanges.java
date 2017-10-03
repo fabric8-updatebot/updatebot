@@ -88,7 +88,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
             LOG.debug("Ignoring repository " + repository.getCloneUrl() + " as this is the source repository!");
             return false;
         }
-        List<DependencyVersionChange> steps = loadPushVersionSteps(context);
+        List<DependencyVersionChange> steps = loadVersionChangesFromSource(context);
         String sourceFullName = getCloneUrl();
         LocalRepository sourceRepository = getSourceRepository();
         if (sourceRepository != null) {
@@ -154,7 +154,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
         return sourceRepository;
     }
 
-    protected List<DependencyVersionChange> loadPushVersionSteps(CommandContext context) throws IOException {
+    protected List<DependencyVersionChange> loadVersionChangesFromSource(CommandContext context) throws IOException {
         Configuration configuration = context.getConfiguration();
         List<DependencyVersionChange> list = new ArrayList<>();
         if (sourceRepository == null) {
@@ -179,7 +179,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
         }
         CommandContext sourceContext = new CommandContext(sourceRepository, configuration);
         CompositeUpdater updater = new CompositeUpdater();
-        updater.addPushVersionsSteps(sourceContext, push, list);
+        updater.addVersionChangesFromSource(sourceContext, push, list);
         return list;
     }
 

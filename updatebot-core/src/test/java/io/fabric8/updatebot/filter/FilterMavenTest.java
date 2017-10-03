@@ -18,7 +18,7 @@ package io.fabric8.updatebot.filter;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.GitRepositoryConfig;
 import io.fabric8.updatebot.model.MavenDependencies;
-import io.fabric8.updatebot.model.MavenDependency;
+import io.fabric8.updatebot.model.MavenArtifactKey;
 import io.fabric8.updatebot.model.MavenDependencyFilter;
 import io.fabric8.updatebot.model.RepositoryConfig;
 import io.fabric8.updatebot.test.Tests;
@@ -62,9 +62,9 @@ public class FilterMavenTest {
     }
 
     private void assertFilterDependency(boolean expected, List<MavenDependencyFilter> dependencies, String... values) {
-        Filter<MavenDependency> filter = MavenDependencyFilter.createFilter(dependencies);
+        Filter<MavenArtifactKey> filter = MavenDependencyFilter.createFilter(dependencies);
         for (String value : values) {
-            MavenDependency dependency = MavenDependency.fromString(value);
+            MavenArtifactKey dependency = MavenArtifactKey.fromString(value);
             boolean actual = filter.matches(dependency);
             assertThat(actual).
                     describedAs("Dependency " + dependency + " with Filter " + filter + " from  " + dependencies).

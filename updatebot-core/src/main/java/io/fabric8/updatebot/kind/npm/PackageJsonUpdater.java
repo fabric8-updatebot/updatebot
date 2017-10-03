@@ -84,7 +84,7 @@ public class PackageJsonUpdater implements Updater {
      * other repositories
      */
     @Override
-    public void addPushVersionsSteps(CommandContext context, Dependencies dependencyConfig, List<DependencyVersionChange> list) {
+    public void addVersionChangesFromSource(CommandContext context, Dependencies dependencyConfig, List<DependencyVersionChange> list) {
         NpmDependencies dependencies = dependencyConfig.getNpm();
         JsonNode tree = getPackageJsonTree(context);
         if (tree != null) {

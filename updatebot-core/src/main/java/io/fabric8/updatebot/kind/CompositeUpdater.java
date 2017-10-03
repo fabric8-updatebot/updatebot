@@ -68,12 +68,12 @@ public class CompositeUpdater implements Updater {
     }
 
     @Override
-    public void addPushVersionsSteps(CommandContext context, Dependencies dependencyConfig, List<DependencyVersionChange> list) throws IOException {
+    public void addVersionChangesFromSource(CommandContext context, Dependencies dependencyConfig, List<DependencyVersionChange> list) throws IOException {
         Kind[] kinds = Kind.values();
         for (Kind kind : kinds) {
             Updater updater = kind.getUpdater();
             if (updater.isApplicable(context)) {
-                updater.addPushVersionsSteps(context, dependencyConfig, list);
+                updater.addVersionChangesFromSource(context, dependencyConfig, list);
             }
         }
     }

@@ -17,11 +17,11 @@ package io.fabric8.updatebot.model;
 
 /**
  */
-public class MavenDependency implements Comparable<MavenDependency> {
+public class MavenArtifactKey implements Comparable<MavenArtifactKey> {
     private final String groupId;
     private final String artifactId;
 
-    public MavenDependency(String groupId, String artifactId) {
+    public MavenArtifactKey(String groupId, String artifactId) {
         this.groupId = groupId;
         this.artifactId = artifactId;
     }
@@ -29,12 +29,12 @@ public class MavenDependency implements Comparable<MavenDependency> {
     /**
      * Returns a maven dependency from the given string using <code>:</code> to separate the group id and artifact
      */
-    public static MavenDependency fromString(String value) {
+    public static MavenArtifactKey fromString(String value) {
         int idx = value.indexOf(':');
         if (idx < 0) {
             throw new IllegalArgumentException("No `:` character in the maven dependency: " + value);
         }
-        return new MavenDependency(value.substring(0, idx), value.substring(idx + 1));
+        return new MavenArtifactKey(value.substring(0, idx), value.substring(idx + 1));
     }
 
     @Override
@@ -47,7 +47,7 @@ public class MavenDependency implements Comparable<MavenDependency> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        MavenDependency that = (MavenDependency) o;
+        MavenArtifactKey that = (MavenArtifactKey) o;
 
         if (!groupId.equals(that.groupId)) return false;
         return artifactId.equals(that.artifactId);
@@ -61,7 +61,7 @@ public class MavenDependency implements Comparable<MavenDependency> {
     }
 
     @Override
-    public int compareTo(MavenDependency that) {
+    public int compareTo(MavenArtifactKey that) {
         int answer = this.groupId.compareTo(that.groupId);
         if (answer == 0) {
             answer = this.artifactId.compareTo(that.artifactId);

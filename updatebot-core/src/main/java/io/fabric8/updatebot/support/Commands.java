@@ -15,6 +15,9 @@
  */
 package io.fabric8.updatebot.support;
 
+import io.fabric8.updatebot.kind.maven.MavenUpdater;
+import io.fabric8.utils.IOHelpers;
+import io.fabric8.utils.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,4 +71,35 @@ public class Commands {
         return 1;
     }
 
+    public static boolean runCommandAndLogOutput(File dir, String[] commands) {
+        File outputFile = new File(dir, "target/updatebot.log");
+        File errorFile = new File(dir, "target/updatebot.err");
+        outputFile.getParentFile().mkdirs();
+        boolean answer = true;
+        if (runCommand(dir, outputFile, errorFile, commands) != 0) {
+            LOG.warn("Failed to run " + String.join(" ", commands));
+            answer = false;
+        }
+        logOutput(outputFile, false);
+        logOutput(errorFile, true);
+        return answer;
+    }
+
+    public static void logOutput(File file, boolean error) {
+        try {
+            String output = IOHelpers.readFully(file);
+            if (Strings.notEmpty(output)) {
+                String[] lines = output.split("\n");
+                for (String line : lines) {
+                    if (error) {
+                        LOG.error(line);
+                    }  else {
+                        LOG.info(line);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            LOG.error("Failed to load " + file + ". " + e, e);
+        }
+    }
 }

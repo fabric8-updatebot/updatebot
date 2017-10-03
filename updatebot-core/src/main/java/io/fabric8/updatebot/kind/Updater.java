@@ -30,7 +30,7 @@ public interface Updater {
 
     boolean pushVersions(PushVersionChangesContext context) throws IOException;
 
-    void addPushVersionsSteps(CommandContext context, Dependencies dependencyConfig, List<DependencyVersionChange> list) throws IOException;
+    void addVersionChangesFromSource(CommandContext context, Dependencies dependencyConfig, List<DependencyVersionChange> list) throws IOException;
 
     boolean pullVersions(CommandContext context) throws IOException;
 
