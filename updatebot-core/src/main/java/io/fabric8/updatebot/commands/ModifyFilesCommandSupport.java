@@ -95,7 +95,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
         String remoteURL = "git@github.com:" + ghRepository.getOwnerName() + "/" + ghRepository.getName();
         File dir = context.getDir();
         if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "remote", "set-url", "origin", remoteURL) != 0) {
-            LOG.warn("Could not set the remote URL of " + remoteURL);
+            context.warn(LOG, "Could not set the remote URL of " + remoteURL);
         }
 
         String commandComment = createPullRequestComment();
@@ -109,12 +109,12 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             String head = localBranch;
 
             if (ProcessHelper.runCommand(dir, "git", "push", "-f", "origin", localBranch) != 0) {
-                LOG.warn("Failed to push branch " + localBranch + " for " + context.getCloneUrl());
+                context.warn(LOG, "Failed to push branch " + localBranch + " for " + context.getCloneUrl());
                 return;
             }
             pullRequest = ghRepository.createPullRequest(title, head, "master", body);
             context.setPullRequest(pullRequest);
-            LOG.info("Created pull request " + pullRequest.getHtmlUrl());
+            context.info(LOG, "Created pull request " + pullRequest.getHtmlUrl());
 
             pullRequest.comment(commandComment);
             addIssueClosedCommentIfRequired(context, pullRequest, true);
@@ -150,9 +150,9 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             doCommit(context, dir, localBranch);
 
             if (ProcessHelper.runCommand(dir, "git", "push", "-f", "origin", localBranch + ":" + remoteRef) != 0) {
-                LOG.warn("Failed to push branch " + localBranch + " to existing github branch " + remoteRef + " for " + pullRequest.getHtmlUrl());
+                context.warn(LOG, "Failed to push branch " + localBranch + " to existing github branch " + remoteRef + " for " + pullRequest.getHtmlUrl());
             }
-            LOG.info("Updated PR " + pullRequest.getHtmlUrl());
+            context.info(LOG, "Updated PR " + pullRequest.getHtmlUrl());
         }
     }
 
@@ -236,7 +236,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
                     if (validChanges.size() > 0) {
                         // lets perform just the valid changes
                         if (!pushVersionChangesWithoutChecks(context, validChanges)) {
-                            LOG.warn("Attempted to apply the subset of valid changes " + DependencyVersionChange.describe(validChanges) + " but no files were modified!");
+                            context.warn(LOG, "Attempted to apply the subset of valid changes " + DependencyVersionChange.describe(validChanges) + " but no files were modified!");
                             return false;
                         }
                     }
@@ -262,7 +262,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             String operationDescrption = getOperationDescription(context);
             if (currentPendingChanges.isEmpty()) {
                 if (issue != null) {
-                    LOG.info("Closing issue as we have no further pending issues " + issue.getHtmlUrl());
+                    context.info(LOG, "Closing issue as we have no further pending issues " + issue.getHtmlUrl());
                     issue.comment(Issues.CLOSE_MESSAGE + operationDescrption);
                     issue.close();
                 }
@@ -271,9 +271,9 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             if (issue == null) {
                 issue = Issues.createIssue(context, ghRepository);
                 context.setIssue(issue);
-                LOG.info("Created issue " + issue.getHtmlUrl());
+                context.info(LOG, "Created issue " + issue.getHtmlUrl());
             } else {
-                LOG.info("Modifying issue " + issue.getHtmlUrl());
+                context.info(LOG, "Modifying issue " + issue.getHtmlUrl());
             }
             Issues.addConflictsComment(issue, currentPendingChanges, operationDescrption, check);
         } else {

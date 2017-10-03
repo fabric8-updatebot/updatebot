@@ -90,7 +90,7 @@ public class UpdatePullRequests extends CommandSupport {
                                 }
                             }
                         } catch (IOException e) {
-                            LOG.warn("Failed to find last commit status for PR " + pullRequest.getHtmlUrl() + " " + e, e);
+                            context.warn(LOG, "Failed to find last commit status for PR " + pullRequest.getHtmlUrl() + " " + e, e);
                         }
                     }
                     if (isOpen(pullRequest)) {
@@ -115,7 +115,7 @@ public class UpdatePullRequests extends CommandSupport {
             }
         }
         if (lastCommand == null) {
-            LOG.warn("No UpdateBot comment found on pull request " + pullRequest.getHtmlUrl() + " so cannot rebase!");
+            context.warn(LOG, "No UpdateBot comment found on pull request " + pullRequest.getHtmlUrl() + " so cannot rebase!");
             return null;
         }
         return parseUpdateBotCommandComment(context, lastCommand);
@@ -136,7 +136,7 @@ public class UpdatePullRequests extends CommandSupport {
         return commands;
     }
 
-    private void addBotCommand(CompositeCommand commands, CommandContext parentContext, String commandLine) {
+    private void addBotCommand(CompositeCommand commands, CommandContext context, String commandLine) {
         String subCommand = commandLine;
         if (subCommand.startsWith(UPDATEBOT)) {
             subCommand = subCommand.substring(UPDATEBOT.length()).trim();
@@ -145,7 +145,7 @@ public class UpdatePullRequests extends CommandSupport {
         Configuration dummyConfig = new Configuration();
         CommandSupport command = UpdateBot.parseCommand(args, dummyConfig, false);
         if (command == null) {
-            LOG.warn("Could not parse command line: " + commandLine);
+            context.warn(LOG, "Could not parse command line: " + commandLine);
         } else {
             commands.addCommand(command);
         }

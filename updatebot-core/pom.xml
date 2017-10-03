@@ -33,11 +33,6 @@
 
   <dependencies>
     <dependency>
-      <groupId>io.fabric8.updatebot</groupId>
-      <artifactId>updatebot-logging</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.beust</groupId>
       <artifactId>jcommander</artifactId>
       <version>1.72</version>

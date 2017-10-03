@@ -27,6 +27,7 @@ import org.kohsuke.github.RateLimitHandler;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
@@ -61,6 +62,7 @@ public class Configuration {
     private NpmDependencyTreeGenerator npmDependencyTreeGenerator = new DefaultNpmDependencyTreeGenerator();
     private boolean pullDisabled;
     private Map<String, String> pollStatusCache = new TreeMap<>();
+    private PrintStream printStream;
 
     public GitHub getGithub() throws IOException {
         if (github == null) {
@@ -216,5 +218,13 @@ public class Configuration {
      */
     public Map<String, String> getPollStatusCache() {
         return pollStatusCache;
+    }
+
+    public PrintStream getPrintStream() {
+        return printStream;
+    }
+
+    public void setPrintStream(PrintStream printStream) {
+        this.printStream = printStream;
     }
 }
