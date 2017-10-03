@@ -17,7 +17,7 @@ package io.fabric8.updatebot.model;
 
 /**
  */
-public class MavenDependency {
+public class MavenDependency implements Comparable<MavenDependency> {
     private final String groupId;
     private final String artifactId;
 
@@ -40,6 +40,33 @@ public class MavenDependency {
     @Override
     public String toString() {
         return groupId + ":" + artifactId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MavenDependency that = (MavenDependency) o;
+
+        if (!groupId.equals(that.groupId)) return false;
+        return artifactId.equals(that.artifactId);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = groupId.hashCode();
+        result = 31 * result + artifactId.hashCode();
+        return result;
+    }
+
+    @Override
+    public int compareTo(MavenDependency that) {
+        int answer = this.groupId.compareTo(that.groupId);
+        if (answer == 0) {
+            answer = this.artifactId.compareTo(that.artifactId);
+        }
+        return answer;
     }
 
     public String getGroupId() {

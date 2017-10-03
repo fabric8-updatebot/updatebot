@@ -61,6 +61,7 @@ public class RepositoryConfigs {
 
     /**
      * Returns the git repository configuration details
+     *
      * @param repositoryConfig
      * @param sourceDir
      * @return

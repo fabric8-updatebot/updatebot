@@ -79,6 +79,8 @@
 
     <kohsuke.github-api.version>1.89</kohsuke.github-api.version>
     <jackson.version>2.9.1</jackson.version>
+    <maven.version>3.5.0</maven.version>
+    <resolverVersion>1.1.0</resolverVersion>
     <slf4j-api.version>1.7.25</slf4j-api.version>
     <slf4j-log4j12.version>1.7.21</slf4j-log4j12.version>
     <fabric8-utils.version>2.3.2</fabric8-utils.version>
@@ -174,6 +176,7 @@
   <modules>
     <module>updatebot-logging</module>
     <module>updatebot-core</module>
+    <module>updatebot-maven-plugin</module>
     <module>updatebot</module>
   </modules>
 

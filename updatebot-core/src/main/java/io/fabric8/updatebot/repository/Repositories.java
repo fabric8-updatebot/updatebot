@@ -19,8 +19,8 @@ import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.commands.CommandSupport;
 import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.model.GitHubProjects;
-import io.fabric8.updatebot.model.GitRepositoryConfig;
 import io.fabric8.updatebot.model.GitRepository;
+import io.fabric8.updatebot.model.GitRepositoryConfig;
 import io.fabric8.updatebot.model.GithubOrganisation;
 import io.fabric8.updatebot.model.GithubRepository;
 import io.fabric8.updatebot.model.RepositoryConfig;
@@ -42,8 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import static io.fabric8.updatebot.support.MarkupHelper.loadYaml;
 
 /**
  */

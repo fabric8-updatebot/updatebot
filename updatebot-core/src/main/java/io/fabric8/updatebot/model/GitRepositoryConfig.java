@@ -15,6 +15,8 @@
  */
 package io.fabric8.updatebot.model;
 
+import io.fabric8.updatebot.support.Strings;
+
 /**
  * Represents the configuration of a git repository
  */
@@ -28,6 +30,16 @@ public class GitRepositoryConfig extends DtoSupport {
 
     public GitRepositoryConfig(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        String nameText = Strings.notEmpty(name) ? "name='" + name + '\'' : "";
+        String pushText = push != null ? "push=" + push : "";
+        String pullText = pull != null ? "pull=" + pull : "";
+
+        return "GitRepositoryConfig{" +
+                Strings.joinNotEmpty(", ", nameText, pushText, pullText) + '}';
     }
 
     public String getName() {

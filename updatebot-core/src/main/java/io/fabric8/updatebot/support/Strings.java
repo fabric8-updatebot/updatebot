@@ -17,6 +17,9 @@ package io.fabric8.updatebot.support;
 
 import io.fabric8.utils.Objects;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  */
 public class Strings {
@@ -85,5 +88,18 @@ public class Strings {
             return value.toString();
         }
         return null;
+    }
+
+    /**
+     * Returns a joined string with the separator for all the non-empty strings
+     */
+    public static String joinNotEmpty(String sep, String... values) {
+        List<String> list = new ArrayList<>();
+        for (String value : values) {
+            if (Strings.notEmpty(value)) {
+                list.add(value);
+            }
+        }
+        return String.join(sep, list);
     }
 }
