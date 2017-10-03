@@ -18,7 +18,10 @@ package io.fabric8.updatebot.model;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.utils.Objects;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -58,6 +61,23 @@ public class DependencyVersionChange {
      */
     public static List<DependencyVersionChange> forKind(Kind kind, List<DependencyVersionChange> list) {
         return list.stream().filter(d -> kind.equals(d.getKind())).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns the dependency version changes by kind
+     */
+    public static Map<Kind, List<DependencyVersionChange>> byKind(List<DependencyVersionChange> list) {
+        Map<Kind, List<DependencyVersionChange>> answer = new LinkedHashMap<>();
+        for (DependencyVersionChange change : list) {
+            Kind key = change.getKind();
+            List<DependencyVersionChange> changes = answer.get(key);
+            if (changes == null) {
+                changes = new ArrayList<>();
+                answer.put(key, changes);
+            }
+            changes.add(change);
+        }
+        return answer;
     }
 
     @Override

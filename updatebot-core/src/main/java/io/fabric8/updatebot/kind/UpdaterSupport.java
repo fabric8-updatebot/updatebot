@@ -17,24 +17,30 @@ package io.fabric8.updatebot.kind;
 
 import io.fabric8.updatebot.commands.CommandContext;
 import io.fabric8.updatebot.commands.PushVersionChangesContext;
-import io.fabric8.updatebot.model.Dependencies;
+import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 
 import java.io.IOException;
 import java.util.List;
 
 /**
+ * A useful base class for implementing {@link Updater}
  */
-public interface Updater {
-    boolean isApplicable(CommandContext context);
+public abstract class UpdaterSupport implements Updater {
 
-    boolean pushVersions(PushVersionChangesContext context) throws IOException;
-
-    void addVersionChangesFromSource(CommandContext context, Dependencies dependencyConfig, List<DependencyVersionChange> list) throws IOException;
-
-    boolean pullVersions(CommandContext context) throws IOException;
-
-    KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> value);
-
-    boolean pushVersions(CommandContext parentContext, List<DependencyVersionChange> changes) throws IOException;
+    public boolean pushVersions(CommandContext parentContext, List<DependencyVersionChange> changes) throws IOException {
+        boolean answer = false;
+        if (isApplicable(parentContext)) {
+            for (DependencyVersionChange step : changes) {
+                PushVersionChangesContext context = new PushVersionChangesContext(parentContext, step);
+                boolean updated = pushVersions(context);
+                if (updated) {
+                    answer = true;
+                } else {
+                    parentContext.removeChild(context);
+                }
+            }
+        }
+        return answer;
+    }
 }

@@ -50,6 +50,21 @@ public class CompositeUpdater implements Updater {
         return answer;
     }
 
+    @Override
+    public boolean pushVersions(CommandContext context, List<DependencyVersionChange> changes) throws IOException {
+        Kind[] kinds = Kind.values();
+        boolean answer = false;
+        for (Kind kind : kinds) {
+            Updater updater = kind.getUpdater();
+            if (updater.isApplicable(context)) {
+                if (updater.pushVersions(context, changes)) {
+                    answer = true;
+                }
+            }
+        }
+        return answer;
+
+    }
 
     @Override
     public boolean pullVersions(CommandContext context) throws IOException {
@@ -61,7 +76,6 @@ public class CompositeUpdater implements Updater {
                 if (updater.pullVersions(context)) {
                     answer = true;
                 }
-                ;
             }
         }
         return answer;

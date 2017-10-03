@@ -17,14 +17,15 @@ package io.fabric8.updatebot.maven;
 
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.GitRepositoryConfig;
+import io.fabric8.updatebot.model.MavenArtifactKey;
 import io.fabric8.updatebot.model.MavenArtifactVersionChange;
 import io.fabric8.updatebot.model.MavenArtifactVersionChanges;
 import io.fabric8.updatebot.model.MavenDependencies;
-import io.fabric8.updatebot.model.MavenArtifactKey;
 import io.fabric8.updatebot.model.MavenDependencyFilter;
 import io.fabric8.updatebot.model.RepositoryConfig;
 import io.fabric8.updatebot.model.RepositoryConfigs;
 import io.fabric8.updatebot.support.MarkupHelper;
+import io.fabric8.utils.Files;
 import io.fabric8.utils.Filter;
 import io.fabric8.utils.Filters;
 import org.apache.maven.execution.MavenSession;
@@ -39,31 +40,38 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.TreeMap;
 
 /**
- * Exports the versions from the source code of the current project so that we can apply the versions
- * to other projects
+ * Updates versions in this project from a file of version changes
  */
-@Mojo(name = "export", aggregator = true, requiresProject = true,
+@Mojo(name = "update", aggregator = true, requiresProject = true,
         requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
-public class ExportVersionsMojo extends AbstractMojo {
+public class UpdateVersionsMojo extends AbstractMojo {
 
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
+    @Parameter(defaultValue = "${session}", readonly = true)
+    protected MavenSession session;
+
     @Parameter(property = "updateBotYaml")
     protected String configYaml;
 
-    @Parameter(property = "destFile", defaultValue = "${basedir}/target/updatebot-versions.yml")
-    protected File destFile;
+    @Parameter(property = "file", defaultValue = "${basedir}/target/updatebot-versions.yml")
+    protected File file;
 
     private RepositoryConfig repositoryConfig;
+
+    protected static void addArtifact(Map<MavenArtifactKey, MavenArtifactVersionChange> exportVersions, MavenArtifactKey artifactKey, String version, String scope) {
+        exportVersions.put(artifactKey, new MavenArtifactVersionChange(artifactKey, version, scope));
+    }
+
+    protected static MavenArtifactKey toMavenDependency(Dependency dependency) {
+        return new MavenArtifactKey(dependency.getGroupId(), dependency.getArtifactId());
+    }
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -80,13 +88,16 @@ public class ExportVersionsMojo extends AbstractMojo {
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to find GitRepositoryConfig from updatebot.yml file " + configYaml + ". " + e, e);
         }
+        if (!Files.isFile(file)) {
+            throw new MojoExecutionException("File does not exist " + file);
+        }
         log.debug("Loaded git config " + config + " from " + sourceDir);
 
         MavenDependencies mavenDependencies = null;
         if (config != null) {
-            Dependencies push = config.getPush();
-            if (push != null) {
-                mavenDependencies = push.getMaven();
+            Dependencies pull = config.getPull();
+            if (pull != null) {
+                mavenDependencies = pull.getMaven();
             }
         }
         Filter<MavenArtifactKey> dependencyFilter = Filters.falseFilter();
@@ -96,41 +107,34 @@ public class ExportVersionsMojo extends AbstractMojo {
                 dependencyFilter = MavenDependencyFilter.createFilter(dependencies);
             }
         }
-        Map<MavenArtifactKey, MavenArtifactVersionChange> exportVersions = new TreeMap<>();
 
         List<MavenProject> projects = project.getCollectedProjects();
-        for (MavenProject project : projects) {
-            MavenArtifactKey artifactKey = new MavenArtifactKey(project.getGroupId(), project.getArtifactId());
-            addArtifact(exportVersions, artifactKey, project.getVersion(), "artifact");
 
-            log.debug("Collected project : " + project);
-            List<Dependency> dependencies = project.getDependencies();
-            for (Dependency dependency : dependencies) {
-                MavenArtifactKey dependencyKey = toMavenDependency(dependency);
-                if (dependencyFilter.matches(dependencyKey)) {
-                    log.debug("    dependency: " + dependency);
-                    addArtifact(exportVersions, dependencyKey, dependency.getVersion(), "dependency");
-                }
-            }
-        }
-
-        destFile.getParentFile().mkdirs();
+        MavenArtifactVersionChanges changes;
         try {
-            MavenArtifactVersionChanges changes = new MavenArtifactVersionChanges(exportVersions.values());
-            MarkupHelper.saveYaml(changes, destFile);
-
-            log.info("Generated updatebot version file " + destFile);
+            changes = MarkupHelper.loadYaml(file, MavenArtifactVersionChanges.class);
         } catch (IOException e) {
-            throw new MojoExecutionException("Failed to write to " + destFile + ". " + e, e);
+            throw new MojoExecutionException("Failed to load changes YAML " + file + ". " + e, e);
         }
+
+        List<MavenArtifactVersionChange> changeList = changes.getChanges();
+        if (changeList == null || changeList.isEmpty()) {
+            log.info("No changes to apply!");
+            return;
+        }
+
+        for (MavenArtifactVersionChange change : changeList) {
+            log.info("Applying change " + change);
+        }
+
+        for (MavenProject project : projects) {
+            applyChanges(project, changeList, mavenDependencies, dependencyFilter);
+        }
+
     }
 
-    protected static void addArtifact(Map<MavenArtifactKey, MavenArtifactVersionChange> exportVersions, MavenArtifactKey artifactKey, String version, String scope) {
-        exportVersions.put(artifactKey, new MavenArtifactVersionChange(artifactKey, version, scope));
-    }
-
-    protected static MavenArtifactKey toMavenDependency(Dependency dependency) {
-        return new MavenArtifactKey(dependency.getGroupId(), dependency.getArtifactId());
+    protected void applyChanges(MavenProject project, List<MavenArtifactVersionChange> changeList, MavenDependencies mavenDependencies, Filter<MavenArtifactKey> dependencyFilter) {
+        // TODO
     }
 
 

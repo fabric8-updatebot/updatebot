@@ -208,26 +208,17 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
 
     protected boolean pushVersionChangesWithoutChecks(CommandContext parentContext, List<DependencyVersionChange> steps) throws IOException {
         boolean answer = false;
-        for (DependencyVersionChange step : steps) {
-            if (pushSingleVersionChangeWithoutChecks(parentContext, step)) {
+        Map<Kind, List<DependencyVersionChange>> map = DependencyVersionChange.byKind(steps);
+        for (Map.Entry<Kind, List<DependencyVersionChange>> entry : map.entrySet()) {
+            Kind kind = entry.getKey();
+            List<DependencyVersionChange> changes = entry.getValue();
+            Updater updater = kind.getUpdater();
+            // lets reuse the parent context for title etc?
+            if (updater.pushVersions(parentContext, changes)) {
                 answer = true;
             }
         }
         return answer;
-    }
-
-    protected boolean pushSingleVersionChangeWithoutChecks(CommandContext parentContext, DependencyVersionChange step) throws IOException {
-        Kind kind = step.getKind();
-        Updater updater = kind.getUpdater();
-        PushVersionChangesContext context = new PushVersionChangesContext(parentContext, step);
-        if (updater.isApplicable(context)) {
-            boolean updated = updater.pushVersions(context);
-            if (!updated) {
-                parentContext.removeChild(context);
-            }
-            return updated;
-        }
-        return false;
     }
 
     protected boolean pushVersionsWithChecks(CommandContext context, List<DependencyVersionChange> originalSteps) throws IOException {

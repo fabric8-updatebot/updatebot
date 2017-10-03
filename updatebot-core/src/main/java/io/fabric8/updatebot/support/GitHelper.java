@@ -118,4 +118,19 @@ public class GitHelper {
         path = Strings.stripSuffix(path, ".git");
         return path;
     }
+
+    /**
+     * Returns true if the given directory has modified files
+     */
+    public static boolean hasChangedFiles(File dir) {
+        try {
+            String output = ProcessHelper.runCommandCaptureOutput(dir, "git", "status", "-s");
+            if (output != null) {
+                output = output.trim();
+            }
+            return Strings.notEmpty(output);
+        } catch (IOException e) {
+            return false;
+        }
+    }
 }

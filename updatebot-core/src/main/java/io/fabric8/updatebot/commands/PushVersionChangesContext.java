@@ -63,6 +63,10 @@ public class PushVersionChangesContext extends CommandContext {
         return "update " + step.getDependency() + " to ";
     }
 
+    public DependencyVersionChange getStep() {
+        return step;
+    }
+
     public Kind getKind() {
         return step.getKind();
     }
@@ -96,13 +100,13 @@ public class PushVersionChangesContext extends CommandContext {
     }
 
     public static class Change {
-        private final String dependencyKey;
+        private final String scope;
         private final String name;
         private final String newValue;
         private final String oldValue;
 
-        public Change(String dependencyKey, String name, String newValue, String oldValue) {
-            this.dependencyKey = dependencyKey;
+        public Change(String scope, String name, String newValue, String oldValue) {
+            this.scope = scope;
             this.name = name;
             this.newValue = newValue;
             this.oldValue = oldValue;
@@ -111,15 +115,15 @@ public class PushVersionChangesContext extends CommandContext {
         @Override
         public String toString() {
             return "Change{" +
-                    "dependencyKey='" + dependencyKey + '\'' +
+                    "scope='" + scope + '\'' +
                     ", name='" + name + '\'' +
                     ", newValue='" + newValue + '\'' +
                     ", oldValue='" + oldValue + '\'' +
                     '}';
         }
 
-        public String getDependencyKey() {
-            return dependencyKey;
+        public String getScope() {
+            return scope;
         }
 
         public String getName() {

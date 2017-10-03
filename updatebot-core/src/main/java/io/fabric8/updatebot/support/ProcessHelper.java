@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.support;
 
+import io.fabric8.utils.Files;
 import io.fabric8.utils.IOHelpers;
 import io.fabric8.utils.Strings;
 import org.slf4j.Logger;
@@ -43,6 +44,28 @@ public class ProcessHelper {
             builder.inheritIO();
         }
         return doRunCommand(builder, commands);
+    }
+
+    public static String runCommandCaptureOutput(File dir, String... commands) throws IOException {
+        File outputFile;
+        File errorFile;
+        try {
+            outputFile = File.createTempFile("updatebot-", ".log");
+            errorFile = File.createTempFile("updatebot-", ".err");
+        } catch (IOException e) {
+            throw new IOException("Failed to create temporary files " + e, e);
+        }
+
+        int result = runCommand(dir, outputFile, errorFile, commands);
+        String output = loadFile(outputFile);
+        String err = loadFile(errorFile);
+        logOutput(err, true);
+        if (result != 0) {
+            LOG.warn("Failed to run commands " + String.join(" ", commands) + " result: " + result);
+            logOutput(output, false);
+            throw new IOException("Failed to run commands " + String.join(" ", commands) + " result: " + result);
+        }
+        return output;
     }
 
     public static int runCommand(File dir, File outputFile, File errorFile, String... commands) {
@@ -85,20 +108,31 @@ public class ProcessHelper {
     }
 
     public static void logOutput(File file, boolean error) {
-        try {
-            String output = IOHelpers.readFully(file);
-            if (Strings.notEmpty(output)) {
-                String[] lines = output.split("\n");
-                for (String line : lines) {
-                    if (error) {
-                        LOG.error(line);
-                    } else {
-                        LOG.info(line);
-                    }
+        logOutput(loadFile(file), error);
+    }
+
+    protected static void logOutput(String output, boolean error) {
+        if (Strings.notEmpty(output)) {
+            String[] lines = output.split("\n");
+            for (String line : lines) {
+                if (error) {
+                    LOG.error(line);
+                } else {
+                    LOG.info(line);
                 }
             }
-        } catch (IOException e) {
-            LOG.error("Failed to load " + file + ". " + e, e);
         }
+    }
+
+    protected static String loadFile(File file) {
+        String output = null;
+        if (Files.isFile(file)) {
+            try {
+                output = IOHelpers.readFully(file);
+            } catch (IOException e) {
+                LOG.error("Failed to load " + file + ". " + e, e);
+            }
+        }
+        return output;
     }
 }

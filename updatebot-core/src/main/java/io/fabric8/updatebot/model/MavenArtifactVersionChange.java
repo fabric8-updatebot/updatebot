@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.model;
 
+import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.kind.Kind;
 
 /**
@@ -37,6 +38,10 @@ public class MavenArtifactVersionChange {
 
     public MavenArtifactVersionChange(MavenArtifactKey artifactKey, String version, String scope) {
         this(artifactKey.getGroupId(), artifactKey.getArtifactId(), version, scope);
+    }
+
+    public MavenArtifactVersionChange(DependencyVersionChange change) {
+        this(MavenArtifactKey.fromString(change.getDependency()), change.getVersion(), change.getScope());
     }
 
     @Override

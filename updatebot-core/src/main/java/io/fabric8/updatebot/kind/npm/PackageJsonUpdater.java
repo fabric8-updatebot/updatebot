@@ -22,6 +22,7 @@ import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.kind.KindDependenciesCheck;
 import io.fabric8.updatebot.kind.Updater;
+import io.fabric8.updatebot.kind.UpdaterSupport;
 import io.fabric8.updatebot.kind.npm.dependency.DependencyCheck;
 import io.fabric8.updatebot.kind.npm.dependency.DependencyTree;
 import io.fabric8.updatebot.model.Dependencies;
@@ -49,7 +50,7 @@ import java.util.TreeMap;
 
 /**
  */
-public class PackageJsonUpdater implements Updater {
+public class PackageJsonUpdater extends UpdaterSupport implements Updater {
 
     private static final transient Logger LOG = LoggerFactory.getLogger(PackageJsonUpdater.class);
 
@@ -78,6 +79,7 @@ public class PackageJsonUpdater implements Updater {
         }
         return answer;
     }
+
 
     /**
      * Adds the list of possible dependency update steps from the given source context that we can then apply to

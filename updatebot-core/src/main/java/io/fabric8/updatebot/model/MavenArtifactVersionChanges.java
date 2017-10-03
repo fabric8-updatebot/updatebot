@@ -15,6 +15,9 @@
  */
 package io.fabric8.updatebot.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.fabric8.updatebot.commands.PushVersionChangesContext;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,5 +40,19 @@ public class MavenArtifactVersionChanges {
 
     public void setChanges(List<MavenArtifactVersionChange> changes) {
         this.changes = changes;
+    }
+
+
+    public void addChange(DependencyVersionChange change) {
+        addChange(new MavenArtifactVersionChange(change));
+    }
+
+    public void addChange(MavenArtifactVersionChange change) {
+        changes.add(change);
+    }
+
+    @JsonIgnore
+    public boolean isEmpty() {
+        return changes.isEmpty();
     }
 }
