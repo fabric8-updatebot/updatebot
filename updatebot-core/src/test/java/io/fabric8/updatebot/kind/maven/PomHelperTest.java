@@ -15,19 +15,16 @@
  */
 package io.fabric8.updatebot.kind.maven;
 
+import de.pdark.decentxml.Document;
+import de.pdark.decentxml.Element;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.test.Tests;
-import io.fabric8.utils.DomHelper;
 import io.fabric8.utils.Objects;
 import io.fabric8.utils.Strings;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.fabric8.updatebot.kind.maven.PomHelper.firstChild;
+import static io.fabric8.updatebot.kind.maven.PomHelper.firstChildTextContent;
 import static io.fabric8.updatebot.kind.maven.PomHelper.parseXmlFile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
@@ -63,45 +62,39 @@ public class PomHelperTest {
     }
 
     protected static void assertPluginVersionChanged(File file, Document doc, DependencyVersionChange change) {
-        NodeList plugins = doc.getElementsByTagName("plugin");
-        for (int i = 0, size = plugins.getLength(); i < size; i++) {
-            Node item = plugins.item(i);
-            if (item instanceof Element) {
-                Element element = (Element) item;
-                String groupId = DomHelper.firstChildTextContent(element, "groupId");
-                String artifactId = DomHelper.firstChildTextContent(element, "artifactId");
-                String version = DomHelper.firstChildTextContent(element, "version");
-                if (Strings.notEmpty(groupId) && Strings.notEmpty(artifactId) && Strings.notEmpty(version)) {
-                    if (change.matches(groupId, artifactId) && !version.startsWith("$")) {
-                        LOG.info("File " + file + " has plugin " + change.getDependency() + " version: " + version);
-                        assertThat(version).describedAs("File " + file + " plugin version for " + change.getDependency()).isEqualTo(change.getVersion());
-                    }
+        List<de.pdark.decentxml.Element> elements = doc.getRootElement().getChildren("plugin");
+        boolean update = false;
+        for (de.pdark.decentxml.Element element : elements) {
+            String groupId = firstChildTextContent(element, "groupId");
+            String artifactId = firstChildTextContent(element, "artifactId");
+            String version = firstChildTextContent(element, "version");
+            if (Strings.notEmpty(groupId) && Strings.notEmpty(artifactId) && Strings.notEmpty(version)) {
+                if (change.matches(groupId, artifactId) && !version.startsWith("$")) {
+                    LOG.info("File " + file + " has plugin " + change.getDependency() + " version: " + version);
+                    assertThat(version).describedAs("File " + file + " plugin version for " + change.getDependency()).isEqualTo(change.getVersion());
                 }
             }
         }
     }
 
     protected static void assertDependencyVersionChanged(File file, Document doc, DependencyVersionChange change) {
-        NodeList plugins = doc.getElementsByTagName("dependency");
-        for (int i = 0, size = plugins.getLength(); i < size; i++) {
-            Node item = plugins.item(i);
-            if (item instanceof Element) {
-                Element element = (Element) item;
-                String groupId = DomHelper.firstChildTextContent(element, "groupId");
-                String artifactId = DomHelper.firstChildTextContent(element, "artifactId");
-                String version = DomHelper.firstChildTextContent(element, "version");
-                if (Strings.notEmpty(groupId) && Strings.notEmpty(artifactId) && Strings.notEmpty(version)) {
-                    if (change.matches(groupId, artifactId) && !version.startsWith("$")) {
-                        LOG.info("File " + file + " has dependency " + change.getDependency() + " version: " + version);
-                        assertThat(version).describedAs("File " + file + " dependency version for " + change.getDependency()).isEqualTo(change.getVersion());
-                    }
+        List<de.pdark.decentxml.Element> elements = doc.getRootElement().getChildren("dependency");
+        boolean update = false;
+        for (de.pdark.decentxml.Element element : elements) {
+            String groupId = firstChildTextContent(element, "groupId");
+            String artifactId = firstChildTextContent(element, "artifactId");
+            String version = firstChildTextContent(element, "version");
+            if (Strings.notEmpty(groupId) && Strings.notEmpty(artifactId) && Strings.notEmpty(version)) {
+                if (change.matches(groupId, artifactId) && !version.startsWith("$")) {
+                    LOG.info("File " + file + " has dependency " + change.getDependency() + " version: " + version);
+                    assertThat(version).describedAs("File " + file + " dependency version for " + change.getDependency()).isEqualTo(change.getVersion());
                 }
             }
         }
     }
 
     protected static void assertPropertiesValid(File file, Document doc, Map<String, String> propertyVersions) {
-        Element properties = DomHelper.firstChild(doc.getDocumentElement(), "properties");
+        Element properties = firstChild(doc.getRootElement(), "properties");
         if (properties != null) {
             for (Map.Entry<String, String> entry : propertyVersions.entrySet()) {
                 String propertyName = entry.getKey();
@@ -112,62 +105,12 @@ public class PomHelperTest {
     }
 
     protected static void assertPropertyEqualsIfExists(File file, Element properties, String propertyName, String expectedValue) {
-        String value = DomHelper.firstChildTextContent(properties, propertyName);
+        String value = firstChildTextContent(properties, propertyName);
         if (value != null) {
             LOG.info("File " + file + " has property " + propertyName + " = " + value);
             assertEquals("File " + file + " property " + propertyName + " element", expectedValue, value);
         }
     }
-/*
-
-     protected static void assertPluginVersionsMatchIndices(File file, Document doc, List<String> expectPluginVersionList) {
-         String fmpVersion = VersionHelper.fabric8MavenPluginVersion();
-         NodeList plugins = doc.getElementsByTagName("plugin");
-         int index = 0;
-         for (int i = 0, size = plugins.getLength(); i < size; i++) {
-             Node item = plugins.item(i);
-             if (item instanceof Element) {
-                 Element element = (Element) item;
-                 if ("fabric8-maven-plugin".equals(DomHelper.firstChildTextContent(element, "artifactId"))) {
-                     String version = DomHelper.firstChildTextContent(element, "version");
-
-                     if (expectPluginVersionList.size() <= index) {
-                         fail("file " + file + " does not have enough version expressions in <expectPluginVersions> element has we have at least " + (index + 1) + " fabric8-maven-plugin elements!");
-                     }
-                     String expected = expectPluginVersionList.get(index);
-                     if ("version".equals(expected)) {
-                         expected = fmpVersion;
-                     }
-
-                     if ("none".equals(expected)) {
-                         if (version != null) {
-                             fail("file " + file + " has a <version> element in the fabric8-maven-plugin element index " + index + " when it is not expected");
-                         }
-                     } else {
-                         if (version == null) {
-                             fail("file " + file + " expected a <version> element in the fabric8-maven-plugin element index " + index + " for " + element);
-                         }
-                         assertEquals("file " + file + " fabric8-maven-plugin element index " + index + " <version> element", expected, version);
-                     }
-                     System.out.println("file " + file + " has fabric8-maven-plugin " + index + " version " + expected);
-                     index++;
-                 }
-             }
-         }
-         if (expectPluginVersionList.size() > index) {
-             fail("file " + file + " does not contain " + expectPluginVersionList.size() + " fabric8-maven-plugin elements so <expectPluginVersions> element contains too many version expressions!");
-         }
-
-         // now lets assert the properties
-         Element properties = DomHelper.firstChild(doc.getDocumentElement(), "properties");
-         if (properties != null) {
-             assertPropertyEqualsIfExists(file, properties, "fabric8.version", VersionHelper.fabric8Version());
-             assertPropertyEqualsIfExists(file, properties, "fabric8.maven.plugin.version", fmpVersion);
-         }
-     }
-
-
-*/
 
     @Test
     public void testVersionReplacement() throws Exception {
@@ -222,49 +165,5 @@ public class PomHelperTest {
             assertPropertiesValid(file, doc, propertyVersions);
             assertChangesValid(file, doc, changes);
         }
-
-
-        // TODO find the
-/*
-             StatusDTO status = new StatusDTO();
-             ChoosePipelineStep.updatePomVersions(file, status, "myspace");
-
-             List<String> warnings = status.getWarnings();
-             for (String warning : warnings) {
-                 System.out.println("Warning: " + warning);
-             }
-
-             // lets assert that the right elements got a version added...
-             Document doc;
-             try {
-                 doc = parseXmlFile(file);
-             } catch (Exception e) {
-                 LOG.error("Failed to parse " + file + " " + e, e);
-                 fail("Failed to parse " + file + " due to " + e);
-                 continue;
-             }
-
-             String expectPluginVersionsText = "";
-             NodeList pluginVersionElements = doc.getElementsByTagName("expectPluginVersions");
-             if (pluginVersionElements.getLength() > 0) {
-                 Node item = pluginVersionElements.item(0);
-                 if (item instanceof Element) {
-                     Element element = (Element) item;
-                     expectPluginVersionsText = element.getTextContent();
-                 }
-             }
-
-             List<String> expectPluginVersionList = new ArrayList<>();
-             if (Strings.isNotBlank(expectPluginVersionsText)) {
-                 StringTokenizer iter = new StringTokenizer(expectPluginVersionsText);
-                 while (iter.hasMoreTokens()) {
-                     expectPluginVersionList.add(iter.nextToken());
-                 }
-             } else {
-                 fail("File " + file + " does not contain a <expectPluginVersions> in the <properties> section!");
-             }
-
-             assertPluginVersionsMatchIndices(file, doc, expectPluginVersionList);
-         }*/
     }
 }

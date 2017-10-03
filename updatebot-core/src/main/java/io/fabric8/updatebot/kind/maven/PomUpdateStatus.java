@@ -15,15 +15,13 @@
  */
 package io.fabric8.updatebot.kind.maven;
 
+import de.pdark.decentxml.Document;
 import io.fabric8.updatebot.model.DependencyVersionChange;
-import io.fabric8.utils.DomHelper;
+import io.fabric8.utils.IOHelpers;
 import io.fabric8.utils.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -43,7 +41,7 @@ public class PomUpdateStatus {
         this.doc = doc;
     }
 
-    public static PomUpdateStatus createPomUpdateStatus(File file) throws IOException, SAXException, ParserConfigurationException {
+    public static PomUpdateStatus createPomUpdateStatus(File file) throws IOException {
         Document doc = PomHelper.parseXmlFile(file);
         return new PomUpdateStatus(file, doc);
     }
@@ -59,7 +57,7 @@ public class PomUpdateStatus {
         if (updated) {
             LOG.info("Updating " + pom);
             try {
-                DomHelper.save(doc, pom);
+                IOHelpers.writeFully(pom, doc.toXML());
             } catch (Exception e) {
                 throw new IOException("failed to save " + pom + ". " + e, e);
             }

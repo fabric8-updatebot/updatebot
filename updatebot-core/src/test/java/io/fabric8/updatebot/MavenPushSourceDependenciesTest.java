@@ -55,20 +55,23 @@ public class MavenPushSourceDependenciesTest {
             LOG.info("Disabling pull to speed up tests");
             configuration.setPullDisabled(true);
         }
-        localRepositories = pushSourceChanges.cloneOrPullRepositories(configuration);
+        if (Tests.canTestWithGithubAPI(configuration)) {
 
-        LocalRepository sourceRepo = LocalRepository.findRepository(localRepositories, sourceRepoName);
-        assertThat(sourceRepo).describedAs("Could not find repository with name: " + sourceRepoName).isNotNull();
+            localRepositories = pushSourceChanges.cloneOrPullRepositories(configuration);
 
-        GitRepositoryConfig sourceRepoDetails = RepositoryConfigs.getGitHubRepositoryDetails(pushSourceChanges.getRepositoryConfig(configuration), sourceRepo.getDir());
-        assertThat(sourceRepoDetails).describedAs("should have found git repo config").isNotNull();
+            LocalRepository sourceRepo = LocalRepository.findRepository(localRepositories, sourceRepoName);
+            assertThat(sourceRepo).describedAs("Could not find repository with name: " + sourceRepoName).isNotNull();
 
-        // lets find the cloned repo...
-        configuration.setSourceDir(sourceRepo.getDir());
+            GitRepositoryConfig sourceRepoDetails = RepositoryConfigs.getGitHubRepositoryDetails(pushSourceChanges.getRepositoryConfig(configuration), sourceRepo.getDir());
+            assertThat(sourceRepoDetails).describedAs("should have found git repo config").isNotNull();
 
-        // lets close all open PRs
-        GitHubHelpers.closeOpenUpdateBotIssuesAndPullRequests(configuration.getGithubPullRequestLabel(), localRepositories);
-        GitHubHelpers.deleteUpdateBotBranches(localRepositories);
+            // lets find the cloned repo...
+            configuration.setSourceDir(sourceRepo.getDir());
+
+            // lets close all open PRs
+            GitHubHelpers.closeOpenUpdateBotIssuesAndPullRequests(configuration.getGithubPullRequestLabel(), localRepositories);
+            GitHubHelpers.deleteUpdateBotBranches(localRepositories);
+        }
     }
 
     @Test

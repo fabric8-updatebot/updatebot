@@ -15,22 +15,15 @@
  */
 package io.fabric8.updatebot.kind.maven;
 
+import de.pdark.decentxml.Document;
+import de.pdark.decentxml.Element;
+import de.pdark.decentxml.XMLParser;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.support.Strings;
-import io.fabric8.utils.DomHelper;
-import io.fabric8.utils.Files;
+import io.fabric8.utils.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,18 +36,6 @@ import java.util.TreeMap;
 public class PomHelper {
     private static final transient Logger LOG = LoggerFactory.getLogger(PomHelper.class);
 
-
-    public static Document parsePom(File pom) throws IOException {
-        if (Files.isFile(pom)) {
-            Document doc;
-            try {
-                doc = parseXmlFile(pom);
-            } catch (Exception e) {
-                throw new IOException("Cannot parse pom.xml: " + e, e);
-            }
-        }
-        return null;
-    }
 
     public static boolean updatePomVersionsInPoms(File dir, List<DependencyVersionChange> changes) throws IOException {
         List<PomUpdateStatus> pomsToChange = new ArrayList<>();
@@ -104,27 +85,23 @@ public class PomHelper {
 
 
     public static boolean updatePluginVersion(Document doc, DependencyVersionChange change, Map<String, String> propertyChanges) {
-        Element rootElement = doc.getDocumentElement();
-        NodeList plugins = rootElement.getElementsByTagName("plugin");
+        Element rootElement = doc.getRootElement();
+        List<Element> plugins = findElementsWithName(rootElement, "plugin");
 
         String newVersion = change.getVersion();
         boolean update = false;
-        for (int i = 0, size = plugins.getLength(); i < size; i++) {
-            Node item = plugins.item(i);
-            if (item instanceof Element) {
-                Element element = (Element) item;
-                String groupId = DomHelper.firstChildTextContent(element, "groupId");
-                String artifactId = DomHelper.firstChildTextContent(element, "artifactId");
-                if (change.matches(groupId, artifactId)) {
-                    String version = DomHelper.firstChildTextContent(element, "version");
-                    if (Strings.notEmpty(version)) {
-                        if (version.startsWith("${") && version.endsWith("}")) {
-                            String versionProperty = version.substring(2, version.length() - 1);
-                            propertyChanges.put(versionProperty, newVersion);
-                        } else {
-                            if (updateFirstChild(element, "version", newVersion)) {
-                                update = true;
-                            }
+        for (Element element : plugins) {
+            String groupId = firstChildTextContent(element, "groupId");
+            String artifactId = firstChildTextContent(element, "artifactId");
+            if (change.matches(groupId, artifactId)) {
+                String version = firstChildTextContent(element, "version");
+                if (Strings.notEmpty(version)) {
+                    if (version.startsWith("${") && version.endsWith("}")) {
+                        String versionProperty = version.substring(2, version.length() - 1);
+                        propertyChanges.put(versionProperty, newVersion);
+                    } else {
+                        if (updateFirstChild(element, "version", newVersion)) {
+                            update = true;
                         }
                     }
                 }
@@ -134,27 +111,22 @@ public class PomHelper {
     }
 
     public static boolean updateDependencyVersion(Document doc, DependencyVersionChange change, Map<String, String> propertyChanges) {
-        Element rootElement = doc.getDocumentElement();
-        NodeList plugins = rootElement.getElementsByTagName("dependency");
-
+        Element rootElement = doc.getRootElement();
+        List<Element> dependencies = findElementsWithName(rootElement, "dependency");
         String newVersion = change.getVersion();
         boolean update = false;
-        for (int i = 0, size = plugins.getLength(); i < size; i++) {
-            Node item = plugins.item(i);
-            if (item instanceof Element) {
-                Element element = (Element) item;
-                String groupId = DomHelper.firstChildTextContent(element, "groupId");
-                String artifactId = DomHelper.firstChildTextContent(element, "artifactId");
-                if (change.matches(groupId, artifactId)) {
-                    String version = DomHelper.firstChildTextContent(element, "version");
-                    if (Strings.notEmpty(version)) {
-                        if (version.startsWith("${") && version.endsWith("}")) {
-                            String versionProperty = version.substring(2, version.length() - 1);
-                            propertyChanges.put(versionProperty, newVersion);
-                        } else {
-                            if (updateFirstChild(element, "version", newVersion)) {
-                                update = true;
-                            }
+        for (Element element : dependencies) {
+            String groupId = firstChildTextContent(element, "groupId");
+            String artifactId = firstChildTextContent(element, "artifactId");
+            if (change.matches(groupId, artifactId)) {
+                String version = firstChildTextContent(element, "version");
+                if (Strings.notEmpty(version)) {
+                    if (version.startsWith("${") && version.endsWith("}")) {
+                        String versionProperty = version.substring(2, version.length() - 1);
+                        propertyChanges.put(versionProperty, newVersion);
+                    } else {
+                        if (updateFirstChild(element, "version", newVersion)) {
+                            update = true;
                         }
                     }
                 }
@@ -163,10 +135,35 @@ public class PomHelper {
         return update;
     }
 
+    public static List<Element> findElementsWithName(Element rootElement, String elementName) {
+        List<Element> answer = new ArrayList<>();
+        List<Element> children = rootElement.getChildren();
+        for (Element child : children) {
+            if (Objects.equal(elementName, child.getName())) {
+                answer.add(child);
+            } else {
+                answer.addAll(findElementsWithName(child, elementName));
+            }
+        }
+        return answer;
+    }
+
+    public static String firstChildTextContent(Element element, String elementName) {
+        Element child = firstChild(element, elementName);
+        if (child != null) {
+            return child.getText();
+        }
+        return null;
+    }
+
+    public static Element firstChild(Element element, String elementName) {
+        return element.getChild(elementName);
+    }
+
     public static boolean updateProperties(Document doc, Map<String, String> propertyChanges) {
-        Element rootElement = doc.getDocumentElement();
+        Element rootElement = doc.getRootElement();
         boolean update = false;
-        Element properties = DomHelper.firstChild(rootElement, "properties");
+        Element properties = firstChild(rootElement, "properties");
         if (properties != null) {
             for (Map.Entry<String, String> entry : propertyChanges.entrySet()) {
                 String propertyName = entry.getKey();
@@ -179,52 +176,23 @@ public class PomHelper {
         return update;
     }
 
-    /**
-     * Returns the combined text of previous nodes of the given element
-     */
 
-    private static String getPreviousText(Node node) {
-        StringBuilder builder = new StringBuilder();
-        while (node != null) {
-            node = node.getPreviousSibling();
-            if (node instanceof Text) {
-                Text textNode = (Text) node;
-                builder.append(textNode.getWholeText());
-            } else {
-                break;
-            }
-        }
-        return builder.toString();
-    }
-
-    public static Document parseXmlFile(File pomFile) throws ParserConfigurationException, SAXException, IOException {
-        DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        return documentBuilder.parse(pomFile);
+    public static Document parseXmlFile(File pomFile) throws IOException {
+        XMLParser parser = new XMLParser();
+        return parser.parse(pomFile);
     }
 
     private static boolean updateFirstChild(Element parentElement, String elementName, String value) {
         if (parentElement != null) {
-            Element element = DomHelper.firstChild(parentElement, elementName);
+            Element element = firstChild(parentElement, elementName);
             if (element != null) {
-                String textContent = element.getTextContent();
+                String textContent = element.getText();
                 if (textContent == null || !value.equals(textContent)) {
-                    element.setTextContent(value);
+                    element.setText(value);
                     return true;
                 }
             }
         }
         return false;
-    }
-
-    private static Element getGrandParentElement(Element node) {
-        Node parentNode = node.getParentNode();
-        if (parentNode != null) {
-            Node grandParent = parentNode.getParentNode();
-            if (grandParent instanceof Element) {
-                Element element = (Element) grandParent;
-                return element;
-            }
-        }
-        return null;
     }
 }

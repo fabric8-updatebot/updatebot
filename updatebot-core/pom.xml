@@ -90,6 +90,13 @@
       <version>${slf4j-api.version}</version>
     </dependency>
 
+    <!-- for whitespace preserving DOM -->
+    <dependency>
+      <groupId>de.pdark</groupId>
+      <artifactId>decentxml</artifactId>
+      <version>1.4</version>
+    </dependency>
+
 
     <!-- testing -->
     <dependency>

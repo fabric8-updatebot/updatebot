@@ -143,8 +143,8 @@ public class MavenUpdater implements Updater {
 
     @Override
     public KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> value) {
-        // TODO
-        return null;
+        // TODO 
+        return new KindDependenciesCheck(value);
     }
 
 }
