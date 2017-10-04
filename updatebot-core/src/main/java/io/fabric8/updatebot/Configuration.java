@@ -17,6 +17,7 @@ package io.fabric8.updatebot;
 
 import com.beust.jcommander.Parameter;
 import io.fabric8.updatebot.git.GitPlugin;
+import io.fabric8.updatebot.git.GitPluginCLI;
 import io.fabric8.updatebot.kind.npm.DefaultNpmDependencyTreeGenerator;
 import io.fabric8.updatebot.kind.npm.NpmDependencyTreeGenerator;
 import io.fabric8.updatebot.support.Strings;
@@ -39,7 +40,7 @@ import java.util.TreeMap;
  * Common configuration parameters
  */
 public class Configuration {
-    public GitPlugin git = new GitPlugin(this);
+    public GitPlugin git = new GitPluginCLI(this);
     @Parameter(names = {"--github-pr-label", "-ghl"}, description = "GitHub Pull Request Label")
     private String githubPullRequestLabel = Systems.getConfigValue(EnvironmentVariables.GITHUB_PR_LABEL, "updatebot");
     @Parameter(names = {"--dry"}, description = "Dry Run mode does not perform any git commits")
