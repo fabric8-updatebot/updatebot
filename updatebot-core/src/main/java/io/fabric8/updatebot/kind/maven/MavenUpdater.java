@@ -44,7 +44,7 @@ public class MavenUpdater implements Updater {
     String updateBotPluginVersion = "1.0-SNAPSHOT";
 
     public static boolean runCommandAndLogOutput(CommandContext context, String... commands) {
-        if (ProcessHelper.runCommandAndLogOutput(context.getDir(), commands)) {
+        if (ProcessHelper.runCommandAndLogOutput(context.getConfiguration(), LOG, context.getDir(), commands)) {
             // TODO check if we have changed the source at all
             return true;
         }

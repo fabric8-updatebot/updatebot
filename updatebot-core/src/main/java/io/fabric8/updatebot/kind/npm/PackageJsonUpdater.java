@@ -94,7 +94,7 @@ public class PackageJsonUpdater extends UpdaterSupport implements Updater {
             String version = JsonNodes.textValue(tree, "version");
             if (Strings.notEmpty(name) && Strings.notEmpty(version)) {
                 if (isDevelopmentVersion(name, version)) {
-                    LOG.info("Not updating NPM dependency " + name + " version " + version + " as this is a development version and not a release");
+                    context.info(LOG, "Not updating NPM dependency " + name + " version " + version + " as this is a development version and not a release");
                 } else {
                     list.add(new DependencyVersionChange(Kind.NPM, name, version, NpmDependencyKinds.DEPENDENCIES));
                 }
@@ -199,11 +199,7 @@ public class PackageJsonUpdater extends UpdaterSupport implements Updater {
     @Override
     public boolean pullVersions(CommandContext context) throws IOException {
         File dir = context.getRepository().getDir();
-        int status = ProcessHelper.runCommand(dir, "ncu", "--upgrade");
-        if (status == 0) {
-            return true;
-        }
-        return false;
+        return ProcessHelper.runCommandAndLogOutput(context.getConfiguration(), LOG, dir, "ncu", "--upgrade");
     }
 
 

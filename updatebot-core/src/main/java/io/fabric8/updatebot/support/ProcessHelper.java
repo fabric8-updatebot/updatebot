@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.support;
 
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.utils.Files;
 import io.fabric8.utils.IOHelpers;
 import io.fabric8.utils.Strings;
@@ -93,7 +94,7 @@ public class ProcessHelper {
         return 1;
     }
 
-    public static boolean runCommandAndLogOutput(File dir, String[] commands) {
+    public static boolean runCommandAndLogOutput(File dir, String... commands) {
         File outputFile = new File(dir, "target/updatebot.log");
         File errorFile = new File(dir, "target/updatebot.err");
         outputFile.getParentFile().mkdirs();
@@ -105,6 +106,24 @@ public class ProcessHelper {
         logOutput(outputFile, false);
         logOutput(errorFile, true);
         return answer;
+    }
+
+    public static boolean runCommandAndLogOutput(Configuration configuration, Logger log, File dir, String... commands) {
+        File outputFile = new File(dir, "target/updatebot.log");
+        File errorFile = new File(dir, "target/updatebot.err");
+        outputFile.getParentFile().mkdirs();
+        boolean answer = true;
+        if (runCommand(dir, outputFile, errorFile, commands) != 0) {
+            LOG.warn("Failed to run " + String.join(" ", commands));
+            answer = false;
+        }
+        logOutput(configuration, log, outputFile, false);
+        logOutput(configuration, log, errorFile, true);
+        return answer;
+    }
+
+    public static void logOutput(Configuration configuration, Logger log, File file, boolean error) {
+        logOutput(configuration, log, loadFile(file), error);
     }
 
     public static void logOutput(File file, boolean error) {
@@ -119,6 +138,19 @@ public class ProcessHelper {
                     LOG.error(line);
                 } else {
                     LOG.info(line);
+                }
+            }
+        }
+    }
+
+    protected static void logOutput(Configuration configuration, Logger log, String output, boolean error) {
+        if (Strings.notEmpty(output)) {
+            String[] lines = output.split("\n");
+            for (String line : lines) {
+                if (error) {
+                    configuration.info(log, line);
+                } else {
+                    configuration.warn(log, line);
                 }
             }
         }

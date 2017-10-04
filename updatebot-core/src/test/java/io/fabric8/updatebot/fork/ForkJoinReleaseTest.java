@@ -107,7 +107,7 @@ public class ForkJoinReleaseTest {
         LocalRepository sourceRepo = assertLocalRepository(repoName);
         File dir = sourceRepo.getDir();
 
-        NpmTests.updatePackageJsonVersion(new File(dir, "package.json"), version);
+        NpmTests.updatePackageJsonVersion(configuration, new File(dir, "package.json"), version);
 
         PushSourceChanges pushSourceChanges = new PushSourceChanges();
 

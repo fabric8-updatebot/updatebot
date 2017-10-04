@@ -16,6 +16,8 @@
 package io.fabric8.updatebot;
 
 import com.beust.jcommander.Parameter;
+import io.fabric8.updatebot.git.GitPlugin;
+import io.fabric8.updatebot.git.GitPluginCLI;
 import io.fabric8.updatebot.kind.npm.DefaultNpmDependencyTreeGenerator;
 import io.fabric8.updatebot.kind.npm.NpmDependencyTreeGenerator;
 import io.fabric8.updatebot.support.Strings;
@@ -24,6 +26,7 @@ import org.kohsuke.github.AbuseLimitHandler;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.kohsuke.github.RateLimitHandler;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +40,7 @@ import java.util.TreeMap;
  * Common configuration parameters
  */
 public class Configuration {
+    public GitPlugin git = new GitPluginCLI(this);
     @Parameter(names = {"--github-pr-label", "-ghl"}, description = "GitHub Pull Request Label")
     private String githubPullRequestLabel = Systems.getConfigValue(EnvironmentVariables.GITHUB_PR_LABEL, "updatebot");
     @Parameter(names = {"--dry"}, description = "Dry Run mode does not perform any git commits")
@@ -56,7 +60,6 @@ public class Configuration {
     private boolean checkDependencies = true;
     @Parameter(names = {"--dir", "-d"}, description = "The source directory containing the git clone of the source to process")
     private String sourcePath;
-
     private File sourceDir;
     private boolean rebaseMode = true;
     private NpmDependencyTreeGenerator npmDependencyTreeGenerator = new DefaultNpmDependencyTreeGenerator();
@@ -226,5 +229,38 @@ public class Configuration {
 
     public void setPrintStream(PrintStream printStream) {
         this.printStream = printStream;
+    }
+
+    public GitPlugin getGit() {
+        return git;
+    }
+
+    public void setGit(GitPlugin git) {
+        this.git = git;
+    }
+
+    public void info(Logger log, String message) {
+        if (printStream != null) {
+            printStream.println(message);
+        } else {
+            log.info(message);
+        }
+    }
+
+    public void warn(Logger log, String message) {
+        if (printStream != null) {
+            printStream.println("WARNING: " + message);
+        } else {
+            log.warn(message);
+        }
+    }
+
+    public void warn(Logger log, String message, Throwable e) {
+        if (printStream != null) {
+            printStream.println("WARNING: " + message + " " + e);
+            e.printStackTrace(printStream);
+        } else {
+            log.warn(message, e);
+        }
     }
 }

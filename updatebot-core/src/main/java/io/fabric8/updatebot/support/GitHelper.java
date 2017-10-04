@@ -19,8 +19,6 @@ import io.fabric8.utils.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -30,31 +28,6 @@ import java.util.List;
  */
 public class GitHelper {
     private static final transient Logger LOG = LoggerFactory.getLogger(GitHelper.class);
-
-    public static boolean gitAddAndCommit(File dir, String commitComment) {
-        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "add", "*") == 0) {
-            if (ProcessHelper.runCommand(dir, "git", "commit", "-m", commitComment) == 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean gitStashAndCheckoutMaster(File dir) {
-        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "stash") == 0) {
-            if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "checkout", "master") == 0) {
-                return true;
-            }
-        }
-        LOG.warn("Failed to checkout master in " + dir);
-        return false;
-    }
-
-    public static void revertChanges(File dir) throws IOException {
-        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "stash") != 0) {
-            throw new IOException("Failed to stash old changes!");
-        }
-    }
 
     public static List<String> getGitHubCloneUrls(String gitHubHost, String orgName, String repository) {
         List<String> answer = new ArrayList<>();
@@ -119,18 +92,4 @@ public class GitHelper {
         return path;
     }
 
-    /**
-     * Returns true if the given directory has modified files
-     */
-    public static boolean hasChangedFiles(File dir) {
-        try {
-            String output = ProcessHelper.runCommandCaptureOutput(dir, "git", "status", "-s");
-            if (output != null) {
-                output = output.trim();
-            }
-            return Strings.notEmpty(output);
-        } catch (IOException e) {
-            return false;
-        }
-    }
 }
