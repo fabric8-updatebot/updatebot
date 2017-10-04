@@ -93,7 +93,7 @@ public class CompositeUpdater implements Updater {
     }
 
     @Override
-    public KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> changes) {
+    public KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> changes) throws IOException {
         // TODO does not handle differnet kinds!!!
         KindDependenciesCheck answer = new KindDependenciesCheck();
         Kind[] kinds = Kind.values();

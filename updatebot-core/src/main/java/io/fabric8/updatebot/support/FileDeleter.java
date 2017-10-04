@@ -13,15 +13,32 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot.kind.npm;
+package io.fabric8.updatebot.support;
 
-import io.fabric8.updatebot.commands.CommandContext;
-
+import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 
 /**
- * The strategy used to generate the npm dependency tree
+ * Allows a number of files to be deleted using a Java try-with-resources block (try / catch).
+ * <br>
+ * <code>
+ *     try (new FileDeleter(file1, file2)) { ... }
+ * </code>
  */
-public interface NpmDependencyTreeGenerator {
-    void generateDependencyTree(CommandContext context, String dependencyFileName) throws IOException;
+public class FileDeleter implements Closeable {
+    private final File[] files;
+
+    public FileDeleter(File... files) {
+        this.files = files;
+    }
+
+    @Override
+    public void close() throws IOException {
+        for (File file : files) {
+            if (file.exists()) {
+                file.delete();
+            }
+        }
+    }
 }

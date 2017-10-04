@@ -29,6 +29,7 @@ import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.DependencySet;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.model.NpmDependencies;
+import io.fabric8.updatebot.support.FileDeleter;
 import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.support.JsonNodes;
 import io.fabric8.updatebot.support.MarkupHelper;
@@ -125,7 +126,7 @@ public class PackageJsonUpdater extends UpdaterSupport implements Updater {
     }
 
     @Override
-    public KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> changes) {
+    public KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> changes) throws IOException {
         List<DependencyVersionChange> validChanges = new ArrayList<>();
         List<DependencyVersionChange> invalidChanges = new ArrayList<>();
         Map<String, DependencyCheck> failedChecks = new TreeMap<>();
@@ -133,13 +134,11 @@ public class PackageJsonUpdater extends UpdaterSupport implements Updater {
         String dependencyFileName = ".dependency-tree.json";
         generateDependencyTree(context, dependencyFileName);
         JsonNode json = null;
-        try {
+        File file = new File(context.getDir(), dependencyFileName);
+        try (FileDeleter ignore = new FileDeleter(file)){
             json = getJsonFile(context, dependencyFileName);
-        } finally {
-            File file = new File(context.getDir(), dependencyFileName);
-            if (Files.isFile(file)) {
-                file.delete();
-            }
+        } catch (IOException e) {
+            LOG.warn("Caught " + e, e);
         }
         if (json != null) {
             DependencyTree dependencyTree = DependencyTree.parseTree(json);
@@ -156,7 +155,7 @@ public class PackageJsonUpdater extends UpdaterSupport implements Updater {
         return new KindDependenciesCheck(validChanges, invalidChanges, failedChecks);
     }
 
-    protected void generateDependencyTree(CommandContext context, String dependencyFileName) {
+    protected void generateDependencyTree(CommandContext context, String dependencyFileName) throws IOException {
         context.getConfiguration().getNpmDependencyTreeGenerator().generateDependencyTree(context, dependencyFileName);
 
     }
