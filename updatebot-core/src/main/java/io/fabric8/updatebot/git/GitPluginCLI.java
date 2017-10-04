@@ -17,6 +17,9 @@ package io.fabric8.updatebot.git;
 
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.support.ProcessHelper;
+import io.fabric8.updatebot.support.Strings;
+import org.kohsuke.github.GHMyself;
+import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +45,9 @@ public class GitPluginCLI implements GitPlugin {
 
     @Override
     public boolean push(File dir, String localBranch) {
-        return ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "push", "-f", "origin", localBranch);
+        // this option leaks the secure git URL... - we could try filter it out?
+        //return ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "push", "-f", "origin", localBranch);
+        return ProcessHelper.runCommandIgnoreOutput(dir, "git", "push", "-f", "origin", localBranch) == 0;
     }
 
     @Override
@@ -52,8 +57,33 @@ public class GitPluginCLI implements GitPlugin {
     }
 
     @Override
-    public void clone(File dir, String cloneUrl, String name) {
-        ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "clone", cloneUrl, name);
+    public void clone(File dir, String cloneUrl, String repoName) {
+        ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "clone", cloneUrl, repoName);
+    }
+
+    @Override
+    public void configUserNameAndEmail(File dir) {
+        String email = null;
+        String personName = null;
+        try {
+            GitHub github = configuration.getGithub();
+            if (github != null) {
+                GHMyself myself = github.getMyself();
+                if (myself != null) {
+                    email = myself.getEmail();
+                    personName = myself.getName();
+
+                }
+            }
+        } catch (IOException e) {
+            configuration.warn(LOG, "Failed to load github username and email: " + e, e);
+        }
+        if (Strings.notEmpty(email)) {
+            ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "config", "user.email", email);
+        }
+        if (Strings.notEmpty(personName)) {
+            ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "config", "user.name", personName);
+        }
     }
 
     @Override

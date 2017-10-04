@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.fabric8.updatebot.support;
+package io.fabric8.updatebot.git;
 
 import org.junit.Test;
 

@@ -20,6 +20,7 @@ import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.CommandNames;
 import io.fabric8.updatebot.Configuration;
+import io.fabric8.updatebot.git.GitHelper;
 import io.fabric8.updatebot.kind.CompositeUpdater;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.DependencyVersionChange;
@@ -73,6 +74,10 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
         this.cloneUrl = cloneUrl;
     }
 
+    public String getRepositoryFullName() {
+        return sourceRepository.getFullName();
+    }
+
     protected String getOperationDescription(CommandContext context) {
         LocalRepository sourceRepository = getSourceRepository();
         if (sourceRepository != null) {
@@ -89,7 +94,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
             return false;
         }
         List<DependencyVersionChange> steps = loadVersionChangesFromSource(context);
-        String sourceFullName = getCloneUrl();
+        String sourceFullName = getRepositoryFullName();
         LocalRepository sourceRepository = getSourceRepository();
         if (sourceRepository != null) {
             sourceFullName = sourceRepository.getFullName();
@@ -120,7 +125,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
                     throw new ParameterException("Could not find the git clone URL in " + dir + ". " + e, e);
                 }
                 if (url != null) {
-                    setCloneUrl(url);
+                    setCloneUrl(GitHelper.removeUsernamePassword(url));
                 }
             }
         }
@@ -199,6 +204,14 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
     protected LocalRepository findLocalRepository(Configuration configuration) throws IOException {
         String cloneUrl = getCloneUrl();
         List<LocalRepository> localRepositories = getLocalRepositories(configuration);
+        LocalRepository localRepository = findLocalRepository(localRepositories, cloneUrl);
+        if (localRepository != null) {
+            return localRepository;
+        }
+        return findLocalRepository(localRepositories, GitHelper.removeUsernamePassword(cloneUrl));
+    }
+
+    private LocalRepository findLocalRepository(List<LocalRepository> localRepositories, String cloneUrl) {
         for (LocalRepository localRepository : localRepositories) {
             if (localRepository.hasCloneUrl(cloneUrl)) {
                 return localRepository;

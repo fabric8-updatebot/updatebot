@@ -58,11 +58,12 @@ public class Repositories {
 
     private static void cloneOrPull(Configuration configuration, LocalRepository repository) {
         File dir = repository.getDir();
+        String secureCloneUrl = repository.getRepo().secureCloneUrl(configuration);
         File gitDir = new File(dir, ".git");
         if (gitDir.exists()) {
             if (configuration.getGit().stashAndCheckoutMaster(dir)) {
                 if (!configuration.isPullDisabled()) {
-                    configuration.git.pull(dir, repository.getCloneUrl());
+                    configuration.getGit().pull(dir, repository.getCloneUrl());
                 }
             }
         } else {
@@ -70,7 +71,9 @@ public class Repositories {
             parentDir.mkdirs();
 
             configuration.info(LOG, "Cloning: " + repository.getFullName() + " to " + FileHelper.getRelativePathToCurrentDir(dir));
-            configuration.git.clone(parentDir, repository.getCloneUrl(), dir.getName());
+            configuration.getGit().clone(parentDir, secureCloneUrl, dir.getName());
+
+            configuration.getGit().configUserNameAndEmail(dir);
         }
     }
 

@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.model;
 
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.support.Strings;
 import org.kohsuke.github.GHRepository;
 
@@ -69,5 +70,31 @@ public class GithubRepository extends GitRepository {
                 repository.getSshUrl(),
                 repository.getUrl(),
                 repository.getSvnUrl());
+    }
+
+    @Override
+    public String secureCloneUrl(Configuration configuration) {
+        if (configuration.isUseHttpsTransport()) {
+            String username = configuration.getGithubUsername();
+            String password = configuration.getGithubPassword();
+            if (Strings.empty(username)) {
+                throw new IllegalArgumentException("Missing githubUsername in configuration!");
+            } else if (Strings.empty(password)) {
+                throw new IllegalArgumentException("Missing githubPassword in configuration!");
+            }
+
+            URL url = repository.getHtmlUrl();
+            String host = username + ":" + password + "@" + url.getHost();
+            String file = url.getFile();
+            if (!file.startsWith("/")) {
+                file = "/" + file;
+            }
+            String answer = "https://" + host + file;
+            if (!answer.endsWith(".git")) {
+                answer += ".git";
+            }
+            return answer;
+        }
+        return getCloneUrl();
     }
 }

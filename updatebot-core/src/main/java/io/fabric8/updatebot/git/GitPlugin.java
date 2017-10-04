@@ -47,6 +47,8 @@ public interface GitPlugin {
 
     void clone(File dir, String cloneUrl, String name);
 
+    void configUserNameAndEmail(File dir);
+
     boolean commitToBranch(File dir, String branch, String commitComment);
 
     void deleteBranch(File dir, String localBranch);

@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.model;
 
+import io.fabric8.updatebot.git.GitHelper;
 import io.fabric8.utils.Files;
 import io.fabric8.utils.GitHelpers;
 
@@ -70,6 +71,8 @@ public class RepositoryConfigs {
     public static GitRepositoryConfig getGitHubRepositoryDetails(RepositoryConfig repositoryConfig, File sourceDir) throws IOException {
         String cloneUrl = GitHelpers.extractGitUrl(sourceDir);
         if (cloneUrl != null) {
+            // lets remove any user/password if using HTTPS
+            cloneUrl = GitHelper.removeUsernamePassword(cloneUrl);
             return repositoryConfig.getRepositoryDetails(cloneUrl);
         }
         return null;
