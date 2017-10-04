@@ -16,6 +16,7 @@
 package io.fabric8.updatebot.commands;
 
 import io.fabric8.updatebot.Configuration;
+import io.fabric8.updatebot.git.GitPlugin;
 import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.model.DependencyVersionChange;
@@ -30,8 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -150,6 +149,9 @@ public class CommandContext {
         updatedFiles.add(file);
     }
 
+    public GitPlugin getGit() {
+        return getConfiguration().getGit();
+    }
 
     // TODO inline or remove?? should use the Command rather than context?
     public PushVersionChangesContext updateVersion(Kind kind, String name, String version) {
@@ -251,4 +253,5 @@ public class CommandContext {
     public void warn(Logger log, String message, Throwable e) {
         getConfiguration().warn(log, message, e);
     }
+
 }

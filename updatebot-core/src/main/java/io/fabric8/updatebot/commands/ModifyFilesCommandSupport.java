@@ -24,8 +24,6 @@ import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.kind.KindDependenciesCheck;
 import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.model.DependencyVersionChange;
-import io.fabric8.updatebot.support.GitHelper;
-import io.fabric8.updatebot.support.ProcessHelper;
 import io.fabric8.utils.Objects;
 import org.kohsuke.github.GHCommitPointer;
 import org.kohsuke.github.GHIssue;
@@ -70,7 +68,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
     protected void prepareDirectory(CommandContext context) {
         File dir = context.getRepository().getDir();
         dir.getParentFile().mkdirs();
-        GitHelper.gitStashAndCheckoutMaster(dir);
+        context.getGit().stashAndCheckoutMaster(dir);
     }
 
     protected boolean doProcess(CommandContext context) throws IOException {
@@ -94,9 +92,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
         String title = context.createPullRequestTitle();
         String remoteURL = "git@github.com:" + ghRepository.getOwnerName() + "/" + ghRepository.getName();
         File dir = context.getDir();
-        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "remote", "set-url", "origin", remoteURL) != 0) {
-            context.warn(LOG, "Could not set the remote URL of " + remoteURL);
-        }
+        context.getGit().setRemoteURL(dir, remoteURL);
 
         String commandComment = createPullRequestComment();
 
@@ -108,7 +104,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             //String head = getGithubUsername() + ":" + localBranch;
             String head = localBranch;
 
-            if (!ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "push", "-f", "origin", localBranch)) {
+            if (!context.getGit().push(dir, localBranch)) {
                 context.warn(LOG, "Failed to push branch " + localBranch + " for " + context.getCloneUrl());
                 return;
             }
@@ -145,11 +141,11 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             String localBranch = remoteRef;
 
             // lets remove any local branches of this name
-            ProcessHelper.runCommandIgnoreOutput(dir, "git", "branch", "-D", localBranch);
+            context.getGit().deleteBranch(dir, localBranch);
 
             doCommit(context, dir, localBranch);
 
-            if (!ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "push", "-f", "origin", localBranch + ":" + remoteRef)) {
+            if (!context.getGit().push(dir, localBranch + ":" + remoteRef)) {
                 context.warn(LOG, "Failed to push branch " + localBranch + " to existing github branch " + remoteRef + " for " + pullRequest.getHtmlUrl());
             }
             context.info(LOG, "Updated PR " + pullRequest.getHtmlUrl());
@@ -184,10 +180,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
 
     private boolean doCommit(CommandContext context, File dir, String branch) {
         String commitComment = context.createCommit();
-        if (ProcessHelper.runCommandIgnoreOutput(dir, "git", "checkout", "-b", branch) == 0) {
-            return GitHelper.gitAddAndCommit(dir, commitComment);
-        }
-        return false;
+        return context.getGit().commitToBranch(dir, branch, commitComment);
     }
 
     /**
@@ -232,7 +225,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
                 List<DependencyVersionChange> validChanges = check.getValidChanges();
                 if (invalidChanges.size() > 0) {
                     // lets revert the current changes
-                    GitHelper.revertChanges(context.getDir());
+                    context.getGit().revertChanges(context.getDir());
                     if (validChanges.size() > 0) {
                         // lets perform just the valid changes
                         if (!pushVersionChangesWithoutChecks(context, validChanges)) {
