@@ -311,7 +311,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
     }
 
 
-    protected DependenciesCheck checkDependencyChanges(CommandContext context, List<DependencyVersionChange> steps) {
+    protected DependenciesCheck checkDependencyChanges(CommandContext context, List<DependencyVersionChange> steps) throws IOException {
         Map<Kind, List<DependencyVersionChange>> map = new LinkedHashMap<>();
         for (DependencyVersionChange change : steps) {
             Kind kind = change.getKind();

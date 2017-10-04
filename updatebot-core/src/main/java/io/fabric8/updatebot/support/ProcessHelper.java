@@ -97,29 +97,39 @@ public class ProcessHelper {
     public static boolean runCommandAndLogOutput(File dir, String... commands) {
         File outputFile = new File(dir, "target/updatebot.log");
         File errorFile = new File(dir, "target/updatebot.err");
-        outputFile.getParentFile().mkdirs();
-        boolean answer = true;
-        if (runCommand(dir, outputFile, errorFile, commands) != 0) {
-            LOG.warn("Failed to run " + String.join(" ", commands));
-            answer = false;
+        try (FileDeleter ignored = new FileDeleter(outputFile, errorFile)) {
+            outputFile.getParentFile().mkdirs();
+            boolean answer = true;
+            if (runCommand(dir, outputFile, errorFile, commands) != 0) {
+                LOG.warn("Failed to run " + String.join(" ", commands));
+                answer = false;
+            }
+            logOutput(outputFile, false);
+            logOutput(errorFile, true);
+            return answer;
+        } catch (IOException e) {
+            LOG.warn("Caught: " + e, e);
+            return false;
         }
-        logOutput(outputFile, false);
-        logOutput(errorFile, true);
-        return answer;
     }
 
     public static boolean runCommandAndLogOutput(Configuration configuration, Logger log, File dir, String... commands) {
         File outputFile = new File(dir, "target/updatebot.log");
         File errorFile = new File(dir, "target/updatebot.err");
-        outputFile.getParentFile().mkdirs();
-        boolean answer = true;
-        if (runCommand(dir, outputFile, errorFile, commands) != 0) {
-            LOG.warn("Failed to run " + String.join(" ", commands));
-            answer = false;
+        try (FileDeleter ignored = new FileDeleter(outputFile, errorFile)) {
+            outputFile.getParentFile().mkdirs();
+            boolean answer = true;
+            if (runCommand(dir, outputFile, errorFile, commands) != 0) {
+                LOG.warn("Failed to run " + String.join(" ", commands));
+                answer = false;
+            }
+            logOutput(configuration, log, outputFile, false);
+            logOutput(configuration, log, errorFile, true);
+            return answer;
+        } catch (IOException e) {
+            LOG.warn("Caught: " + e, e);
+            return false;
         }
-        logOutput(configuration, log, outputFile, false);
-        logOutput(configuration, log, errorFile, true);
-        return answer;
     }
 
     public static void logOutput(Configuration configuration, Logger log, File file, boolean error) {

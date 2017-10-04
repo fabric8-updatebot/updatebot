@@ -34,7 +34,7 @@ public interface Updater {
 
     boolean pullVersions(CommandContext context) throws IOException;
 
-    KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> value);
+    KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> value) throws IOException;
 
     boolean pushVersions(CommandContext parentContext, List<DependencyVersionChange> changes) throws IOException;
 }

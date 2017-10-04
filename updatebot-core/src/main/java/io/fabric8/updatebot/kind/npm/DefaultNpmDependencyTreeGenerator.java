@@ -16,11 +16,13 @@
 package io.fabric8.updatebot.kind.npm;
 
 import io.fabric8.updatebot.commands.CommandContext;
+import io.fabric8.updatebot.support.FileDeleter;
 import io.fabric8.updatebot.support.ProcessHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  */
@@ -28,7 +30,7 @@ public class DefaultNpmDependencyTreeGenerator implements NpmDependencyTreeGener
     private static final transient Logger LOG = LoggerFactory.getLogger(DefaultNpmDependencyTreeGenerator.class);
 
     @Override
-    public void generateDependencyTree(CommandContext context, String dependencyFileName) {
+    public void generateDependencyTree(CommandContext context, String dependencyFileName) throws IOException {
         File dir = context.getDir();
         context.info(LOG, "Generating dependency tree file " + dependencyFileName + " in " + dir);
 
@@ -36,10 +38,12 @@ public class DefaultNpmDependencyTreeGenerator implements NpmDependencyTreeGener
 
         File outputFile = new File(dir, dependencyFileName);
         File errorFile = new File(dir, "npm-list-errors.log");
-        if (ProcessHelper.runCommand(dir, outputFile, errorFile, "npm", "list", "-json") != 0) {
-            context.warn(LOG, "Failed to generate dependencies file " + outputFile);
-        } else {
-            LOG.debug("Generate dependencies file " + outputFile);
+        try (FileDeleter ignored = new FileDeleter(errorFile)) {
+            if (ProcessHelper.runCommand(dir, outputFile, errorFile, "npm", "list", "-json") != 0) {
+                context.warn(LOG, "Failed to generate dependencies file " + outputFile);
+            } else {
+                LOG.debug("Generate dependencies file " + outputFile);
+            }
         }
 
     }
