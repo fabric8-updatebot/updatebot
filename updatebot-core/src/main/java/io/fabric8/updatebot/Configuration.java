@@ -64,7 +64,7 @@ public class Configuration {
 
     @Parameter(names = {"--mvn"}, description = "The location of the `mvn` executable for invoking maven")
     private String mvnCommand = Systems.getConfigValue(EnvironmentVariables.MVN_COMMAND, "mvn");
-    @Parameter(names = {"--mvn"}, description = "The location of the `npm` executable for invoking nodejs tooling")
+    @Parameter(names = {"--npm"}, description = "The location of the `npm` executable for invoking nodejs tooling")
     private String npmCommand = Systems.getConfigValue(EnvironmentVariables.NPM_COMMAND, "npm");
 
     private File sourceDir;
