@@ -62,6 +62,11 @@ public class Configuration {
     @Parameter(names = {"--https"}, description = "Whether to use HTTPS transport instead of git and SSH")
     private boolean useHttpsTransport;
 
+    @Parameter(names = {"--mvn"}, description = "The location of the `mvn` executable for invoking maven")
+    private String mvnCommand = Systems.getConfigValue(EnvironmentVariables.MVN_COMMAND, "mvn");
+    @Parameter(names = {"--npm"}, description = "The location of the `npm` executable for invoking nodejs tooling")
+    private String npmCommand = Systems.getConfigValue(EnvironmentVariables.NPM_COMMAND, "npm");
+
     private File sourceDir;
     private boolean rebaseMode = true;
     private NpmDependencyTreeGenerator npmDependencyTreeGenerator = new DefaultNpmDependencyTreeGenerator();
@@ -248,6 +253,22 @@ public class Configuration {
 
     public void setGit(GitPlugin git) {
         this.git = git;
+    }
+
+    public String getMvnCommand() {
+        return mvnCommand;
+    }
+
+    public void setMvnCommand(String mvnCommand) {
+        this.mvnCommand = mvnCommand;
+    }
+
+    public String getNpmCommand() {
+        return npmCommand;
+    }
+
+    public void setNpmCommand(String npmCommand) {
+        this.npmCommand = npmCommand;
     }
 
     public void info(Logger log, String message) {

@@ -23,7 +23,7 @@ import java.io.IOException;
  * Allows a number of files to be deleted using a Java try-with-resources block (try / catch).
  * <br>
  * <code>
- *     try (new FileDeleter(file1, file2)) { ... }
+ * try (new FileDeleter(file1, file2)) { ... }
  * </code>
  */
 public class FileDeleter implements Closeable {

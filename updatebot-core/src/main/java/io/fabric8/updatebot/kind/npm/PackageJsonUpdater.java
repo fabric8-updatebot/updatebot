@@ -57,7 +57,16 @@ public class PackageJsonUpdater extends UpdaterSupport implements Updater {
 
     @Override
     public boolean isApplicable(CommandContext context) {
-        return FileHelper.isFile(context.file("package.json"));
+        boolean answer = FileHelper.isFile(context.file("package.json"));
+        // lets verify we have a npm install
+        String npmCommand = context.getConfiguration().getNpmCommand();
+        int returnCode = ProcessHelper.runCommandIgnoreOutput(context.getDir(), npmCommand, "-v");
+        if (returnCode != 0) {
+            context.warn(LOG, "Could not invoke NodeJS!. Command failed: " + npmCommand + " -v => " + returnCode);
+            context.warn(LOG, "Please verify you have `npm` on your PATH or you have configured NodeJS property");
+            return false;
+        }
+        return answer;
     }
 
     @Override
@@ -132,10 +141,10 @@ public class PackageJsonUpdater extends UpdaterSupport implements Updater {
         Map<String, DependencyCheck> failedChecks = new TreeMap<>();
 
         String dependencyFileName = ".dependency-tree.json";
-        generateDependencyTree(context, dependencyFileName);
         JsonNode json = null;
         File file = new File(context.getDir(), dependencyFileName);
-        try (FileDeleter ignore = new FileDeleter(file)){
+        try (FileDeleter ignore = new FileDeleter(file)) {
+            generateDependencyTree(context, dependencyFileName);
             json = getJsonFile(context, dependencyFileName);
         } catch (IOException e) {
             LOG.warn("Caught " + e, e);
