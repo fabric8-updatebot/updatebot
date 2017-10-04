@@ -42,8 +42,8 @@ import static io.fabric8.updatebot.CommandNames.UPDATE;
 /**
  */
 public class UpdateBot {
-    private Configuration config = new Configuration();
-    private CommandSupport lastCommend;
+    private Configuration configuration = new Configuration();
+    private CommandSupport command;
     private UpdatePullRequests updatePullRequests = new UpdatePullRequests();
     private Logger LOG;
 
@@ -111,25 +111,25 @@ public class UpdateBot {
         return null;
     }
 
-    public Configuration getConfig() {
-        return config;
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
-    public void setConfig(Configuration config) {
-        this.config = config;
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
     }
 
     public void setLoggerOutput(PrintStream out) {
-        getConfig().setPrintStream(out);
+        getConfiguration().setPrintStream(out);
     }
 
     /**
      * Runs a command
      */
     public CommandSupport run(String[] args) throws IOException {
-        CommandSupport command = parseCommand(args, config, true);
-        this.lastCommend = command;
-        command.run(config);
+        CommandSupport command = parseCommand(args, configuration, true);
+        this.command = command;
+        command.run(configuration);
         return command;
     }
 
@@ -139,7 +139,7 @@ public class UpdateBot {
     public List<Map<String, String>> poll() throws IOException {
         List<Map<String, String>> answer = new ArrayList<>();
 
-        ParentContext context = updatePullRequests.run(getConfig());
+        ParentContext context = updatePullRequests.run(getConfiguration());
         List<CommandContext> children = context.getChildren();
         for (CommandContext child : children) {
             Map<String, String> map = child.createStatusMap();
@@ -157,7 +157,11 @@ public class UpdateBot {
         return LOG;
     }
 
-    public CommandSupport getLastCommend() {
-        return lastCommend;
+    public CommandSupport getCommand() {
+        return command;
+    }
+
+    public void setCommand(CommandSupport command) {
+        this.command = command;
     }
 }
