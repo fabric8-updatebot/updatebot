@@ -122,7 +122,11 @@
             <include>**/*Test.java</include>
           </includes>
           <excludes>
+            <!-- requires nodejs install -->
+            <exclude>**/PackageJsonUpdaterTest.java</exclude>
             <exclude>**/NpmUpdateBotTest.java</exclude>
+
+            <!-- requires github karma -->
             <exclude>**/Fork*Test.java</exclude>
             <exclude>**/Push*Test.java</exclude>
           </excludes>
