@@ -99,7 +99,7 @@ public class GitHubHelpers {
             mergeable = single.getMergeable();
         }
         if (mergeable == null) {
-            LOG.warn("Mergable flag is still null on pull request " + pullRequest.getHtmlUrl() + " assuming its still mergable. Probably a caching issue and this flag may appear again later");
+            LOG.warn("Mergeable flag is still null on pull request " + pullRequest.getHtmlUrl() + " assuming its still mergable. Probably a caching issue and this flag may appear again later");
             return true;
         }
         if (mergeable != null && mergeable.booleanValue()) {

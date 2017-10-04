@@ -43,7 +43,7 @@ public class PushSourceChangesContext extends CommandContext {
 
     @Override
     public String createPullRequestBody() {
-        String gitUrl = command.getCloneUrl();
+        String gitUrl = command.getRepositoryFullName();
         String ref = command.getRef();
         String linkText = LocalRepository.getRepositoryLink(this.sourceRepository, gitUrl);
 
@@ -54,7 +54,7 @@ public class PushSourceChangesContext extends CommandContext {
 
     @Override
     public String createCommit() {
-        String gitUrl = command.getCloneUrl();
+        String gitUrl = command.getRepositoryFullName();
         String ref = command.getRef();
         return "fix(versions): " + gitUrl + "\n\n" +
                 "Push version changes from the source code in repository: " + gitUrl + " ref: " + ref + "\n";
@@ -67,7 +67,7 @@ public class PushSourceChangesContext extends CommandContext {
 
     @Override
     public String createPullRequestTitlePrefix() {
-        return "push " + command.getCloneUrl() + " ";
+        return "push " + command.getRepositoryFullName() + " ";
     }
 
 }

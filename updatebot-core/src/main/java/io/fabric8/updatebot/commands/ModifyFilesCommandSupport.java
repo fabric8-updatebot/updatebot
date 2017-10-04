@@ -90,9 +90,13 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
     protected void processPullRequest(CommandContext context, GHRepository ghRepository, GHPullRequest pullRequest) throws IOException {
         Configuration configuration = context.getConfiguration();
         String title = context.createPullRequestTitle();
-        String remoteURL = "git@github.com:" + ghRepository.getOwnerName() + "/" + ghRepository.getName();
         File dir = context.getDir();
+/*
+        TODO this should already be set right? Otherwise we'll overwrite the HTTPS URL
+
+        String remoteURL = "git@github.com:" + ghRepository.getOwnerName() + "/" + ghRepository.getName();
         context.getGit().setRemoteURL(dir, remoteURL);
+*/
 
         String commandComment = createPullRequestComment();
 

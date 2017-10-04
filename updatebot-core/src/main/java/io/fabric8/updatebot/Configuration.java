@@ -40,7 +40,6 @@ import java.util.TreeMap;
  * Common configuration parameters
  */
 public class Configuration {
-    public GitPlugin git = new GitPluginCLI(this);
     @Parameter(names = {"--github-pr-label", "-ghl"}, description = "GitHub Pull Request Label")
     private String githubPullRequestLabel = Systems.getConfigValue(EnvironmentVariables.GITHUB_PR_LABEL, "updatebot");
     @Parameter(names = {"--dry"}, description = "Dry Run mode does not perform any git commits")
@@ -60,12 +59,16 @@ public class Configuration {
     private boolean checkDependencies = true;
     @Parameter(names = {"--dir", "-d"}, description = "The source directory containing the git clone of the source to process")
     private String sourcePath;
+    @Parameter(names = {"--https"}, description = "Whether to use HTTPS transport instead of git and SSH")
+    private boolean useHttpsTransport;
+
     private File sourceDir;
     private boolean rebaseMode = true;
     private NpmDependencyTreeGenerator npmDependencyTreeGenerator = new DefaultNpmDependencyTreeGenerator();
     private boolean pullDisabled;
     private Map<String, String> pollStatusCache = new TreeMap<>();
     private PrintStream printStream;
+    private GitPlugin git = new GitPluginCLI(this);
 
     public GitHub getGithub() throws IOException {
         if (github == null) {
@@ -182,6 +185,14 @@ public class Configuration {
         this.pullDisabled = pullDisabled;
     }
 
+    public boolean isUseHttpsTransport() {
+        return useHttpsTransport;
+    }
+
+    public void setUseHttpsTransport(boolean useHttpsTransport) {
+        this.useHttpsTransport = useHttpsTransport;
+    }
+
     public String getSourcePath() {
         return sourcePath;
     }
@@ -263,4 +274,5 @@ public class Configuration {
             log.warn(message, e);
         }
     }
+
 }

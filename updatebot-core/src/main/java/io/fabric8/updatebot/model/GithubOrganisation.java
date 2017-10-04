@@ -15,7 +15,7 @@
  */
 package io.fabric8.updatebot.model;
 
-import io.fabric8.updatebot.support.GitHelper;
+import io.fabric8.updatebot.git.GitHelper;
 import io.fabric8.updatebot.support.Strings;
 
 import java.util.ArrayList;

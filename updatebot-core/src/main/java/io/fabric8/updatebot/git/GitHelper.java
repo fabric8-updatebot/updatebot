@@ -13,14 +13,16 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot.support;
+package io.fabric8.updatebot.git;
 
 import io.fabric8.utils.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,4 +94,16 @@ public class GitHelper {
         return path;
     }
 
+    /**
+     * Returns the clone URL without a user or password
+     */
+    public static String removeUsernamePassword(String cloneUrl) {
+        try {
+            URL url = new URL(cloneUrl);
+            return new URL(url.getProtocol(), url.getHost(), url.getPort(), url.getFile()).toString();
+        } catch (MalformedURLException e) {
+            // ignore
+            return cloneUrl;
+        }
+    }
 }

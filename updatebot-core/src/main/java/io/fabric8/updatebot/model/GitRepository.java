@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.model;
 
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.utils.Objects;
 
 /**
@@ -77,6 +78,14 @@ public class GitRepository extends DtoSupport {
     }
 
     public String getFullName() {
-        return cloneUrl;
+        return name;
+    }
+
+    /**
+     * Based on the configuration lets modify the clone URL to optionally include the username
+     * and password if using HTTPS URLs
+     */
+    public String secureCloneUrl(Configuration configuration) {
+        return getCloneUrl();
     }
 }
