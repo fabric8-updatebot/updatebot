@@ -34,12 +34,13 @@ public class DefaultNpmDependencyTreeGenerator implements NpmDependencyTreeGener
         File dir = context.getDir();
         context.info(LOG, "Generating dependency tree file " + dependencyFileName + " in " + dir);
 
-        ProcessHelper.runCommandIgnoreOutput(dir, "npm", "install");
+        String npmBinary = context.getConfiguration().getNpmCommand();
+        ProcessHelper.runCommandIgnoreOutput(dir, npmBinary, "install");
 
         File outputFile = new File(dir, dependencyFileName);
         File errorFile = new File(dir, "npm-list-errors.log");
         try (FileDeleter ignored = new FileDeleter(errorFile)) {
-            if (ProcessHelper.runCommand(dir, outputFile, errorFile, "npm", "list", "-json") != 0) {
+            if (ProcessHelper.runCommand(dir, outputFile, errorFile, npmBinary, "list", "-json") != 0) {
                 context.warn(LOG, "Failed to generate dependencies file " + outputFile);
             } else {
                 LOG.debug("Generate dependencies file " + outputFile);

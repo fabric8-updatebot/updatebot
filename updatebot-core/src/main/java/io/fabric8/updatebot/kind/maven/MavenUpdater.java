@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.kind.maven;
 
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.commands.CommandContext;
 import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.kind.KindDependenciesCheck;
@@ -53,7 +54,18 @@ public class MavenUpdater implements Updater {
 
     @Override
     public boolean isApplicable(CommandContext context) {
-        return FileHelper.isFile(context.file("pom.xml"));
+        boolean answer = FileHelper.isFile(context.file("pom.xml"));
+        if (answer) {
+            // lets verify we have a maven install
+            String mvnCommand = context.getConfiguration().getMvnCommand();
+            int returnCode = ProcessHelper.runCommandIgnoreOutput(context.getDir(), mvnCommand, "-v");
+            if (returnCode != 0) {
+                context.warn(LOG, "Could not invoke Maven!. Command failed: " + mvnCommand + " -v => " + returnCode);
+                context.warn(LOG, "Please verify you have `mvn` on your PATH or you have configured Maven property");
+                return false;
+            }
+        }
+        return answer;
     }
 
     @Override
@@ -61,9 +73,10 @@ public class MavenUpdater implements Updater {
         File file = context.file("pom.xml");
         if (Files.isFile(file)) {
             // lets run the maven plugin to generate the export versions file
-            String configFile = context.getConfiguration().getConfigFile();
+            Configuration configuration = context.getConfiguration();
+            String configFile = configuration.getConfigFile();
             File versionsFile = createVersionsYamlFile(context);
-            if (runCommandAndLogOutput(context, "mvn",
+            if (runCommandAndLogOutput(context, configuration.getMvnCommand(),
                     "io.fabric8.updatebot:updatebot-maven-plugin:" + updateBotPluginVersion + ":export",
                     "-DdestFile=" + versionsFile,
                     "-DupdateBotYaml=" + configFile)) {
@@ -102,30 +115,6 @@ public class MavenUpdater implements Updater {
             if (PomHelper.updatePomVersionsInPoms(context.getDir(), changes)) {
                 return true;
             }
-
-/*
-
-            MavenArtifactVersionChanges mavenChanges = new MavenArtifactVersionChanges();
-            for (DependencyVersionChange change : changes) {
-                mavenChanges.addChange(change);
-            }
-            if (!mavenChanges.isEmpty()) {
-                File versionsFile = createVersionsYamlFile(context);
-                versionsFile.getParentFile().mkdirs();
-                try {
-                    MarkupHelper.saveYaml(mavenChanges, versionsFile);
-                } catch (IOException e) {
-                    throw new IOException("Failed to write to " + versionsFile + ". " + e, e);
-                }
-                String configFile = context.getConfiguration().getConfigFile();
-                if (runCommandAndLogOutput(context, "mvn",
-                        "io.fabric8.updatebot:updatebot-maven-plugin:" + updateBotPluginVersion + ":update",
-                        "-Dfile=" + versionsFile,
-                        "-DupdateBotYaml=" + configFile)) {
-                    return GitHelper.hasChangedFiles(context.getDir());
-                }
-            }
-*/
         }
         return answer;
 

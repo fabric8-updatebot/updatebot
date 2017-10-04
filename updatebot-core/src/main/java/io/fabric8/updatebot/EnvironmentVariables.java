@@ -27,4 +27,7 @@ public class EnvironmentVariables {
     public static final String GITHUB_PR_LABEL = "UPDATEBOT_GITHUB_PR_LABEL";
 
     public static final String DRY_RUN = "UPDATEBOT_DRY_RUN";
+
+    public static final String MVN_COMMAND = "UPDATEBOT_MVN_COMMAND";
+    public static final String NPM_COMMAND = "UPDATEBOT_NPM_COMMAND";
 }
