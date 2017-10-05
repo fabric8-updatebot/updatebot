@@ -44,7 +44,7 @@ public class ProcessHelper {
         return runCommand(dir, Collections.EMPTY_MAP, false, commands);
     }
 
-    public static int runCommand(File dir,  Map<String, String> environmentVariables, boolean inheritIO, String... commands) {
+    public static int runCommand(File dir, Map<String, String> environmentVariables, boolean inheritIO, String... commands) {
         ProcessBuilder builder = new ProcessBuilder(commands);
         builder.directory(dir);
         applyEnvironmentVariables(builder, environmentVariables);
@@ -57,7 +57,7 @@ public class ProcessHelper {
     public static String runCommandCaptureOutput(File dir, String... commands) throws IOException {
         return runCommandCaptureOutput(dir, Collections.EMPTY_MAP, commands);
     }
-    
+
     public static String runCommandCaptureOutput(File dir, Map<String, String> environmentVariables, String... commands) throws IOException {
         File outputFile;
         File errorFile;
