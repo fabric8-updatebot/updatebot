@@ -120,7 +120,7 @@ public class ProcessHelper {
             outputFile.getParentFile().mkdirs();
             boolean answer = true;
             if (runCommand(dir, outputFile, errorFile, commands) != 0) {
-                LOG.warn("Failed to run " + String.join(" ", commands));
+                LOG.error("Failed to run " + String.join(" ", commands));
                 answer = false;
             }
             logOutput(configuration, log, outputFile, false);
@@ -160,7 +160,7 @@ public class ProcessHelper {
                 if (error) {
                     configuration.info(log, line);
                 } else {
-                    configuration.warn(log, line);
+                    configuration.error(log, line);
                 }
             }
         }
