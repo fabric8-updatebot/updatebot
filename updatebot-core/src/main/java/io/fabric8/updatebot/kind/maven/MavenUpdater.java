@@ -27,6 +27,7 @@ import io.fabric8.updatebot.model.MavenArtifactVersionChanges;
 import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.support.MarkupHelper;
 import io.fabric8.updatebot.support.ProcessHelper;
+import io.fabric8.updatebot.support.VersionHelper;
 import io.fabric8.utils.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +42,6 @@ import java.util.Map;
  */
 public class MavenUpdater implements Updater {
     private static final transient Logger LOG = LoggerFactory.getLogger(MavenUpdater.class);
-
-    // TODO load dynamically!
-    String updateBotPluginVersion = "1.0-SNAPSHOT";
 
     @Override
     public boolean isApplicable(CommandContext context) {
@@ -72,6 +70,7 @@ public class MavenUpdater implements Updater {
             File versionsFile = createVersionsYamlFile(context);
             Map<String, String> env = configuration.getMvnEnvironmentVariables();
             String mvnCommand = configuration.getMvnCommand();
+            String updateBotPluginVersion = VersionHelper.updateBotVersion();
             if (ProcessHelper.runCommandAndLogOutput(context.getConfiguration(), LOG, context.getDir(), env, mvnCommand,
                     "-B",
                     "io.fabric8.updatebot:updatebot-maven-plugin:" + updateBotPluginVersion + ":export",
