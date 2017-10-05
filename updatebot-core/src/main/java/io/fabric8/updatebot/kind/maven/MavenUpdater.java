@@ -35,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  */
@@ -69,7 +70,12 @@ public class MavenUpdater implements Updater {
             Configuration configuration = context.getConfiguration();
             String configFile = configuration.getConfigFile();
             File versionsFile = createVersionsYamlFile(context);
-            if (ProcessHelper.runCommandAndLogOutput(context.getConfiguration(), LOG, context.getDir(),  configuration.getMvnEnvironmentVariables(), configuration.getMvnCommand(), "io.fabric8.updatebot:updatebot-maven-plugin:" + updateBotPluginVersion + ":export", "-DdestFile=" + versionsFile, "-DupdateBotYaml=" + configFile)) {
+            Map<String, String> env = configuration.getMvnEnvironmentVariables();
+            String mvnCommand = configuration.getMvnCommand();
+            if (ProcessHelper.runCommandAndLogOutput(context.getConfiguration(), LOG, context.getDir(), env, mvnCommand,
+                    "-B",
+                    "io.fabric8.updatebot:updatebot-maven-plugin:" + updateBotPluginVersion + ":export",
+                    "-DdestFile=" + versionsFile, "-DupdateBotYaml=" + configFile)) {
                 if (!Files.isFile(versionsFile)) {
                     LOG.warn("Should have generated the export versions file " + versionsFile);
                     return;
