@@ -74,6 +74,8 @@ public class Configuration {
     private Map<String, String> pollStatusCache = new TreeMap<>();
     private PrintStream printStream;
     private GitPlugin git = new GitPluginCLI(this);
+    private Map<String, String> mvnEnvironmentVariables;
+    private Map<String, String> npmEnvironmentVariables;
 
     public GitHub getGithub() throws IOException {
         if (github == null) {
@@ -271,6 +273,24 @@ public class Configuration {
         this.npmCommand = npmCommand;
     }
 
+
+    public Map<String, String> getMvnEnvironmentVariables() {
+        return mvnEnvironmentVariables;
+    }
+
+    public void setMvnEnvironmentVariables(Map<String, String> mvnEnvironmentVariables) {
+        this.mvnEnvironmentVariables = mvnEnvironmentVariables;
+    }
+
+    public Map<String, String> getNpmEnvironmentVariables() {
+        return npmEnvironmentVariables;
+    }
+
+    public void setNpmEnvironmentVariables(Map<String, String> npmEnvironmentVariables) {
+        this.npmEnvironmentVariables = npmEnvironmentVariables;
+    }
+
+
     public void info(Logger log, String message) {
         if (printStream != null) {
             printStream.println(message);
@@ -313,4 +333,5 @@ public class Configuration {
             log.warn(message, e);
         }
     }
+
 }

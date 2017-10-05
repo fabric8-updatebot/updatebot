@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  */
@@ -31,16 +33,21 @@ public class ProcessHelper {
     private static final transient Logger LOG = LoggerFactory.getLogger(ProcessHelper.class);
 
     public static int runCommand(File dir, String... commands) {
-        return runCommand(dir, true, commands);
+        return runCommand(dir, Collections.EMPTY_MAP, true, commands);
+    }
+
+    public static int runCommandIgnoreOutput(File dir, Map<String, String> environmentVariables, String... commands) {
+        return runCommand(dir, environmentVariables, false, commands);
     }
 
     public static int runCommandIgnoreOutput(File dir, String... commands) {
-        return runCommand(dir, false, commands);
+        return runCommand(dir, Collections.EMPTY_MAP, false, commands);
     }
 
-    public static int runCommand(File dir, boolean inheritIO, String... commands) {
+    public static int runCommand(File dir,  Map<String, String> environmentVariables, boolean inheritIO, String... commands) {
         ProcessBuilder builder = new ProcessBuilder(commands);
         builder.directory(dir);
+        applyEnvironmentVariables(builder, environmentVariables);
         if (inheritIO) {
             builder.inheritIO();
         }
@@ -48,6 +55,10 @@ public class ProcessHelper {
     }
 
     public static String runCommandCaptureOutput(File dir, String... commands) throws IOException {
+        return runCommandCaptureOutput(dir, Collections.EMPTY_MAP, commands);
+    }
+    
+    public static String runCommandCaptureOutput(File dir, Map<String, String> environmentVariables, String... commands) throws IOException {
         File outputFile;
         File errorFile;
         try {
@@ -70,29 +81,18 @@ public class ProcessHelper {
     }
 
     public static int runCommand(File dir, File outputFile, File errorFile, String... commands) {
+        return runCommand(dir, Collections.EMPTY_MAP, outputFile, errorFile, commands);
+    }
+
+    public static int runCommand(File dir, Map<String, String> environmentVariables, File outputFile, File errorFile, String... commands) {
         ProcessBuilder builder = new ProcessBuilder(commands);
         builder.directory(dir);
+        applyEnvironmentVariables(builder, environmentVariables);
         builder.redirectOutput(outputFile);
         builder.redirectError(errorFile);
         return doRunCommand(builder, commands);
     }
 
-    protected static int doRunCommand(ProcessBuilder builder, String[] commands) {
-        String line = String.join(" ", commands);
-        try {
-            Process process = builder.start();
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                LOG.warn("Failed to run command " + line + " in " + builder.directory() + " : exit " + exitCode);
-            }
-            return exitCode;
-        } catch (IOException e) {
-            LOG.warn("Failed to run command " + line + " in " + builder.directory() + " : error " + e);
-        } catch (InterruptedException e) {
-            // ignore
-        }
-        return 1;
-    }
 
     public static boolean runCommandAndLogOutput(File dir, String... commands) {
         File outputFile = new File(dir, "target/updatebot.log");
@@ -114,12 +114,16 @@ public class ProcessHelper {
     }
 
     public static boolean runCommandAndLogOutput(Configuration configuration, Logger log, File dir, String... commands) {
+        return runCommandAndLogOutput(configuration, log, dir, Collections.EMPTY_MAP, commands);
+    }
+
+    public static boolean runCommandAndLogOutput(Configuration configuration, Logger log, File dir, Map<String, String> environmentVariables, String... commands) {
         File outputFile = new File(dir, "target/updatebot.log");
         File errorFile = new File(dir, "target/updatebot.err");
         try (FileDeleter ignored = new FileDeleter(outputFile, errorFile)) {
             outputFile.getParentFile().mkdirs();
             boolean answer = true;
-            if (runCommand(dir, outputFile, errorFile, commands) != 0) {
+            if (runCommand(dir, environmentVariables, outputFile, errorFile, commands) != 0) {
                 LOG.error("Failed to run " + String.join(" ", commands));
                 answer = false;
             }
@@ -176,5 +180,31 @@ public class ProcessHelper {
             }
         }
         return output;
+    }
+
+
+    protected static void applyEnvironmentVariables(ProcessBuilder builder, Map<String, String> environmentVariables) {
+        if (environmentVariables != null) {
+            for (Map.Entry<String, String> entry : environmentVariables.entrySet()) {
+                builder.environment().put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    protected static int doRunCommand(ProcessBuilder builder, String[] commands) {
+        String line = String.join(" ", commands);
+        try {
+            Process process = builder.start();
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                LOG.warn("Failed to run command " + line + " in " + builder.directory() + " : exit " + exitCode);
+            }
+            return exitCode;
+        } catch (IOException e) {
+            LOG.warn("Failed to run command " + line + " in " + builder.directory() + " : error " + e);
+        } catch (InterruptedException e) {
+            // ignore
+        }
+        return 1;
     }
 }

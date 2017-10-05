@@ -44,21 +44,14 @@ public class MavenUpdater implements Updater {
     // TODO load dynamically!
     String updateBotPluginVersion = "1.0-SNAPSHOT";
 
-    public static boolean runCommandAndLogOutput(CommandContext context, String... commands) {
-        if (ProcessHelper.runCommandAndLogOutput(context.getConfiguration(), LOG, context.getDir(), commands)) {
-            // TODO check if we have changed the source at all
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public boolean isApplicable(CommandContext context) {
         boolean answer = FileHelper.isFile(context.file("pom.xml"));
         if (answer) {
             // lets verify we have a maven install
-            String mvnCommand = context.getConfiguration().getMvnCommand();
-            int returnCode = ProcessHelper.runCommandIgnoreOutput(context.getDir(), mvnCommand, "-v");
+            Configuration configuration = context.getConfiguration();
+            String mvnCommand = configuration.getMvnCommand();
+            int returnCode = ProcessHelper.runCommandIgnoreOutput(context.getDir(), configuration.getMvnEnvironmentVariables(), mvnCommand, "-v");
             if (returnCode != 0) {
                 context.warn(LOG, "Could not invoke Maven!. Command failed: " + mvnCommand + " -v => " + returnCode);
                 context.warn(LOG, "Please verify you have `mvn` on your PATH or you have configured Maven property");
@@ -76,10 +69,7 @@ public class MavenUpdater implements Updater {
             Configuration configuration = context.getConfiguration();
             String configFile = configuration.getConfigFile();
             File versionsFile = createVersionsYamlFile(context);
-            if (runCommandAndLogOutput(context, configuration.getMvnCommand(),
-                    "io.fabric8.updatebot:updatebot-maven-plugin:" + updateBotPluginVersion + ":export",
-                    "-DdestFile=" + versionsFile,
-                    "-DupdateBotYaml=" + configFile)) {
+            if (ProcessHelper.runCommandAndLogOutput(context.getConfiguration(), LOG, context.getDir(),  configuration.getMvnEnvironmentVariables(), configuration.getMvnCommand(), "io.fabric8.updatebot:updatebot-maven-plugin:" + updateBotPluginVersion + ":export", "-DdestFile=" + versionsFile, "-DupdateBotYaml=" + configFile)) {
                 if (!Files.isFile(versionsFile)) {
                     LOG.warn("Should have generated the export versions file " + versionsFile);
                     return;
