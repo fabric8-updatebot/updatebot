@@ -162,9 +162,9 @@ public class ProcessHelper {
             String[] lines = output.split("\n");
             for (String line : lines) {
                 if (error) {
-                    configuration.info(log, line);
-                } else {
                     configuration.error(log, line);
+                } else {
+                    configuration.info(log, line);
                 }
             }
         }
