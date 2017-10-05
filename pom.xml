@@ -85,6 +85,7 @@
     <slf4j-log4j12.version>1.7.21</slf4j-log4j12.version>
     <fabric8-utils.version>2.3.2</fabric8-utils.version>
 
+    <updatebot.version>1.0.12</updatebot.version>
     <junit.version>4.12</junit.version>
     <!-- maven plugins -->
     <buildnumber.plugin.version>1.3</buildnumber.plugin.version>
@@ -187,6 +188,10 @@
   <profiles>
     <profile>
       <id>release</id>
+      <properties>
+        <updatebot.version>${project.version}</updatebot.version>
+      </properties>
+
       <build>
         <plugins>
           <plugin>

@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.kind.npm;
 
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.commands.CommandContext;
 import io.fabric8.updatebot.support.FileDeleter;
 import io.fabric8.updatebot.support.ProcessHelper;
@@ -34,8 +35,9 @@ public class DefaultNpmDependencyTreeGenerator implements NpmDependencyTreeGener
         File dir = context.getDir();
         context.info(LOG, "Generating dependency tree file " + dependencyFileName + " in " + dir);
 
-        String npmBinary = context.getConfiguration().getNpmCommand();
-        ProcessHelper.runCommandIgnoreOutput(dir, npmBinary, "install");
+        Configuration configuration = context.getConfiguration();
+        String npmBinary = configuration.getNpmCommand();
+        ProcessHelper.runCommandIgnoreOutput(dir, configuration.getNpmEnvironmentVariables(), npmBinary, "install");
 
         File outputFile = new File(dir, dependencyFileName);
         File errorFile = new File(dir, "npm-list-errors.log");

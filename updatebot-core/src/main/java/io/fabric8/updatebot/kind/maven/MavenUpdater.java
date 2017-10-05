@@ -27,38 +27,31 @@ import io.fabric8.updatebot.model.MavenArtifactVersionChanges;
 import io.fabric8.updatebot.support.FileHelper;
 import io.fabric8.updatebot.support.MarkupHelper;
 import io.fabric8.updatebot.support.ProcessHelper;
+import io.fabric8.updatebot.support.VersionHelper;
 import io.fabric8.utils.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  */
 public class MavenUpdater implements Updater {
     private static final transient Logger LOG = LoggerFactory.getLogger(MavenUpdater.class);
 
-    // TODO load dynamically!
-    String updateBotPluginVersion = "1.0-SNAPSHOT";
-
-    public static boolean runCommandAndLogOutput(CommandContext context, String... commands) {
-        if (ProcessHelper.runCommandAndLogOutput(context.getConfiguration(), LOG, context.getDir(), commands)) {
-            // TODO check if we have changed the source at all
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public boolean isApplicable(CommandContext context) {
         boolean answer = FileHelper.isFile(context.file("pom.xml"));
         if (answer) {
             // lets verify we have a maven install
-            String mvnCommand = context.getConfiguration().getMvnCommand();
-            int returnCode = ProcessHelper.runCommandIgnoreOutput(context.getDir(), mvnCommand, "-v");
+            Configuration configuration = context.getConfiguration();
+            String mvnCommand = configuration.getMvnCommand();
+            int returnCode = ProcessHelper.runCommandIgnoreOutput(context.getDir(), configuration.getMvnEnvironmentVariables(), mvnCommand, "-v");
             if (returnCode != 0) {
                 context.warn(LOG, "Could not invoke Maven!. Command failed: " + mvnCommand + " -v => " + returnCode);
                 context.warn(LOG, "Please verify you have `mvn` on your PATH or you have configured Maven property");
@@ -76,10 +69,13 @@ public class MavenUpdater implements Updater {
             Configuration configuration = context.getConfiguration();
             String configFile = configuration.getConfigFile();
             File versionsFile = createVersionsYamlFile(context);
-            if (runCommandAndLogOutput(context, configuration.getMvnCommand(),
+            Map<String, String> env = configuration.getMvnEnvironmentVariables();
+            String mvnCommand = configuration.getMvnCommand();
+            String updateBotPluginVersion = VersionHelper.updateBotVersion();
+            if (ProcessHelper.runCommandAndLogOutput(context.getConfiguration(), LOG, context.getDir(), env, mvnCommand,
+                    "-B",
                     "io.fabric8.updatebot:updatebot-maven-plugin:" + updateBotPluginVersion + ":export",
-                    "-DdestFile=" + versionsFile,
-                    "-DupdateBotYaml=" + configFile)) {
+                    "-DdestFile=" + versionsFile, "-DupdateBotYaml=" + configFile)) {
                 if (!Files.isFile(versionsFile)) {
                     LOG.warn("Should have generated the export versions file " + versionsFile);
                     return;
@@ -95,6 +91,11 @@ public class MavenUpdater implements Updater {
                 if (list != null) {
                     for (MavenArtifactVersionChange change : changeList) {
                         list.add(change.createDependencyVersionChange());
+                    }
+
+                    PrintStream printStream = configuration.getPrintStream();
+                    if (!changeList.isEmpty() && printStream != null) {
+                        printStream.println("\n");
                     }
                 }
             }

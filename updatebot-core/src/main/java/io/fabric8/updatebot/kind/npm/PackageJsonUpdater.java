@@ -17,6 +17,7 @@ package io.fabric8.updatebot.kind.npm;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.commands.CommandContext;
 import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.kind.Kind;
@@ -58,13 +59,16 @@ public class PackageJsonUpdater extends UpdaterSupport implements Updater {
     @Override
     public boolean isApplicable(CommandContext context) {
         boolean answer = FileHelper.isFile(context.file("package.json"));
-        // lets verify we have a npm install
-        String npmCommand = context.getConfiguration().getNpmCommand();
-        int returnCode = ProcessHelper.runCommandIgnoreOutput(context.getDir(), npmCommand, "-v");
-        if (returnCode != 0) {
-            context.warn(LOG, "Could not invoke NodeJS!. Command failed: " + npmCommand + " -v => " + returnCode);
-            context.warn(LOG, "Please verify you have `npm` on your PATH or you have configured NodeJS property");
-            return false;
+        if (answer) {
+            // lets verify we have a npm install
+            Configuration configuration = context.getConfiguration();
+            String npmCommand = configuration.getNpmCommand();
+            int returnCode = ProcessHelper.runCommandIgnoreOutput(context.getDir(), configuration.getNpmEnvironmentVariables(), npmCommand, "-v");
+            if (returnCode != 0) {
+                context.warn(LOG, "Could not invoke NodeJS!. Command failed: " + npmCommand + " -v => " + returnCode);
+                context.warn(LOG, "Please verify you have `npm` on your PATH or you have configured NodeJS property");
+                return false;
+            }
         }
         return answer;
     }
