@@ -296,4 +296,21 @@ public class Configuration {
         }
     }
 
+    public void error(Logger log, String message) {
+        if (printStream != null) {
+            printStream.println("ERROR: " + message);
+        } else {
+            log.warn(message);
+        }
+    }
+
+
+    public void error(Logger log, String message, Throwable e) {
+        if (printStream != null) {
+            printStream.println("ERROR: " + message + " " + e);
+            e.printStackTrace(printStream);
+        } else {
+            log.warn(message, e);
+        }
+    }
 }

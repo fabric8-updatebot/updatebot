@@ -254,4 +254,12 @@ public class CommandContext {
         getConfiguration().warn(log, message, e);
     }
 
+    public void error(Logger log, String message) {
+        getConfiguration().error(log, message);
+    }
+
+    public void error(Logger log, String message, Throwable e) {
+        getConfiguration().error(log, message, e);
+    }
+
 }

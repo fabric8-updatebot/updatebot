@@ -94,7 +94,8 @@ public class GithubRepository extends GitRepository {
                 answer += ".git";
             }
             return answer;
+        } else {
+            return repository.getSshUrl();
         }
-        return getCloneUrl();
     }
 }
