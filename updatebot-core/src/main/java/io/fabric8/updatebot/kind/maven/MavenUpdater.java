@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +91,11 @@ public class MavenUpdater implements Updater {
                 if (list != null) {
                     for (MavenArtifactVersionChange change : changeList) {
                         list.add(change.createDependencyVersionChange());
+                    }
+
+                    PrintStream printStream = configuration.getPrintStream();
+                    if (!changeList.isEmpty() && printStream != null) {
+                        printStream.println("\n");
                     }
                 }
             }

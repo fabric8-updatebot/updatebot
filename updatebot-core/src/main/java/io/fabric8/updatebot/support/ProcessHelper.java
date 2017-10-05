@@ -117,7 +117,15 @@ public class ProcessHelper {
         return runCommandAndLogOutput(configuration, log, dir, Collections.EMPTY_MAP, commands);
     }
 
+    public static boolean runCommandAndLogOutput(Configuration configuration, Logger log, File dir, boolean useError, String... commands) {
+        return runCommandAndLogOutput(configuration, log, dir, Collections.EMPTY_MAP, useError, commands);
+    }
+
     public static boolean runCommandAndLogOutput(Configuration configuration, Logger log, File dir, Map<String, String> environmentVariables, String... commands) {
+        return runCommandAndLogOutput(configuration, log, dir, environmentVariables, true, commands);
+    }
+
+    public static boolean runCommandAndLogOutput(Configuration configuration, Logger log, File dir, Map<String, String> environmentVariables, boolean useError, String... commands) {
         File outputFile = new File(dir, "target/updatebot.log");
         File errorFile = new File(dir, "target/updatebot.err");
         try (FileDeleter ignored = new FileDeleter(outputFile, errorFile)) {
@@ -128,7 +136,7 @@ public class ProcessHelper {
                 answer = false;
             }
             logOutput(configuration, log, outputFile, false);
-            logOutput(configuration, log, errorFile, true);
+            logOutput(configuration, log, errorFile, useError);
             return answer;
         } catch (IOException e) {
             LOG.warn("Caught: " + e, e);

@@ -53,12 +53,12 @@ public class GitPluginCLI implements GitPlugin {
     @Override
     public void pull(File dir, String cloneUrl) {
         LOG.debug("Pulling: " + dir + " repo: " + cloneUrl);
-        ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "pull");
+        ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, false, "git", "pull");
     }
 
     @Override
     public void clone(File dir, String cloneUrl, String repoName) {
-        ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "clone", cloneUrl, repoName);
+        ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, false, "git", "clone", cloneUrl, repoName);
     }
 
     @Override
