@@ -18,5 +18,15 @@ package io.fabric8.updatebot.commands;
 /**
  */
 public enum Status {
-    PENDING, COMPLETE, FAILED
+    PENDING("Pending"), COMPLETE("Complete"), FAILED("Failed");
+
+    private final String name;
+
+    Status(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

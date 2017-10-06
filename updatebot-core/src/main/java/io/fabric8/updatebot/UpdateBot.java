@@ -23,13 +23,16 @@ import io.fabric8.updatebot.commands.ParentContext;
 import io.fabric8.updatebot.commands.PullVersionChanges;
 import io.fabric8.updatebot.commands.PushSourceChanges;
 import io.fabric8.updatebot.commands.PushVersionChanges;
+import io.fabric8.updatebot.commands.StatusInfo;
 import io.fabric8.updatebot.commands.UpdatePullRequests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,6 +49,7 @@ public class UpdateBot {
     private CommandSupport command;
     private UpdatePullRequests updatePullRequests = new UpdatePullRequests();
     private Logger LOG;
+    private Map<String, StatusInfo> lastStatusMap = new HashMap();
 
     public static void main(String[] args) {
         try {
@@ -136,17 +140,35 @@ public class UpdateBot {
     /**
      * Returns the list of PullRequests / Issues and their status from the previous command
      */
-    public List<Map<String, String>> poll() throws IOException {
-        List<Map<String, String>> answer = new ArrayList<>();
+    public Map<String, StatusInfo> poll() throws IOException {
+        Map<String, StatusInfo> answer = new LinkedHashMap();
 
-        ParentContext context = updatePullRequests.run(getConfiguration());
+        Configuration configuration = getConfiguration();
+        ParentContext context = updatePullRequests.run(configuration);
         List<CommandContext> children = context.getChildren();
         for (CommandContext child : children) {
-            Map<String, String> map = child.createStatusMap();
-            answer.add(map);
+            StatusInfo status = child.createStatusInfo();
+            answer.put(status.getCloneUrl(), status);
         }
 
-        getLOG().debug("Polled " + answer);
+        // lets get the previous state and compare them then log the differences
+        Collection<StatusInfo> changes;
+        boolean logBlankLineAfter = false;
+        if (lastStatusMap.isEmpty() && !answer.isEmpty()) {
+            changes = answer.values();
+            configuration.info(LOG, "");
+            configuration.info(LOG, "");
+            logBlankLineAfter = true;
+        } else {
+            changes = StatusInfo.changedStatuses(configuration, lastStatusMap, answer).values();
+        }
+        for (StatusInfo change : changes) {
+            configuration.info(LOG, change.description());
+        }
+        if (logBlankLineAfter) {
+            configuration.info(LOG, "");
+        }
+        this.lastStatusMap = answer;
         return answer;
     }
 
