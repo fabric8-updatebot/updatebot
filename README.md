@@ -12,7 +12,36 @@ UpdateBot takes a simple YAML file to define which git repositories and github o
 
 See [an example UpdateBot YAML file](updatebot-core/src/test/resources/maven/updatebot.yml)
 
-### Using UpdateBot
+## Using UpdateBot
+
+### Jenkins Pipelines
+
+A good place to use UpdateBot is in your Continuous Delivery pipelines when you've just created a release, tagged the source code and have waited for the artifacts to be in maven central or your nexus/artifactory; then you want to push those new versions into your downstream projects via Pull Requests.
+
+To do that please use the [UpdateBot Jenkins Plugin](https://wiki.jenkins.io/display/JENKINS/Updatebot+Plugin) or checkout the [UpdateBot Jenkins Plugin documentation](https://github.com/jenkinsci/updatebot-plugin/blob/master/readme.md).
+
+Essentially once you have installed the [UpdateBot Jenkins Plugin](https://wiki.jenkins.io/display/JENKINS/Updatebot+Plugin)  into your Jeknins you just use the `updateBotPush` step in your pipeline like this:
+
+```groovy
+node {
+
+    stage('Release') { 
+        git 'https://github.com/jstrachan-testing/updatebot-npm-sample.git'
+
+        // TODO do the actual release first...
+        
+        // TODO wait for the release to be in maven central or npm or whatever...
+    }
+
+    stage('UpdateBot') {
+        // now lets update any dependent projects with this new release
+        // using the local file system as the tagged source code with versions
+        updateBotPush
+    }
+}
+``` 
+
+### Command Line
 
 The updatebot jar file is a fat executable jar so you can use: 
 
@@ -23,6 +52,10 @@ But the jar is also a unix binary so you can just run the following:
     ./updatebot-${version}.jar
 
 To install on a unix operating system just copy the updatebot-${version).jar to file called `updatebot` on your `PATH`
+
+## Kinds of update
+
+There are different kinds of updates that UpdateBot can do. Lets walk through the kinds of updates you might want to do...
 
 ### Pushing
 
