@@ -14,7 +14,7 @@ See [an example UpdateBot YAML file](updatebot-core/src/test/resources/maven/upd
 
 ## Using UpdateBot
 
-### Jenkins Pipelines
+### Jenkins Pipelines
 
 A good place to use UpdateBot is in your Continuous Delivery pipelines when you've just created a release, tagged the source code and have waited for the artifacts to be in maven central or your nexus/artifactory; then you want to push those new versions into your downstream projects via Pull Requests.
 
@@ -41,7 +41,7 @@ node {
 }
 ``` 
 
-### Command Line
+### Command Line
 
 The updatebot jar file is a fat executable jar so you can use: 
 
