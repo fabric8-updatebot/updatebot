@@ -143,7 +143,7 @@ public abstract class CommandSupport {
         if (repositoryConfig == null) {
             String configFile = configuration.getConfigFile();
             File sourceDir = configuration.getSourceDir();
-            repositoryConfig = RepositoryConfigs.loadRepositoryConfig(configFile, sourceDir);
+            repositoryConfig = RepositoryConfigs.loadRepositoryConfig(configuration, configFile, sourceDir);
         }
         return repositoryConfig;
     }

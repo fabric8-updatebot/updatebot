@@ -26,6 +26,14 @@ public class RepositoryConfig {
     private GitHubProjects github;
     private List<GitRepository> git = new ArrayList<>();
 
+    @Override
+    public String toString() {
+        return "RepositoryConfig{" +
+                "github=" + github +
+                ", git=" + git +
+                '}';
+    }
+
     public GitHubProjects getGithub() {
         return github;
     }

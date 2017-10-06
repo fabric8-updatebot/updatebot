@@ -22,6 +22,13 @@ import java.util.List;
 public class GitHubProjects extends DtoSupport {
     private List<GithubOrganisation> organisations;
 
+    @Override
+    public String toString() {
+        return "GitHubProjects{" +
+                "organisations=" + organisations +
+                '}';
+    }
+
     public List<GithubOrganisation> getOrganisations() {
         return organisations;
     }
