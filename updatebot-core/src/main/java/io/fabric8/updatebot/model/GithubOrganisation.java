@@ -27,6 +27,14 @@ public class GithubOrganisation extends FilterSupport {
     private String name;
     private List<GitRepositoryConfig> repositories = new ArrayList<>();
 
+    @Override
+    public String toString() {
+        return "GithubOrganisation{" +
+                "name='" + name + '\'' +
+                ", repositories=" + repositories +
+                '}';
+    }
+
     public String getName() {
         return name;
     }

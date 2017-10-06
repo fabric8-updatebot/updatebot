@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.maven;
 
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.kind.maven.MavenScopes;
 import io.fabric8.updatebot.maven.support.MavenHelper;
 import io.fabric8.updatebot.model.Dependencies;
@@ -72,8 +73,10 @@ public class ExportVersionsMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         Log log = getLog();
         File sourceDir = project.getBasedir();
+        Configuration configuration = new Configuration();
+        configuration.setSourceDir(sourceDir);
         try {
-            repositoryConfig = RepositoryConfigs.loadRepositoryConfig(configYaml, sourceDir);
+            repositoryConfig = RepositoryConfigs.loadRepositoryConfig(configuration, configYaml, sourceDir);
         } catch (IOException e) {
             throw new MojoExecutionException("Failed to load updatebot.yml file from " + configYaml + ". " + e, e);
         }
