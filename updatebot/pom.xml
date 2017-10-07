@@ -22,11 +22,11 @@
   <parent>
     <groupId>io.fabric8.updatebot</groupId>
     <artifactId>parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.17</version>
   </parent>
 
   <artifactId>updatebot</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0.17</version>
   <packaging>jar</packaging>
   <name>updatebot :: executable</name>
 
