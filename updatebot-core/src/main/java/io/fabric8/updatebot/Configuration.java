@@ -22,6 +22,7 @@ import io.fabric8.updatebot.kind.npm.DefaultNpmDependencyTreeGenerator;
 import io.fabric8.updatebot.kind.npm.NpmDependencyTreeGenerator;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.updatebot.support.Systems;
+import org.fusesource.jansi.Ansi;
 import org.kohsuke.github.AbuseLimitHandler;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
@@ -36,10 +37,25 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static org.fusesource.jansi.Ansi.Color.CYAN;
+import static org.fusesource.jansi.Ansi.Color.GREEN;
+import static org.fusesource.jansi.Ansi.Color.RED;
+import static org.fusesource.jansi.Ansi.Color.YELLOW;
+import static org.fusesource.jansi.Ansi.Color.MAGENTA;
+import static org.fusesource.jansi.Ansi.ansi;
+
 /**
  * Common configuration parameters
  */
 public class Configuration {
+    // ANSI escapes for various colors (or empty strings if no coloring is used)
+    public static Ansi.Color
+            COLOR_ERROR = RED,
+            COLOR_COMPLETE = MAGENTA,
+            COLOR_PENDING = GREEN,
+            COLOR_WARNING = YELLOW;
+
+
     @Parameter(names = {"--github-pr-label", "-ghl"}, description = "GitHub Pull Request Label")
     private String githubPullRequestLabel = Systems.getConfigValue(EnvironmentVariables.GITHUB_PR_LABEL, "updatebot");
     @Parameter(names = {"--dry"}, description = "Dry Run mode does not perform any git commits")
@@ -61,6 +77,8 @@ public class Configuration {
     private String sourcePath;
     @Parameter(names = {"--https"}, description = "Whether to use HTTPS transport instead of git and SSH")
     private boolean useHttpsTransport;
+    @Parameter(names = {"--disable-ansi"}, description = "Whether to disable the use of ANSI colours in the output")
+    private boolean disableAnsi;
 
     @Parameter(names = {"--mvn"}, description = "The location of the `mvn` executable for invoking maven")
     private String mvnCommand = Systems.getConfigValue(EnvironmentVariables.MVN_COMMAND, "mvn");
@@ -76,6 +94,8 @@ public class Configuration {
     private GitPlugin git = new GitPluginCLI(this);
     private Map<String, String> mvnEnvironmentVariables;
     private Map<String, String> npmEnvironmentVariables;
+    private boolean ansiInitialised;
+    private boolean useAnsi;
 
     public GitHub getGithub() throws IOException {
         if (github == null) {
@@ -208,6 +228,14 @@ public class Configuration {
         this.sourcePath = sourcePath;
     }
 
+    public boolean isDisableAnsi() {
+        return disableAnsi;
+    }
+
+    public void setDisableAnsi(boolean disableAnsi) {
+        this.disableAnsi = disableAnsi;
+    }
+
     public File getSourceDir() {
         if (sourceDir == null) {
             if (sourcePath == null) {
@@ -301,7 +329,7 @@ public class Configuration {
 
     public void warn(Logger log, String message) {
         if (printStream != null) {
-            printStream.println("WARNING: " + message);
+            printStream.println(colored(COLOR_WARNING, "WARNING: " + message));
         } else {
             log.warn(message);
         }
@@ -309,7 +337,7 @@ public class Configuration {
 
     public void warn(Logger log, String message, Throwable e) {
         if (printStream != null) {
-            printStream.println("WARNING: " + message + " " + e);
+            printStream.println(colored(COLOR_WARNING, "WARNING: " + message + " " + e));
             e.printStackTrace(printStream);
         } else {
             log.warn(message, e);
@@ -318,7 +346,7 @@ public class Configuration {
 
     public void error(Logger log, String message) {
         if (printStream != null) {
-            printStream.println("ERROR: " + message);
+            printStream.println(colored(COLOR_ERROR, "ERROR: " + message));
         } else {
             log.warn(message);
         }
@@ -327,11 +355,39 @@ public class Configuration {
 
     public void error(Logger log, String message, Throwable e) {
         if (printStream != null) {
-            printStream.println("ERROR: " + message + " " + e);
+            printStream.println(colored(COLOR_ERROR, "ERROR: " + message + " " + e));
             e.printStackTrace(printStream);
         } else {
             log.warn(message, e);
         }
+    }
+
+    private boolean useAnsiColor() {
+        if (!ansiInitialised) {
+            this.useAnsi = !isDisableAnsi() && System.console() != null && !isWindows();
+            if (useAnsi) {
+                //AnsiConsole.systemInstall();
+                Ansi.setEnabled(true);
+            } else {
+                Ansi.setEnabled(false);
+            }
+            ansiInitialised = true;
+        }
+        return useAnsi;
+    }
+
+    private boolean isWindows() {
+        String os = System.getProperty("os.name");
+        return os != null && os.toLowerCase().startsWith("windows");
+    }
+
+
+    public String colored(Ansi.Color color, String message) {
+        if (!useAnsiColor()) {
+            return message;
+        }
+        Ansi ansi = ansi().fg(color);
+        return ansi.a(message).reset().toString();
     }
 
 }

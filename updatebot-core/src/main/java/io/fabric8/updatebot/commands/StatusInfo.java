@@ -19,6 +19,7 @@ import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.utils.Objects;
+import org.fusesource.jansi.Ansi;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHIssueState;
 import org.kohsuke.github.GHPullRequest;
@@ -208,10 +209,20 @@ public class StatusInfo {
 
     /**
      * Returns a description of the status
+     * @param configuration
      */
-    public String description() {
+    public String description(Configuration configuration) {
         StringBuilder builder = new StringBuilder();
+        Ansi.Color color = Configuration.COLOR_PENDING;
         if (status != null) {
+            switch (status) {
+                case COMPLETE:
+                    color = Configuration.COLOR_COMPLETE;
+                    break;
+                case FAILED:
+                    color = Configuration.COLOR_WARNING;
+                    break;
+            }
             builder.append(status.getName());
             builder.append(":");
         }
@@ -231,7 +242,9 @@ public class StatusInfo {
             }
             builder.append(pullRequestUrl);
         }
-        return builder.toString();
+        // lets add a trailing space just in case ansi color codes break URLs in logs ;)
+        builder.append(" ");
+        return configuration.colored(color, builder.toString());
     }
 
     protected String format(GHIssueState state) {
