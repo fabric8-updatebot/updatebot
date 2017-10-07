@@ -84,6 +84,11 @@
       <artifactId>slf4j-simple</artifactId>
       <version>${slf4j-api.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.fusesource.jansi</groupId>
+      <artifactId>jansi</artifactId>
+      <version>1.16</version>
+    </dependency>
 
     <!-- for whitespace preserving DOM -->
     <dependency>

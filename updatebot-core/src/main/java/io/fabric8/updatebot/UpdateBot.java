@@ -163,7 +163,7 @@ public class UpdateBot {
             changes = StatusInfo.changedStatuses(configuration, lastStatusMap, answer).values();
         }
         for (StatusInfo change : changes) {
-            configuration.info(LOG, change.description());
+            configuration.info(LOG, change.description(configuration));
         }
         if (logBlankLineAfter) {
             configuration.info(LOG, "");
