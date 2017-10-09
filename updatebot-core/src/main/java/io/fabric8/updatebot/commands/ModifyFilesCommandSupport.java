@@ -114,7 +114,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             }
             pullRequest = ghRepository.createPullRequest(title, head, "master", body);
             context.setPullRequest(pullRequest);
-            context.info(LOG, "Created pull request " + pullRequest.getHtmlUrl());
+            context.info(LOG, configuration.colored(Configuration.COLOR_PENDING, "Created pull request " + pullRequest.getHtmlUrl()));
 
             pullRequest.comment(commandComment);
             addIssueClosedCommentIfRequired(context, pullRequest, true);
@@ -246,6 +246,7 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
     }
 
     public void updatePendingChanges(CommandContext context, DependenciesCheck check, List<DependencyVersionChange> pendingChanges) throws IOException {
+        Configuration configuration = context.getConfiguration();
         List<DependencyVersionChange> currentPendingChanges = check.getInvalidChanges();
         GHRepository ghRepository = context.gitHubRepository();
         if (ghRepository != null) {
@@ -268,9 +269,9 @@ public abstract class ModifyFilesCommandSupport extends CommandSupport {
             if (issue == null) {
                 issue = Issues.createIssue(context, ghRepository);
                 context.setIssue(issue);
-                context.info(LOG, "Created issue " + issue.getHtmlUrl());
+                context.info(LOG, configuration.colored(Configuration.COLOR_PENDING, "Created issue " + issue.getHtmlUrl()));
             } else {
-                context.info(LOG, "Modifying issue " + issue.getHtmlUrl());
+                context.info(LOG, configuration.colored(Configuration.COLOR_PENDING, "Modifying issue " + issue.getHtmlUrl()));
             }
             Issues.addConflictsComment(issue, currentPendingChanges, operationDescrption, check);
         } else {

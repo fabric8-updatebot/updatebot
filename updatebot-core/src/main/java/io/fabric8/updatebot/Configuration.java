@@ -37,11 +37,11 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static org.fusesource.jansi.Ansi.Color.CYAN;
+import static org.fusesource.jansi.Ansi.Color.BLUE;
 import static org.fusesource.jansi.Ansi.Color.GREEN;
+import static org.fusesource.jansi.Ansi.Color.MAGENTA;
 import static org.fusesource.jansi.Ansi.Color.RED;
 import static org.fusesource.jansi.Ansi.Color.YELLOW;
-import static org.fusesource.jansi.Ansi.Color.MAGENTA;
 import static org.fusesource.jansi.Ansi.ansi;
 
 /**
@@ -52,6 +52,7 @@ public class Configuration {
     public static Ansi.Color
             COLOR_ERROR = RED,
             COLOR_COMPLETE = MAGENTA,
+            COLOR_COMMAND = BLUE,
             COLOR_PENDING = GREEN,
             COLOR_WARNING = YELLOW;
 

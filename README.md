@@ -20,7 +20,7 @@ A good place to use UpdateBot is in your Continuous Delivery pipelines when you'
 
 To do that please use the [UpdateBot Jenkins Plugin](https://wiki.jenkins.io/display/JENKINS/Updatebot+Plugin) or checkout the [UpdateBot Jenkins Plugin documentation](https://github.com/jenkinsci/updatebot-plugin/blob/master/readme.md).
 
-Essentially once you have installed the [UpdateBot Jenkins Plugin](https://wiki.jenkins.io/display/JENKINS/Updatebot+Plugin)  into your Jeknins you just use the `updateBotPush` step in your pipeline like this:
+Essentially once you have installed the [UpdateBot Jenkins Plugin](https://wiki.jenkins.io/display/JENKINS/Updatebot+Plugin)  into your Jeknins you just use the `updateBotPush()` step in your pipeline like this:
 
 ```groovy
 node {
@@ -36,7 +36,7 @@ node {
     stage('UpdateBot') {
         // now lets update any dependent projects with this new release
         // using the local file system as the tagged source code with versions
-        updateBotPush
+        updateBotPush()
     }
 }
 ``` 
