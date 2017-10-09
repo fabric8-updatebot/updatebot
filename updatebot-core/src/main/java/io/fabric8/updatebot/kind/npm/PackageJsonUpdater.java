@@ -23,7 +23,6 @@ import io.fabric8.updatebot.commands.PushVersionChangesContext;
 import io.fabric8.updatebot.kind.Kind;
 import io.fabric8.updatebot.kind.KindDependenciesCheck;
 import io.fabric8.updatebot.kind.Updater;
-import io.fabric8.updatebot.kind.UpdaterSupport;
 import io.fabric8.updatebot.kind.npm.dependency.DependencyCheck;
 import io.fabric8.updatebot.kind.npm.dependency.DependencyTree;
 import io.fabric8.updatebot.model.Dependencies;
@@ -52,7 +51,7 @@ import java.util.TreeMap;
 
 /**
  */
-public class PackageJsonUpdater extends UpdaterSupport implements Updater {
+public class PackageJsonUpdater implements Updater {
 
     private static final transient Logger LOG = LoggerFactory.getLogger(PackageJsonUpdater.class);
 
@@ -73,8 +72,7 @@ public class PackageJsonUpdater extends UpdaterSupport implements Updater {
         return answer;
     }
 
-    @Override
-    public boolean pushVersions(PushVersionChangesContext context) throws IOException {
+    protected boolean pushVersions(PushVersionChangesContext context) throws IOException {
         File file = context.file("package.json");
         JsonNode tree = MarkupHelper.loadJson(file);
         boolean answer = false;
@@ -94,6 +92,22 @@ public class PackageJsonUpdater extends UpdaterSupport implements Updater {
         return answer;
     }
 
+    @Override
+    public boolean pushVersions(CommandContext parentContext, List<DependencyVersionChange> changes) throws IOException {
+        boolean answer = false;
+        if (isApplicable(parentContext)) {
+            for (DependencyVersionChange step : changes) {
+                PushVersionChangesContext context = new PushVersionChangesContext(parentContext, step);
+                boolean updated = pushVersions(context);
+                if (updated) {
+                    answer = true;
+                } else {
+                    parentContext.removeChild(context);
+                }
+            }
+        }
+        return answer;
+    }
 
     /**
      * Adds the list of possible dependency update steps from the given source context that we can then apply to

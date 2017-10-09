@@ -17,9 +17,8 @@ package io.fabric8.updatebot.kind.maven;
 
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.commands.CommandContext;
-import io.fabric8.updatebot.commands.PushVersionChangesContext;
-import io.fabric8.updatebot.kind.KindDependenciesCheck;
 import io.fabric8.updatebot.kind.Updater;
+import io.fabric8.updatebot.kind.UpdaterSupport;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.model.MavenArtifactVersionChange;
@@ -35,13 +34,12 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 /**
  */
-public class MavenUpdater implements Updater {
+public class MavenUpdater extends UpdaterSupport implements Updater {
     private static final transient Logger LOG = LoggerFactory.getLogger(MavenUpdater.class);
 
     @Override
@@ -103,12 +101,6 @@ public class MavenUpdater implements Updater {
     }
 
     @Override
-    public boolean pushVersions(PushVersionChangesContext context) throws IOException {
-        List list = Arrays.asList(context.getStep());
-        return pushVersions(context, list);
-    }
-
-    @Override
     public boolean pushVersions(CommandContext context, List<DependencyVersionChange> changes) throws IOException {
         File file = context.file("pom.xml");
         boolean answer = false;
@@ -123,18 +115,6 @@ public class MavenUpdater implements Updater {
 
     protected File createVersionsYamlFile(CommandContext context) {
         return new File(context.getDir(), "target/updatebot-versions.yaml");
-    }
-
-    @Override
-    public boolean pullVersions(CommandContext context) throws IOException {
-        // TODO
-        return false;
-    }
-
-    @Override
-    public KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> value) {
-        // TODO 
-        return new KindDependenciesCheck(value);
     }
 
 }

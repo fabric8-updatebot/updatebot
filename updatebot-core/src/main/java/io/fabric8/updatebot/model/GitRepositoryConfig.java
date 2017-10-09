@@ -65,4 +65,5 @@ public class GitRepositoryConfig extends DtoSupport {
     public void setPull(Dependencies pull) {
         this.pull = pull;
     }
+
 }

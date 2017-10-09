@@ -22,6 +22,8 @@ import io.fabric8.updatebot.support.Strings;
 public class Dependencies {
     private NpmDependencies npm;
     private MavenDependencies maven;
+    private FileDependencies file;
+    private PluginsDependencies plugins;
 
     @Override
     public String toString() {
@@ -45,5 +47,21 @@ public class Dependencies {
 
     public void setMaven(MavenDependencies maven) {
         this.maven = maven;
+    }
+
+    public FileDependencies getFile() {
+        return file;
+    }
+
+    public void setFile(FileDependencies file) {
+        this.file = file;
+    }
+
+    public PluginsDependencies getPlugins() {
+        return plugins;
+    }
+
+    public void setPlugins(PluginsDependencies plugins) {
+        this.plugins = plugins;
     }
 }

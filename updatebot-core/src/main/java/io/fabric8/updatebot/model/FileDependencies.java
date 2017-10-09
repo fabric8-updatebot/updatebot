@@ -13,26 +13,15 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot.kind;
-
-import io.fabric8.updatebot.commands.CommandContext;
-import io.fabric8.updatebot.model.DependencyVersionChange;
-
-import java.io.IOException;
-import java.util.List;
+package io.fabric8.updatebot.model;
 
 /**
- * A useful base class for implementing {@link Updater}
+ * Represents sets of file dependencies
  */
-public abstract class UpdaterSupport implements Updater {
+public class FileDependencies {
 
-    @Override
-    public boolean pullVersions(CommandContext context) throws IOException {
-        return false;
-    }
-
-    @Override
-    public KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> value) {
-        return new KindDependenciesCheck(value);
+    public boolean isEmpty() {
+        // TODO
+        return true;
     }
 }
