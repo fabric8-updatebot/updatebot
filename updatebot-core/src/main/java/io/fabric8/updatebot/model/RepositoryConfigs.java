@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
 
 import static io.fabric8.updatebot.support.MarkupHelper.loadYaml;
 
@@ -74,7 +73,7 @@ public class RepositoryConfigs {
 
     /**
      * Lets try detect the github organisation level configuration for a project.
-     *
+     * <p>
      * This lets us have a shared updatebot configuration across repositories within a github organisation
      *
      * @return null if it cannot be found

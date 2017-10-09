@@ -88,6 +88,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
 
     @Override
     protected boolean doProcess(CommandContext context) throws IOException {
+        Configuration configuration = context.getConfiguration();
         LocalRepository repository = context.getRepository();
         if (repository.hasCloneUrl(cloneUrl)) {
             LOG.debug("Ignoring repository " + repository.getCloneUrl() + " as this is the source repository!");
@@ -105,7 +106,7 @@ public class PushSourceChanges extends ModifyFilesCommandSupport {
             stepDescription = " no changes found";
             LOG.debug(message + stepDescription);
         } else {
-            context.info(LOG, message + stepDescription);
+            context.info(LOG, configuration.colored(Configuration.COLOR_COMMAND, message + stepDescription));
         }
         return pushVersionsWithChecks(context, steps);
     }

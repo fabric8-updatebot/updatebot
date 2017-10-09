@@ -209,6 +209,7 @@ public class StatusInfo {
 
     /**
      * Returns a description of the status
+     *
      * @param configuration
      */
     public String description(Configuration configuration) {
