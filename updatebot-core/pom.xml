@@ -40,7 +40,7 @@
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>fabric8-utils</artifactId>
-      <version>${fabric8-utils.version}</version>
+      <version>${fabric8.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

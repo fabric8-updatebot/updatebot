@@ -32,6 +32,7 @@ public class DependencyVersionChange {
     private final String dependency;
     private final String version;
     private final String scope;
+    private final boolean add;
 
     public DependencyVersionChange(Kind kind, String dependency, String version) {
         this(kind, dependency, version, null);
@@ -39,10 +40,15 @@ public class DependencyVersionChange {
 
 
     public DependencyVersionChange(Kind kind, String dependency, String version, String scope) {
+        this(kind, dependency, version, scope, false);
+    }
+
+    public DependencyVersionChange(Kind kind, String dependency, String version, String scope, boolean add) {
         this.kind = kind;
         this.dependency = dependency;
         this.version = version;
         this.scope = scope;
+        this.add = add;
     }
 
     public static String describe(List<DependencyVersionChange> changes) {
@@ -149,4 +155,10 @@ public class DependencyVersionChange {
         return scope;
     }
 
+    /**
+     * Returns if we add this dependency if its missing from a project
+     */
+    public boolean isAdd() {
+        return add;
+    }
 }

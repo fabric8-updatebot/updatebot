@@ -37,7 +37,6 @@ public class EnableFabric8Test {
     protected EnableFabric8 enableFabric8 = new EnableFabric8();
     protected List<LocalRepository> localRepositories;
     protected Configuration configuration = new Configuration();
-    protected String organisationAndRepository = "jstrachan-testing/spring-boot-webmvc";
 
     @Before
     public void init() throws IOException {
@@ -46,11 +45,21 @@ public class EnableFabric8Test {
         configuration.setWorkDir(workDirPath);
         configuration.setSourceDir(new File(workDirPath));
 
-        enableFabric8.setOrganisationAndRepository(organisationAndRepository);
     }
 
     @Test
-    public void testUpdater() throws Exception {
+    public void testEnableFabric8OnProjectWithFMP() throws Exception {
+        enableFabric8.setOrganisationAndRepository("jstrachan-testing/spring-boot-webmvc");
+        assertEnableFabric8();
+    }
+
+    @Test
+    public void testEnableFabric8OnProjectWithoutFMP() throws Exception {
+        enableFabric8.setOrganisationAndRepository("jstrachan-testing/spring-boot-webmvc-no-fmp");
+        assertEnableFabric8();
+    }
+
+    protected void assertEnableFabric8() throws IOException {
         if (Tests.canTestWithGithubAPI(configuration)) {
             enableFabric8.run(configuration);
 

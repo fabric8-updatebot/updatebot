@@ -32,9 +32,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.fabric8.updatebot.kind.maven.PomHelper.firstChild;
-import static io.fabric8.updatebot.kind.maven.PomHelper.firstChildTextContent;
-import static io.fabric8.updatebot.kind.maven.PomHelper.parseXmlFile;
+import static io.fabric8.updatebot.support.DecentXmlHelper.findElementsWithName;
+import static io.fabric8.updatebot.support.DecentXmlHelper.firstChild;
+import static io.fabric8.updatebot.support.DecentXmlHelper.firstChildTextContent;
+import static io.fabric8.updatebot.support.DecentXmlHelper.parseXmlFile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Fail.fail;
 import static org.junit.Assert.assertEquals;
@@ -62,35 +63,47 @@ public class PomHelperTest {
     }
 
     protected static void assertPluginVersionChanged(File file, Document doc, DependencyVersionChange change) {
-        List<de.pdark.decentxml.Element> elements = doc.getRootElement().getChildren("plugin");
-        boolean update = false;
-        for (de.pdark.decentxml.Element element : elements) {
+        boolean found = false;
+        List<Element> elements = findElementsWithName(doc.getRootElement(), "plugin");
+        for (Element element : elements) {
             String groupId = firstChildTextContent(element, "groupId");
             String artifactId = firstChildTextContent(element, "artifactId");
             String version = firstChildTextContent(element, "version");
             if (Strings.notEmpty(groupId) && Strings.notEmpty(artifactId) && Strings.notEmpty(version)) {
-                if (change.matches(groupId, artifactId) && !version.startsWith("$")) {
-                    LOG.info("File " + file + " has plugin " + change.getDependency() + " version: " + version);
-                    assertThat(version).describedAs("File " + file + " plugin version for " + change.getDependency()).isEqualTo(change.getVersion());
+                if (change.matches(groupId, artifactId)) {
+                    found = true;
+                    if (!version.startsWith("$")) {
+                        LOG.info("File " + file + " has plugin " + change.getDependency() + " version: " + version);
+                        assertThat(version).describedAs("File " + file + " plugin version for " + change.getDependency()).isEqualTo(change.getVersion());
+                    }
                 }
             }
         }
+        assertThat(found).describedAs("File " + file + " does not have plugin " +
+                change.getDependency() + " version: " + change.getVersion()).isTrue();
     }
 
     protected static void assertDependencyVersionChanged(File file, Document doc, DependencyVersionChange change) {
-        List<de.pdark.decentxml.Element> elements = doc.getRootElement().getChildren("dependency");
-        boolean update = false;
-        for (de.pdark.decentxml.Element element : elements) {
+        boolean found = false;
+        List<Element> elements = findElementsWithName(doc.getRootElement(), "dependency");
+        for (Element element : elements) {
             String groupId = firstChildTextContent(element, "groupId");
             String artifactId = firstChildTextContent(element, "artifactId");
             String version = firstChildTextContent(element, "version");
             if (Strings.notEmpty(groupId) && Strings.notEmpty(artifactId) && Strings.notEmpty(version)) {
-                if (change.matches(groupId, artifactId) && !version.startsWith("$")) {
-                    LOG.info("File " + file + " has dependency " + change.getDependency() + " version: " + version);
-                    assertThat(version).describedAs("File " + file + " dependency version for " + change.getDependency()).isEqualTo(change.getVersion());
+                if (change.matches(groupId, artifactId)) {
+                    found = true;
+                    if (!version.startsWith("$")) {
+                        LOG.info("File " + file + " has dependency " + change.getDependency() + " version: " + version);
+                        assertThat(version).describedAs("File " + file + " dependency version for " + change.getDependency()).isEqualTo(change.getVersion());
+                    }
                 }
             }
         }
+/*
+        assertThat(found).describedAs("File " + file + " does not have dependency " +
+                change.getDependency() + " version: " + change.getVersion()).isTrue();
+*/
     }
 
     protected static void assertPropertiesValid(File file, Document doc, Map<String, String> propertyVersions) {
@@ -114,7 +127,6 @@ public class PomHelperTest {
 
     @Test
     public void testVersionReplacement() throws Exception {
-
         File outDir = Tests.copyPackageSources(getClass());
 
         LOG.info("Updating poms in " + outDir);
@@ -127,7 +139,9 @@ public class PomHelperTest {
 
         for (File file : files) {
             try {
-                pomsToChange.add(PomUpdateStatus.createPomUpdateStatus(file));
+                PomUpdateStatus pomUpdateStatus = PomUpdateStatus.createPomUpdateStatus(file);
+                pomUpdateStatus.setRootPom(true);
+                pomsToChange.add(pomUpdateStatus);
             } catch (Exception e) {
                 fail("Failed to parse " + file, e);
             }
@@ -142,8 +156,7 @@ public class PomHelperTest {
 
         // lets add some changes
         List<DependencyVersionChange> changes = new ArrayList<>();
-        changes.add(new DependencyVersionChange(Kind.MAVEN, "io.fabric8:fabric8-maven-plugin", fmpVersion, MavenScopes.PLUGIN));
-
+        changes.add(new MavenDependencyVersionChange("io.fabric8:fabric8-maven-plugin", fmpVersion, MavenScopes.PLUGIN, true, ElementProcessors.createFabric8MavenPluginElementProcessor()));
 
         changes.add(new DependencyVersionChange(Kind.MAVEN, "org.assertj:assertj-core", assertJVersion, MavenScopes.ARTIFACT));
 

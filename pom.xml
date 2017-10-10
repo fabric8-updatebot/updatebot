@@ -74,16 +74,17 @@
     <maven.compiler.target>1.8</maven.compiler.target>
 
     <aether.version>1.0.2.v20150114</aether.version>
-    <fabric8.version>2.2.95</fabric8.version>
-
+    <assertj.core.version>2.4.1</assertj.core.version>
+    <fabric8.version>2.3.7</fabric8.version>
+    <fabric8.maven.plugin.version>3.5.31</fabric8.maven.plugin.version>
 
     <kohsuke.github-api.version>1.89</kohsuke.github-api.version>
     <jackson.version>2.9.1</jackson.version>
+    <junit.version>4.12</junit.version>
     <maven.version>3.5.0</maven.version>
     <resolverVersion>1.1.0</resolverVersion>
     <slf4j-api.version>1.7.25</slf4j-api.version>
     <slf4j-log4j12.version>1.7.21</slf4j-log4j12.version>
-    <fabric8-utils.version>2.3.2</fabric8-utils.version>
 
     <updatebot.version>1.0.12</updatebot.version>
     <junit.version>4.12</junit.version>
@@ -149,7 +150,7 @@
     <dependencies>
       <dependency>
         <groupId>io.fabric8</groupId>
-        <artifactId>fabric8-project-bom-full</artifactId>
+        <artifactId>fabric8-project-bom-with-platform-deps</artifactId>
         <version>${fabric8.version}</version>
         <type>pom</type>
         <scope>import</scope>
@@ -170,6 +171,17 @@
         <groupId>io.updatebot</groupId>
         <artifactId>updatebot-resolver</artifactId>
         <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.core.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

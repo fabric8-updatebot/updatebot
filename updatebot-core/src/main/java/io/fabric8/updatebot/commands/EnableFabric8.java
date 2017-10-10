@@ -21,6 +21,9 @@ import io.fabric8.updatebot.CommandNames;
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.kind.Kind;
+import io.fabric8.updatebot.kind.maven.ElementProcessors;
+import io.fabric8.updatebot.kind.maven.MavenDependencyVersionChange;
+import io.fabric8.updatebot.kind.maven.MavenScopes;
 import io.fabric8.updatebot.kind.maven.MavenUpdater;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.model.GitHubProjects;
@@ -185,11 +188,18 @@ public class EnableFabric8 extends ModifyFilesCommandSupport {
         File jenkinsLibraryDir = jenkinsfileRepository.getDir();
         File jenkinsfileFolder = new File(jenkinsLibraryDir, path);
 
-        File jenkinsfile = new File(jenkinsfileFolder, pipeline + "/Jenkinsfile");
-        boolean found = true;
-        if (!Files.isFile(jenkinsfile)) {
-            found = false;
-            configuration.warn(LOG, "Could not find Jenkinsfile " + jenkinsfile + " in the library!");
+        File jenkinsfile = null;
+        boolean found = false;
+        if (Strings.notEmpty(pipeline)) {
+            jenkinsfile = new File(jenkinsfileFolder, pipeline + "/Jenkinsfile");
+            found = Files.isFile(jenkinsfile);
+        }
+        if (!found) {
+            if (Strings.notEmpty(pipeline)) {
+                configuration.warn(LOG, "Could not find Jenkinsfile " + jenkinsfile + " in the library!");
+            } else {
+                configuration.warn(LOG, "No pipeline configured so using a default");
+            }
             for (String name : defaultJenkinsfileNames) {
                 jenkinsfile = new File(jenkinsfileFolder, name + "/Jenkinsfile");
                 if (Files.isFile(jenkinsfile)) {
@@ -257,10 +267,12 @@ public class EnableFabric8 extends ModifyFilesCommandSupport {
 
     protected List<DependencyVersionChange> createEnableFabric8VersionChanges() {
         List<DependencyVersionChange> answer = new ArrayList<>();
-        addVersionChanges(answer, VersionHelper.fabric8MavenPluginVersion(), "io.fabric8", "fabric8-maven-plugin");
+        String fmpVersion = VersionHelper.fabric8MavenPluginVersion();
+        answer.add(new MavenDependencyVersionChange("io.fabric8:fabric8-maven-plugin", fmpVersion, MavenScopes.PLUGIN, true, ElementProcessors.createFabric8MavenPluginElementProcessor()));
+
         addVersionChanges(answer, VersionHelper.fabric8Version(), "io.fabric8",
                 "fabric8-utils", "kubernetes-api", "fabric8-parent", "fabric8-project-bom",
-                "fabric8-project-bom-camel-spring-boot", "fabric8-project-bom-cxf-spring-boot", "fabric8-project-bom-fuse-karaf", "fabric8-project-bom-with-platform-deps", "");
+                "fabric8-project-bom-camel-spring-boot", "fabric8-project-bom-cxf-spring-boot", "fabric8-project-bom-fuse-karaf", "fabric8-project-bom-with-platform-deps");
         return answer;
     }
 
