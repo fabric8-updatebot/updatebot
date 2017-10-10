@@ -23,4 +23,5 @@ public final class CommandNames {
     public static final String PUSH_VERSION = "push-version";
     public static final String PUSH_SOURCE = "push";
     public static final String UPDATE = "update";
+    public static final String ENABLE_F8 = "f8";
 }

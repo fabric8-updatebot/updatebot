@@ -47,6 +47,13 @@ public final class VersionHelper {
         return getVersion("io.fabric8", "fabric8-maven-plugin");
     }
 
+    /**
+     * Retrieves the version of fabric8 maven plugin to use
+     */
+    public static String fabric8Version() {
+        return getVersion("io.fabric8", "kubernetes-api");
+    }
+
     public static String getVersion(String groupId, String artifactId) {
         String key = "" + groupId + "/" + artifactId;
         Map map = getGroupArtifactVersionMap();

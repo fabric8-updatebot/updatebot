@@ -134,7 +134,7 @@ public abstract class CommandSupport {
     public List<LocalRepository> getLocalRepositories(Configuration configuration) throws IOException {
         if (localRepositories == null) {
             RepositoryConfig repositoryConfig = getRepositoryConfig(configuration);
-            this.localRepositories = Repositories.cloneOrPullRepositories(this, configuration, repositoryConfig);
+            this.localRepositories = Repositories.cloneOrPullRepositories(configuration, repositoryConfig);
         }
         return localRepositories;
     }
@@ -159,5 +159,13 @@ public abstract class CommandSupport {
             context.setIssue(issue);
         }
         return issue;
+    }
+
+    protected void setLocalRepositories(List<LocalRepository> localRepositories) {
+        this.localRepositories = localRepositories;
+    }
+
+    protected void setRepositoryConfig(RepositoryConfig repositoryConfig) {
+        this.repositoryConfig = repositoryConfig;
     }
 }

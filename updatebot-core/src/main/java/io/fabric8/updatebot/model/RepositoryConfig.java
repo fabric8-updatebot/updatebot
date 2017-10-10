@@ -35,6 +35,16 @@ public class RepositoryConfig {
                 '}';
     }
 
+    /**
+     * Returns the github configuration, lazily created if required
+     */
+    public GitHubProjects github() {
+        if (github == null) {
+            github = new GitHubProjects();
+        }
+        return github;
+    }
+
     public GitHubProjects getGithub() {
         return github;
     }

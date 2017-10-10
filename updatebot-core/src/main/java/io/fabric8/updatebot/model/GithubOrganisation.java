@@ -17,6 +17,7 @@ package io.fabric8.updatebot.model;
 
 import io.fabric8.updatebot.git.GitHelper;
 import io.fabric8.updatebot.support.Strings;
+import io.fabric8.utils.Objects;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,13 @@ import java.util.List;
 public class GithubOrganisation extends FilterSupport {
     private String name;
     private List<GitRepositoryConfig> repositories = new ArrayList<>();
+
+    public GithubOrganisation() {
+    }
+
+    public GithubOrganisation(String name) {
+        this.name = name;
+    }
 
     @Override
     public String toString() {
@@ -63,5 +71,26 @@ public class GithubOrganisation extends FilterSupport {
     protected boolean hasCloneUrl(GitRepositoryConfig repository, String cloneUrl) {
         List<String> gitUrls = GitHelper.getGitHubCloneUrls("github.com", getName(), repository.getName());
         return Strings.equalAnyValue(cloneUrl, gitUrls);
+    }
+
+    /**
+     * Returns the github repository for the given name, lazily creating or updating if required
+     */
+    public GitRepositoryConfig repository(String name) {
+        GitRepositoryConfig config = findRepository(name);
+        if (config == null) {
+            config = new GitRepositoryConfig(name);
+            repositories.add(config);
+        }
+        return config;
+    }
+
+    public GitRepositoryConfig findRepository(String name) {
+        for (GitRepositoryConfig repository : repositories) {
+            if (Objects.equal(name, repository.getName())) {
+                return repository;
+            }
+        }
+        return null;
     }
 }
