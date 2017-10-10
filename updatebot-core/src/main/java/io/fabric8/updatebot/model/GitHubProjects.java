@@ -15,6 +15,9 @@
  */
 package io.fabric8.updatebot.model;
 
+import io.fabric8.utils.Objects;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,6 +30,29 @@ public class GitHubProjects extends DtoSupport {
         return "GitHubProjects{" +
                 "organisations=" + organisations +
                 '}';
+    }
+
+    public GithubOrganisation organisation(String name) {
+        GithubOrganisation answer = findOrganisation(name);
+        if (answer == null) {
+            if (organisations == null) {
+                organisations = new ArrayList<>();
+            }
+            answer = new GithubOrganisation(name);
+            organisations.add(answer);
+        }
+        return answer;
+    }
+
+    public GithubOrganisation findOrganisation(String name) {
+        if (organisations != null) {
+            for (GithubOrganisation organisation : organisations) {
+                if (Objects.equal(name, organisation.getName())) {
+                    return organisation;
+                }
+            }
+        }
+        return null;
     }
 
     public List<GithubOrganisation> getOrganisations() {

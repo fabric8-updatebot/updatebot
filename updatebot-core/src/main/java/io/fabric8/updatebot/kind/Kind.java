@@ -15,12 +15,14 @@
  */
 package io.fabric8.updatebot.kind;
 
+import io.fabric8.updatebot.kind.file.FileUpdater;
 import io.fabric8.updatebot.kind.maven.MavenUpdater;
 import io.fabric8.updatebot.kind.npm.PackageJsonUpdater;
 
 /**
  */
 public enum Kind {
+    FILE("file", new FileUpdater()),
     MAVEN("maven", new MavenUpdater()),
     NPM("npm", new PackageJsonUpdater());
 

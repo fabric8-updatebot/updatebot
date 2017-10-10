@@ -16,7 +16,6 @@
 package io.fabric8.updatebot.repository;
 
 import io.fabric8.updatebot.Configuration;
-import io.fabric8.updatebot.commands.CommandSupport;
 import io.fabric8.updatebot.github.GitHubHelpers;
 import io.fabric8.updatebot.model.GitHubProjects;
 import io.fabric8.updatebot.model.GitRepository;
@@ -48,15 +47,15 @@ public class Repositories {
     private static final transient Logger LOG = LoggerFactory.getLogger(Repositories.class);
 
 
-    public static List<LocalRepository> cloneOrPullRepositories(CommandSupport command, Configuration configuration, RepositoryConfig repositoryConfig) throws IOException {
-        List<LocalRepository> repositories = findRepositories(command, configuration, repositoryConfig);
+    public static List<LocalRepository> cloneOrPullRepositories(Configuration configuration, RepositoryConfig repositoryConfig) throws IOException {
+        List<LocalRepository> repositories = findRepositories(configuration, repositoryConfig);
         for (LocalRepository repository : repositories) {
-            cloneOrPull(configuration, repository);
+            cloneOrPullRepository(configuration, repository);
         }
         return repositories;
     }
 
-    private static void cloneOrPull(Configuration configuration, LocalRepository repository) {
+    public static void cloneOrPullRepository(Configuration configuration, LocalRepository repository) {
         File dir = repository.getDir();
         String secureCloneUrl = repository.getRepo().secureCloneUrl(configuration);
         File gitDir = new File(dir, ".git");
@@ -77,7 +76,7 @@ public class Repositories {
         }
     }
 
-    protected static List<LocalRepository> findRepositories(CommandSupport updateBot, Configuration configuration, RepositoryConfig repositoryConfig) throws IOException {
+    protected static List<LocalRepository> findRepositories(Configuration configuration, RepositoryConfig repositoryConfig) throws IOException {
         String workDirPath = configuration.getWorkDir();
         File workDir = new File(workDirPath);
         if (!workDir.isAbsolute()) {

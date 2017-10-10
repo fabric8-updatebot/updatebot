@@ -54,8 +54,9 @@ public class PullRequestCommentReadWriteTest {
     }
 
     @Before
-    public void init() {
-        parentContext = new CommandContext(LocalRepository.fromDirectory(testDir), configuration);
+    public void init() throws Exception {
+        LocalRepository repository = LocalRepository.fromDirectory(configuration, testDir);
+        parentContext = new CommandContext(repository, configuration);
     }
 
     @Test

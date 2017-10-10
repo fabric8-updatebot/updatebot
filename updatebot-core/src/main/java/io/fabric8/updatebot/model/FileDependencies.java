@@ -13,15 +13,15 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot;
+package io.fabric8.updatebot.model;
 
 /**
+ * Represents sets of file dependencies
  */
-public final class CommandNames {
-    public static final String HELP = "help";
-    public static final String PULL = "pull";
-    public static final String PUSH_VERSION = "push-version";
-    public static final String PUSH_SOURCE = "push";
-    public static final String UPDATE = "update";
-    public static final String ENABLE_F8 = "f8";
+public class FileDependencies {
+
+    public boolean isEmpty() {
+        // TODO
+        return true;
+    }
 }

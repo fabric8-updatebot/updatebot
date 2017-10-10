@@ -17,6 +17,7 @@ package io.fabric8.updatebot.kind.maven;
 
 import de.pdark.decentxml.Document;
 import io.fabric8.updatebot.model.DependencyVersionChange;
+import io.fabric8.updatebot.support.DecentXmlHelper;
 import io.fabric8.utils.IOHelpers;
 import io.fabric8.utils.Objects;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ public class PomUpdateStatus {
     private final File pom;
     private final Document doc;
     private boolean updated;
+    private boolean rootPom;
 
     public PomUpdateStatus(File pom, Document doc) {
         this.pom = pom;
@@ -42,10 +44,32 @@ public class PomUpdateStatus {
     }
 
     public static PomUpdateStatus createPomUpdateStatus(File file) throws IOException {
-        Document doc = PomHelper.parseXmlFile(file);
+        Document doc = DecentXmlHelper.parseXmlFile(file);
         return new PomUpdateStatus(file, doc);
     }
 
+    public boolean isRootPom() {
+        return rootPom;
+    }
+
+    public void setRootPom(boolean rootPom) {
+        this.rootPom = rootPom;
+    }
+
+    /**
+     * Returns true if we should add the given dependency version change if the dependency is missing.
+     * <p>
+     * For dependencies like plugins we often only add it to the parent <code>pom.xml</code> only
+     */
+    public boolean shouldLazyAdd(DependencyVersionChange change) {
+        if (change instanceof MavenDependencyVersionChange) {
+            MavenDependencyVersionChange mavenDependencyVersionChange = (MavenDependencyVersionChange) change;
+            if (mavenDependencyVersionChange.isAddOnlyToRootPom()) {
+                return isRootPom();
+            }
+        }
+        return change.isAdd();
+    }
 
     /**
      * Saves the pom.xml if its been changed
@@ -68,8 +92,9 @@ public class PomUpdateStatus {
     public void updateVersions(List<DependencyVersionChange> changes, Map<String, String> propertyChanges) {
         for (DependencyVersionChange change : changes) {
             String scope = change.getScope();
+            boolean lazyAdd = shouldLazyAdd(change);
             if (Objects.equal(MavenScopes.PLUGIN, scope)) {
-                if (PomHelper.updatePluginVersion(doc, change, propertyChanges)) {
+                if (PomHelper.updatePluginVersion(doc, change, propertyChanges, lazyAdd)) {
                     updated = true;
                 }
             } else {
@@ -87,4 +112,5 @@ public class PomUpdateStatus {
         }
 
     }
+
 }

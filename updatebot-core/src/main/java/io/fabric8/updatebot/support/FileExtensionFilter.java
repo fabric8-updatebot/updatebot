@@ -13,26 +13,33 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot.kind;
+package io.fabric8.updatebot.support;
 
-import io.fabric8.updatebot.commands.CommandContext;
-import io.fabric8.updatebot.model.DependencyVersionChange;
+import io.fabric8.utils.Files;
+import io.fabric8.utils.Objects;
 
-import java.io.IOException;
-import java.util.List;
+import java.io.File;
+import java.io.FileFilter;
 
 /**
- * A useful base class for implementing {@link Updater}
  */
-public abstract class UpdaterSupport implements Updater {
+public class FileExtensionFilter implements FileFilter {
 
-    @Override
-    public boolean pullVersions(CommandContext context) throws IOException {
-        return false;
+    private final String extension;
+
+    public FileExtensionFilter(String extension) {
+        this.extension = extension;
     }
 
     @Override
-    public KindDependenciesCheck checkDependencies(CommandContext context, List<DependencyVersionChange> value) {
-        return new KindDependenciesCheck(value);
+    public String toString() {
+        return "FileExtensionFilter{" +
+                "extension='" + extension + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean accept(File file) {
+        return Objects.equal(extension, Files.getExtension(file.getName()));
     }
 }

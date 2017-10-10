@@ -44,7 +44,7 @@ public class PackageJsonUpdaterTest {
     @Before
     public void init() throws Exception {
         testDir = Tests.copyPackageSources(getClass());
-        parentContext = new CommandContext(LocalRepository.fromDirectory(testDir), configuration);
+        parentContext = new CommandContext(LocalRepository.fromDirectory(configuration, testDir), configuration);
         packageJson = Tests.testFile(this.testDir, "package.json");
     }
 

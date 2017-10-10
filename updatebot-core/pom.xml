@@ -40,7 +40,7 @@
     <dependency>
       <groupId>io.fabric8</groupId>
       <artifactId>fabric8-utils</artifactId>
-      <version>${fabric8-utils.version}</version>
+      <version>${fabric8.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -88,6 +88,12 @@
       <groupId>org.fusesource.jansi</groupId>
       <artifactId>jansi</artifactId>
       <version>1.16</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>5.0.0.RELEASE</version>
     </dependency>
 
     <!-- for whitespace preserving DOM -->

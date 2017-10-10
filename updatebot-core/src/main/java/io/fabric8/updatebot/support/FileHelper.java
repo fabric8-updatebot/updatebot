@@ -18,6 +18,7 @@ package io.fabric8.updatebot.support;
 import io.fabric8.utils.Files;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 
 /**
@@ -42,5 +43,25 @@ public class FileHelper {
         } catch (IOException e) {
             return dir;
         }
+    }
+
+    /**
+     * Returns true if a file matching the filter can be found in the given directory
+     */
+    public static boolean hasFile(File dir, FileFilter filter) {
+        if (filter.accept(dir)) {
+            return true;
+        }
+        if (dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (hasFile(file, filter)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

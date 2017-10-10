@@ -48,6 +48,7 @@ import static org.fusesource.jansi.Ansi.ansi;
  * Common configuration parameters
  */
 public class Configuration {
+    public static final String DEFAULT_CONFIG_FILE = ".updatebot.yml";
     // ANSI escapes for various colors (or empty strings if no coloring is used)
     public static Ansi.Color
             COLOR_ERROR = RED,
@@ -63,7 +64,7 @@ public class Configuration {
     private boolean dryRun = Systems.isConfigFlag(EnvironmentVariables.DRY_RUN);
     private GitHub github;
     @Parameter(names = {"--config", "-c"}, description = "Location of the UpdateBot YAML configuration file")
-    private String configFile = Systems.getConfigValue(EnvironmentVariables.CONFIG_FILE, ".updatebot.yml");
+    private String configFile = Systems.getConfigValue(EnvironmentVariables.CONFIG_FILE, DEFAULT_CONFIG_FILE);
     @Parameter(names = {"--work-dir", "-wd"}, description = "The work directory where other downstream projects are cloned")
     private String workDir = Systems.getConfigValue(EnvironmentVariables.WORK_DIR, "./.updatebot-repos");
     @Parameter(names = {"--github-username", "-ghu"}, description = "GitHub Username")

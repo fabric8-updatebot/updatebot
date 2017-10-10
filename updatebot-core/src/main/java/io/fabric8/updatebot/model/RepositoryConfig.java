@@ -25,6 +25,7 @@ import java.util.List;
 public class RepositoryConfig {
     private GitHubProjects github;
     private List<GitRepository> git = new ArrayList<>();
+    private GitRepositoryConfig local;
 
     @Override
     public String toString() {
@@ -32,6 +33,16 @@ public class RepositoryConfig {
                 "github=" + github +
                 ", git=" + git +
                 '}';
+    }
+
+    /**
+     * Returns the github configuration, lazily created if required
+     */
+    public GitHubProjects github() {
+        if (github == null) {
+            github = new GitHubProjects();
+        }
+        return github;
     }
 
     public GitHubProjects getGithub() {
@@ -50,6 +61,13 @@ public class RepositoryConfig {
         this.git = git;
     }
 
+    public GitRepositoryConfig getLocal() {
+        return local;
+    }
+
+    public void setLocal(GitRepositoryConfig local) {
+        this.local = local;
+    }
 
     public GitRepositoryConfig getRepositoryDetails(String cloneUrl) {
         GitRepositoryConfig answer = github.getRepositoryDetails(cloneUrl);

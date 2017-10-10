@@ -13,15 +13,13 @@
  * implied.  See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package io.fabric8.updatebot;
+package io.fabric8.updatebot.kind.maven;
+
+import de.pdark.decentxml.Element;
 
 /**
+ * Allows processing on a per dependency or plugin basis to add default configuration
  */
-public final class CommandNames {
-    public static final String HELP = "help";
-    public static final String PULL = "pull";
-    public static final String PUSH_VERSION = "push-version";
-    public static final String PUSH_SOURCE = "push";
-    public static final String UPDATE = "update";
-    public static final String ENABLE_F8 = "f8";
+public interface ElementProcessor {
+    void process(Element element, String separator);
 }

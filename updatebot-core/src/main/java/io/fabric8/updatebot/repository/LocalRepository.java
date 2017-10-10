@@ -15,12 +15,20 @@
  */
 package io.fabric8.updatebot.repository;
 
+import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.model.GitRepository;
+import io.fabric8.updatebot.model.GitRepositoryConfig;
+import io.fabric8.updatebot.model.RepositoryConfig;
+import io.fabric8.updatebot.model.RepositoryConfigs;
 import io.fabric8.updatebot.support.Strings;
+import io.fabric8.utils.Files;
 import io.fabric8.utils.Objects;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
+
+import static io.fabric8.updatebot.Configuration.DEFAULT_CONFIG_FILE;
 
 /**
  */
@@ -36,8 +44,19 @@ public class LocalRepository {
     /**
      * Returns a local repository from a directory.
      */
-    public static LocalRepository fromDirectory(File dir) {
-        return new LocalRepository(new GitRepository(dir.getName()), dir);
+    public static LocalRepository fromDirectory(Configuration configuration, File dir) throws IOException {
+        LocalRepository localRepository = new LocalRepository(new GitRepository(dir.getName()), dir);
+        File configFile = new File(dir, DEFAULT_CONFIG_FILE);
+        if (Files.isFile(configFile)) {
+            RepositoryConfig config = RepositoryConfigs.loadRepositoryConfig(configuration, DEFAULT_CONFIG_FILE, dir);
+            if (config != null) {
+                GitRepositoryConfig local = config.getLocal();
+                if (local != null) {
+                    localRepository.getRepo().setRepositoryDetails(local);
+                }
+            }
+        }
+        return localRepository;
     }
 
     /**
