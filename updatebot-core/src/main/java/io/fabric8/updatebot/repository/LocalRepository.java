@@ -77,6 +77,23 @@ public class LocalRepository {
     }
 
     /**
+     * Returns the repository for the given repo
+     */
+    public static LocalRepository findRepository(List<LocalRepository> localRepositories, GitRepository gitRepository) {
+        if (localRepositories != null) {
+            for (LocalRepository repository : localRepositories) {
+                GitRepository repo = repository.getRepo();
+                if (repo != null) {
+                    if (Objects.equal(repo.getCloneUrl(), gitRepository.getCloneUrl())) {
+                        return repository;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the link to the repository
      */
     public static String getRepositoryLink(LocalRepository repository) {

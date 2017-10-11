@@ -17,6 +17,7 @@ package io.fabric8.updatebot.model;
 
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.utils.Objects;
+import io.fabric8.utils.Strings;
 
 /**
  */
@@ -31,6 +32,12 @@ public class GitRepository extends DtoSupport {
 
     public GitRepository(String name) {
         this.name = name;
+    }
+
+    public GitRepository(String name, String cloneUrl) {
+        this.name = name;
+        this.cloneUrl = cloneUrl;
+        this.htmlUrl = Strings.stripSuffix(cloneUrl, ".git");
     }
 
     @Override

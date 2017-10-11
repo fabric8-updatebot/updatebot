@@ -30,4 +30,6 @@ public class EnvironmentVariables {
 
     public static final String MVN_COMMAND = "UPDATEBOT_MVN_COMMAND";
     public static final String NPM_COMMAND = "UPDATEBOT_NPM_COMMAND";
+
+    public static final String JENKINSFILE_GIT_REPO = "UPDATEBOT_JENKINSFILE_GIT_REPO";
 }

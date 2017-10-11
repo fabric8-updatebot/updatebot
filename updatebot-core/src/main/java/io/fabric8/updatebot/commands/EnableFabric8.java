@@ -27,6 +27,7 @@ import io.fabric8.updatebot.kind.maven.MavenScopes;
 import io.fabric8.updatebot.kind.maven.MavenUpdater;
 import io.fabric8.updatebot.model.DependencyVersionChange;
 import io.fabric8.updatebot.model.GitHubProjects;
+import io.fabric8.updatebot.model.GitRepository;
 import io.fabric8.updatebot.model.RepositoryConfig;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.repository.Repositories;
@@ -66,9 +67,6 @@ public class EnableFabric8 extends ModifyFilesCommandSupport {
 
     private String organisation;
     private String name;
-
-    private String jenkinsfileLibraryRepository = "fabric8-jenkinsfile-library";
-    private String jenkinsfileLibraryOrganisation = "fabric8io";
 
     private String[] defaultJenkinsfileNames = {"ReleaseStageApproveAndPromote", "ReleaseAndStage", "Release"};
 
@@ -125,7 +123,10 @@ public class EnableFabric8 extends ModifyFilesCommandSupport {
         RepositoryConfig config = new RepositoryConfig();
         GitHubProjects gitHubProjects = config.github();
         gitHubProjects.organisation(organisation).repository(name);
-        gitHubProjects.organisation(jenkinsfileLibraryOrganisation).repository(jenkinsfileLibraryRepository);
+        String jenkinsfileGitCloneURL = configuration.getJenksinsfileGitRepo();
+        GitRepository jenkinsfileGitRepo = new GitRepository("jenkinsfile library", jenkinsfileGitCloneURL);
+        config.add(jenkinsfileGitRepo);
+
         setRepositoryConfig(config);
 
         List<LocalRepository> localRepositories = Repositories.cloneOrPullRepositories(configuration, config);
@@ -134,9 +135,9 @@ public class EnableFabric8 extends ModifyFilesCommandSupport {
         if (localRepository == null) {
             throw new IOException("Could not find repository called " + name + " in " + localRepositories);
         }
-        LocalRepository jenkinsfileRepository = LocalRepository.findRepository(localRepositories, jenkinsfileLibraryRepository);
+        LocalRepository jenkinsfileRepository = LocalRepository.findRepository(localRepositories, jenkinsfileGitRepo);
         if (jenkinsfileRepository == null) {
-            throw new IOException("Could not find repository called " + jenkinsfileLibraryRepository + " in " + localRepositories);
+            throw new IOException("Could not find repository for " + jenkinsfileGitRepo + " in " + localRepositories);
         }
 
         EnableFabric8Context context = new EnableFabric8Context(localRepository, configuration, jenkinsfileRepository);
