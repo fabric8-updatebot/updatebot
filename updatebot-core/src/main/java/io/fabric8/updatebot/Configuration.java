@@ -49,6 +49,7 @@ import static org.fusesource.jansi.Ansi.ansi;
  */
 public class Configuration {
     public static final String DEFAULT_CONFIG_FILE = ".updatebot.yml";
+    public static final String DEFAULT_JENKINSFILE_LIBRARY_GIT_URL = "https://github.com/fabric8io/fabric8-jenkinsfile-library.git";
     // ANSI escapes for various colors (or empty strings if no coloring is used)
     public static Ansi.Color
             COLOR_ERROR = RED,
@@ -86,6 +87,8 @@ public class Configuration {
     private String mvnCommand = Systems.getConfigValue(EnvironmentVariables.MVN_COMMAND, "mvn");
     @Parameter(names = {"--npm"}, description = "The location of the `npm` executable for invoking nodejs tooling")
     private String npmCommand = Systems.getConfigValue(EnvironmentVariables.NPM_COMMAND, "npm");
+    @Parameter(names = {"--jenkinsfile-git-repo"}, description = "The git URL to clone for the Jenkinsfile library")
+    private String jenksinsfileGitRepo = Systems.getConfigValue(EnvironmentVariables.JENKINSFILE_GIT_REPO, DEFAULT_JENKINSFILE_LIBRARY_GIT_URL);
 
     private File sourceDir;
     private boolean rebaseMode = true;
@@ -320,10 +323,25 @@ public class Configuration {
         this.npmEnvironmentVariables = npmEnvironmentVariables;
     }
 
+    public String getJenksinsfileGitRepo() {
+        return jenksinsfileGitRepo;
+    }
+
+    public void setJenksinsfileGitRepo(String jenksinsfileGitRepo) {
+        this.jenksinsfileGitRepo = jenksinsfileGitRepo;
+    }
 
     public void info(Logger log, String message) {
         if (printStream != null) {
             printStream.println(message);
+        } else {
+            log.info(message);
+        }
+    }
+
+    public void logCommand(Logger log, String message) {
+        if (printStream != null) {
+            printStream.println(colored(COLOR_COMMAND, message));
         } else {
             log.info(message);
         }

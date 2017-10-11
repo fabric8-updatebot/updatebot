@@ -84,4 +84,10 @@ public class RepositoryConfig {
         return answer;
     }
 
+    public void add(GitRepository gitRepository) {
+        if (git == null) {
+            git = new ArrayList<>();
+        }
+        git.add(gitRepository);
+    }
 }
