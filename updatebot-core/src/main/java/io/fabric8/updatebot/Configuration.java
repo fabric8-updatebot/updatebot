@@ -339,6 +339,14 @@ public class Configuration {
         }
     }
 
+    public void logCommand(Logger log, String message) {
+        if (printStream != null) {
+            printStream.println(colored(COLOR_COMMAND, message));
+        } else {
+            log.info(message);
+        }
+    }
+
     public void warn(Logger log, String message) {
         if (printStream != null) {
             printStream.println(colored(COLOR_WARNING, "WARNING: " + message));

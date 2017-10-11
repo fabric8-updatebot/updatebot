@@ -183,7 +183,10 @@ public class UpdateBot {
         return command;
     }
 
-    public void setCommand(CommandSupport command) {
+    public void setCommand(CommandSupport command) throws IOException {
         this.command = command;
+        if (command != null) {
+            updatePullRequests.setLastCommand(command, configuration);
+        }
     }
 }

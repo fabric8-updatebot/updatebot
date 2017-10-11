@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -124,7 +125,7 @@ public class EnableFabric8 extends ModifyFilesCommandSupport {
         GitHubProjects gitHubProjects = config.github();
         gitHubProjects.organisation(organisation).repository(name);
         String jenkinsfileGitCloneURL = configuration.getJenksinsfileGitRepo();
-        GitRepository jenkinsfileGitRepo = new GitRepository("jenkinsfile library", jenkinsfileGitCloneURL);
+        GitRepository jenkinsfileGitRepo = new GitRepository("jenkinsfile-library", jenkinsfileGitCloneURL);
         config.add(jenkinsfileGitRepo);
 
         setRepositoryConfig(config);
@@ -139,6 +140,9 @@ public class EnableFabric8 extends ModifyFilesCommandSupport {
         if (jenkinsfileRepository == null) {
             throw new IOException("Could not find repository for " + jenkinsfileGitRepo + " in " + localRepositories);
         }
+
+        // lets record the local repos for the pull request polling
+        setLocalRepositories(Arrays.asList(localRepository));
 
         EnableFabric8Context context = new EnableFabric8Context(localRepository, configuration, jenkinsfileRepository);
         parentContext.addChild(context);

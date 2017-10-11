@@ -166,4 +166,8 @@ public class UpdatePullRequests extends CommandSupport {
         }
         return null;
     }
+
+    public void setLastCommand(CommandSupport command, Configuration configuration) throws IOException {
+        setLocalRepositories(command.getLocalRepositories(configuration));
+    }
 }

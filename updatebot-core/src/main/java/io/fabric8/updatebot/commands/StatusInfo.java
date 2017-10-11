@@ -64,6 +64,25 @@ public class StatusInfo {
         this.status = status;
     }
 
+    /**
+     * Returns true if there are any pending statuses in the map
+     */
+    public static boolean isPending(Map<String, StatusInfo> statusMap) {
+        return isPending(statusMap.values());
+    }
+
+    /**
+     * Returns true if there are any pending statuses in the map
+     */
+    public static boolean isPending(Iterable<StatusInfo> statuses) {
+        for (StatusInfo status : statuses) {
+            if (status.isPending()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     protected static boolean nullOrClosed(GHIssueState state) {
         return state == null || state.equals(GHIssueState.CLOSED);
     }
