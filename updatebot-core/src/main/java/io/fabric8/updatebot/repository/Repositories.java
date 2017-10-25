@@ -65,6 +65,7 @@ public class Repositories {
                     configuration.getGit().pull(dir, repository.getCloneUrl());
                 }
             }
+            configuration.getGit().configUserNameAndEmail(dir);
         } else {
             File parentDir = dir.getParentFile();
             parentDir.mkdirs();
