@@ -72,7 +72,10 @@ public class GitPluginCLI implements GitPlugin {
                 if (myself != null) {
                     email = myself.getEmail();
                     personName = myself.getName();
-
+                    if (Strings.empty(personName)) {
+                        configuration.warn(LOG, "No name available for GitHub login!");
+                        personName = myself.getLogin();
+                    }
                 }
             }
         } catch (IOException e) {
@@ -80,9 +83,13 @@ public class GitPluginCLI implements GitPlugin {
         }
         if (Strings.notEmpty(email)) {
             ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "config", "user.email", email);
+        } else {
+            configuration.error(LOG, "No email available for GitHub login!");
         }
         if (Strings.notEmpty(personName)) {
             ProcessHelper.runCommandAndLogOutput(configuration, LOG, dir, "git", "config", "user.name", personName);
+        } else {
+            configuration.error(LOG, "No name available for GitHub login!");
         }
     }
 
