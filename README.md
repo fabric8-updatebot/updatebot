@@ -132,7 +132,7 @@ We recommend `pushing` version changes eagerly in your CI / CD pipelines.
 
 However projects often depend on lots of dependencies that are released upstream by different teams. So to pull version changes from upstream releases you can use the pull command:
 
-    updatebot push -k npm 
+    updatebot pull -k npm 
 
 This will then update any dependencies in your projects.
 
