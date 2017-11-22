@@ -1,0 +1,7 @@
+environments:
+  - id: stage
+    name: Staging
+    github: jstrachan/test-env-stage
+  - id: prod
+    name: Production
+    github: jstrachan/test-env-prod

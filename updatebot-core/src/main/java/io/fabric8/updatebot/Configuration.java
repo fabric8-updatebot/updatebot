@@ -20,6 +20,8 @@ import io.fabric8.updatebot.git.GitPlugin;
 import io.fabric8.updatebot.git.GitPluginCLI;
 import io.fabric8.updatebot.kind.npm.DefaultNpmDependencyTreeGenerator;
 import io.fabric8.updatebot.kind.npm.NpmDependencyTreeGenerator;
+import io.fabric8.updatebot.model.RepositoryConfig;
+import io.fabric8.updatebot.model.RepositoryConfigs;
 import io.fabric8.updatebot.support.Strings;
 import io.fabric8.updatebot.support.Systems;
 import org.fusesource.jansi.Ansi;
@@ -410,4 +412,9 @@ public class Configuration {
         return ansi.a(message).reset().toString();
     }
 
+    public RepositoryConfig loadRepositoryConfig() throws IOException {
+        String configFile = getConfigFile();
+        File sourceDir = getSourceDir();
+        return RepositoryConfigs.loadRepositoryConfig(this, configFile, sourceDir);
+    }
 }

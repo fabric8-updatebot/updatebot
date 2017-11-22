@@ -32,15 +32,6 @@ def approveRelease(project){
 }
 
 def release(project){
-  releaseProject{
-    stagedProject = project
-    useGitTagForNextVersion = true
-    helmPush = false
-    groupId = 'io.fabric8.updatebot'
-    githubOrganisation = 'fabric8io'
-    artifactIdToWatchInCentral = 'updatebot'
-    artifactExtensionToWatchInCentral = 'pom'
-  }
 }
 
 def mergePullRequest(prId){

@@ -20,14 +20,12 @@ import com.beust.jcommander.Parameters;
 import io.fabric8.updatebot.Configuration;
 import io.fabric8.updatebot.github.Issues;
 import io.fabric8.updatebot.model.RepositoryConfig;
-import io.fabric8.updatebot.model.RepositoryConfigs;
 import io.fabric8.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.repository.Repositories;
 import io.fabric8.utils.Strings;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHRepository;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -141,12 +139,11 @@ public abstract class CommandSupport {
 
     public RepositoryConfig getRepositoryConfig(Configuration configuration) throws IOException {
         if (repositoryConfig == null) {
-            String configFile = configuration.getConfigFile();
-            File sourceDir = configuration.getSourceDir();
-            repositoryConfig = RepositoryConfigs.loadRepositoryConfig(configuration, configFile, sourceDir);
+            repositoryConfig = configuration.loadRepositoryConfig();
         }
         return repositoryConfig;
     }
+
 
     // Properties
     //-------------------------------------------------------------------------
