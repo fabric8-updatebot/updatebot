@@ -1,0 +1,6 @@
+github:
+  organisations:
+  - name: fabric8-updatebot
+    repositories:
+    - name: updatebot
+    - name: updatebot-plugin

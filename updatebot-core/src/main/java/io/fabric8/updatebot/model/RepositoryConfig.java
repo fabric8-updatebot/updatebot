@@ -26,6 +26,7 @@ public class RepositoryConfig {
     private GitHubProjects github;
     private List<GitRepository> git = new ArrayList<>();
     private GitRepositoryConfig local;
+    private List<Environment> environments = new ArrayList();
 
     @Override
     public String toString() {
@@ -67,6 +68,14 @@ public class RepositoryConfig {
 
     public void setLocal(GitRepositoryConfig local) {
         this.local = local;
+    }
+
+    public List<Environment> getEnvironments() {
+        return environments;
+    }
+
+    public void setEnvironments(List<Environment> environments) {
+        this.environments = environments;
     }
 
     public GitRepositoryConfig getRepositoryDetails(String cloneUrl) {

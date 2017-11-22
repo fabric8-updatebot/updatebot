@@ -54,7 +54,31 @@ public class HelmUpdater extends UpdaterSupport {
     @Override
     public boolean isApplicable(CommandContext context) {
         boolean answer = isFile(context.file(CHART_YAML));
+        if (!answer) {
+            return fileExistsInDir(context.getDir(), CHART_YAML);
+        }
         return answer;
+    }
+
+    protected boolean fileExistsInDir(File dir, String fileName) {
+        if (dir.isFile()) {
+            return dir.getName().equals(fileName);
+        } else if (dir.isDirectory()) {
+            if (isFile(new File(dir, fileName))) {
+                return true;
+            }
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (Files.isDirectory(file)) {
+                        if (fileExistsInDir(file, fileName)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**

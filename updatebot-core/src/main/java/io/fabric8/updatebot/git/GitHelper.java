@@ -63,13 +63,7 @@ public class GitHelper {
             if (Strings.notEmpty(userInfo)) {
                 return new GitRepositoryInfo(host, userInfo, path);
             } else {
-                if (Strings.notEmpty(path)) {
-                    String[] paths = path.split("/", 2);
-                    if (paths.length > 1) {
-                        return new GitRepositoryInfo(host, paths[0], paths[1]);
-                    }
-                }
-                return null;
+                return parseRepository(path, host);
             }
         } catch (URISyntaxException e) {
             // ignore
@@ -81,6 +75,26 @@ public class GitHelper {
             String[] paths = path.split(":|/", 3);
             if (paths.length == 3) {
                 return new GitRepositoryInfo(paths[0], paths[1], paths[2]);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the repository string split its organisation and name
+     */
+    public static GitRepositoryInfo parseRepository(String orgAndRepoName) {
+        return parseRepository(orgAndRepoName, null);
+    }
+
+    /**
+     * Returns the repository string split its organisation and name
+     */
+    public static GitRepositoryInfo parseRepository(String orgAndRepoName, String host) {
+        if (Strings.notEmpty(orgAndRepoName)) {
+            String[] paths = orgAndRepoName.split("/", 2);
+            if (paths.length > 1) {
+                return new GitRepositoryInfo(host, paths[0], paths[1]);
             }
         }
         return null;

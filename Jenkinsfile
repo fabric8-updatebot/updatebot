@@ -28,18 +28,39 @@ clientsTemplate{
         }
       } else if (utils.isCD()){
         echo 'Running CD pipeline'
-        sh "git remote set-url origin git@github.com:fabric8io/updatebot.git"
+        sh "git remote set-url origin git@github.com:fabric8-updatebot/updatebot.git"
 
-        def pipeline = load 'release.groovy'
+        stage('Stage') {
+          stageProject {
+            project = 'fabric8-updatebot/updatebot'
+            useGitTagForNextVersion = true
+          }
+        }
 
-        stage 'Stage'
-        def stagedProject = pipeline.stage()
+        stage('Promote') {
+          releaseProject {
+            stagedProject = project
+            useGitTagForNextVersion = true
+            helmPush = false
+            groupId = 'io.fabric8.updatebot'
+            githubOrganisation = 'fabric8-updatebot'
+            artifactIdToWatchInCentral = 'updatebot'
+            artifactExtensionToWatchInCentral = 'pom'
+          }
+        }
 
-        stage 'Promote'
-        pipeline.release(stagedProject)
+        stage('UpdateBot') {
 
-        stage 'Update downstream dependencies'
-        pipeline.updateDownstreamDependencies(stagedProject)
+
+/*
+  pushDockerfileEnvVarChangePR {
+    propertyName = 'UPDATEBOT_VERSION'
+    project = 'fabric8io-images/maven-builder'
+    version = stagedProject[1]
+    containerName = 'maven'
+  }
+ */
+        }
       }
     }
   }
