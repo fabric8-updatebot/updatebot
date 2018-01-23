@@ -130,6 +130,13 @@ public class MarkupHelper {
         return OBJECT_MAPPER.readTree(file);
     }
 
+    /**
+     * Loads the JSON
+     */
+    public static <T> T loadJson(URL src, Class<T> clazz) throws IOException {
+        return OBJECT_MAPPER.readValue(src, clazz);
+    }
+
     public static void savePrettyJson(File file, Object value) throws IOException {
         // lets use the node layout
         NpmJsonPrettyPrinter printer = new NpmJsonPrettyPrinter();
