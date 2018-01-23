@@ -84,9 +84,7 @@ public class BrewUpdater extends UpdaterSupport {
 
 
     private boolean doPushVersionChange(PushVersionChangesContext context, String name, String value) throws IOException {
-        Pattern re = Pattern.compile("\\s*version\\s+\"([^\"]+)\"");
         boolean answer = false;
-
         File dir = context.file("Formula");
         File rb = new File(dir, name + ".rb");
 
@@ -100,28 +98,6 @@ public class BrewUpdater extends UpdaterSupport {
             if (answer) {
                 IOHelpers.writeFully(rb, updatedText);
             }
-/*
-            List<String> lines = IOHelpers.readLines(rb);
-            for (int i = 0, size = lines.size(); i < size; i++) {
-                String line = lines.get(i);
-                Matcher m = re.matcher(line);
-                if (m.matches()) {
-                    String old = m.group(1);
-                    StringBuffer buffer = new StringBuffer();
-                    m.appendReplacement(buffer, value);
-                    String updatedText = buffer.toString();
-                    if (!Objects.equal(line, updatedText)) {
-                        lines.set(i, updatedText);
-                        context.updatedVersion(name, name, value, old);
-                        answer = true;
-                    }
-                    break;
-                }
-            }
-            if (answer) {
-                IOHelpers.writeLines(rb, lines);
-            }
-*/
         }
         return answer;
     }
