@@ -15,6 +15,7 @@
  */
 package io.fabric8.updatebot.kind;
 
+import io.fabric8.updatebot.kind.brew.BrewUpdater;
 import io.fabric8.updatebot.kind.file.FileUpdater;
 import io.fabric8.updatebot.kind.helm.HelmUpdater;
 import io.fabric8.updatebot.kind.maven.MavenUpdater;
@@ -28,7 +29,8 @@ public enum Kind {
     HELM("helm", new HelmUpdater()),
     MAVEN("maven", new MavenUpdater()),
     NPM("npm", new PackageJsonUpdater()),
-    PLUGINS("plugins", new PluginsUpdater());
+    PLUGINS("plugins", new PluginsUpdater()),
+    BREW("brew", new BrewUpdater());
 
     private String name;
     private Updater updater;

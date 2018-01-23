@@ -92,8 +92,8 @@ public class PushVersionChanges extends ModifyFilesCommandSupport {
         for (int i = 0; i + 1 < values.size(); i += 2) {
             String propertyName = values.get(i);
             String version = values.get(i + 1);
-
-            DependencyVersionChange step = new DependencyVersionChange(Kind.NPM, propertyName, version);
+            Kind kind = getKind();
+            DependencyVersionChange step = new DependencyVersionChange(kind, propertyName, version);
             if (pushVersionsWithChecks(context, Arrays.asList(step))) {
                 answer = true;
             }
