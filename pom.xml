@@ -115,7 +115,7 @@
     </snapshotRepository>
   </distributionManagement>
 
-  <repositories>
+<!--  <repositories>
     <repository>
       <id>oss-sonatype-snapshots</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
@@ -144,7 +144,7 @@
         <enabled>true</enabled>
       </snapshots>
     </pluginRepository>
-  </pluginRepositories>
+  </pluginRepositories>-->
 
   <dependencyManagement>
     <dependencies>
