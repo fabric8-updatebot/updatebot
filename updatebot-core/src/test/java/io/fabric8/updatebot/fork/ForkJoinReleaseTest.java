@@ -16,13 +16,13 @@
 package io.fabric8.updatebot.fork;
 
 
-import io.fabric8.updatebot.Configuration;
-import io.fabric8.updatebot.commands.PushSourceChanges;
-import io.fabric8.updatebot.github.GitHubHelpers;
-import io.fabric8.updatebot.github.Issues;
-import io.fabric8.updatebot.github.PullRequests;
-import io.fabric8.updatebot.repository.LocalRepository;
-import io.fabric8.updatebot.support.FileHelper;
+import io.jenkins.updatebot.Configuration;
+import io.jenkins.updatebot.commands.PushSourceChanges;
+import io.jenkins.updatebot.github.GitHubHelpers;
+import io.jenkins.updatebot.github.Issues;
+import io.jenkins.updatebot.github.PullRequests;
+import io.jenkins.updatebot.repository.LocalRepository;
+import io.jenkins.updatebot.support.FileHelper;
 import io.fabric8.updatebot.test.GithubAssertions;
 import io.fabric8.updatebot.test.NpmTests;
 import io.fabric8.updatebot.test.Tests;

@@ -16,11 +16,12 @@
 package io.fabric8.updatebot;
 
 
-import io.fabric8.updatebot.commands.PullVersionChanges;
-import io.fabric8.updatebot.github.GitHubHelpers;
-import io.fabric8.updatebot.model.GitRepositoryConfig;
-import io.fabric8.updatebot.model.RepositoryConfigs;
-import io.fabric8.updatebot.repository.LocalRepository;
+import io.jenkins.updatebot.Configuration;
+import io.jenkins.updatebot.commands.PullVersionChanges;
+import io.jenkins.updatebot.github.GitHubHelpers;
+import io.jenkins.updatebot.model.GitRepositoryConfig;
+import io.jenkins.updatebot.model.RepositoryConfigs;
+import io.jenkins.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
 import org.junit.Test;

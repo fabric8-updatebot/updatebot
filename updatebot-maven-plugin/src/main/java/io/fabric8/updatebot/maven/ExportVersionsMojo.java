@@ -15,19 +15,19 @@
  */
 package io.fabric8.updatebot.maven;
 
-import io.fabric8.updatebot.Configuration;
-import io.fabric8.updatebot.kind.maven.MavenScopes;
+import io.jenkins.updatebot.Configuration;
+import io.jenkins.updatebot.kind.maven.MavenScopes;
 import io.fabric8.updatebot.maven.support.MavenHelper;
-import io.fabric8.updatebot.model.Dependencies;
-import io.fabric8.updatebot.model.GitRepositoryConfig;
-import io.fabric8.updatebot.model.MavenArtifactKey;
-import io.fabric8.updatebot.model.MavenArtifactVersionChange;
-import io.fabric8.updatebot.model.MavenArtifactVersionChanges;
-import io.fabric8.updatebot.model.MavenDependencies;
-import io.fabric8.updatebot.model.MavenDependencyFilter;
-import io.fabric8.updatebot.model.RepositoryConfig;
-import io.fabric8.updatebot.model.RepositoryConfigs;
-import io.fabric8.updatebot.support.MarkupHelper;
+import io.jenkins.updatebot.model.Dependencies;
+import io.jenkins.updatebot.model.GitRepositoryConfig;
+import io.jenkins.updatebot.model.MavenArtifactKey;
+import io.jenkins.updatebot.model.MavenArtifactVersionChange;
+import io.jenkins.updatebot.model.MavenArtifactVersionChanges;
+import io.jenkins.updatebot.model.MavenDependencies;
+import io.jenkins.updatebot.model.MavenDependencyFilter;
+import io.jenkins.updatebot.model.RepositoryConfig;
+import io.jenkins.updatebot.model.RepositoryConfigs;
+import io.jenkins.updatebot.support.MarkupHelper;
 import io.fabric8.utils.Filter;
 import io.fabric8.utils.Filters;
 import org.apache.maven.model.Dependency;

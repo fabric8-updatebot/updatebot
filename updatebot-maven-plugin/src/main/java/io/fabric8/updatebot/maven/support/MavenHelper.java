@@ -15,7 +15,7 @@
  */
 package io.fabric8.updatebot.maven.support;
 
-import io.fabric8.updatebot.model.MavenArtifactKey;
+import io.jenkins.updatebot.model.MavenArtifactKey;
 import org.apache.maven.model.Dependency;
 
 /**

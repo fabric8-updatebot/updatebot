@@ -15,13 +15,13 @@
  */
 package io.fabric8.updatebot.test;
 
-import io.fabric8.updatebot.Configuration;
-import io.fabric8.updatebot.model.GitHubProjects;
-import io.fabric8.updatebot.model.GitRepositoryConfig;
-import io.fabric8.updatebot.model.GithubOrganisation;
-import io.fabric8.updatebot.model.RepositoryConfig;
-import io.fabric8.updatebot.support.MarkupHelper;
-import io.fabric8.updatebot.support.Strings;
+import io.jenkins.updatebot.Configuration;
+import io.jenkins.updatebot.model.GitHubProjects;
+import io.jenkins.updatebot.model.GitRepositoryConfig;
+import io.jenkins.updatebot.model.GithubOrganisation;
+import io.jenkins.updatebot.model.RepositoryConfig;
+import io.jenkins.updatebot.support.MarkupHelper;
+import io.jenkins.updatebot.support.Strings;
 import io.fabric8.utils.Files;
 import org.assertj.core.api.Assertions;
 import org.slf4j.Logger;

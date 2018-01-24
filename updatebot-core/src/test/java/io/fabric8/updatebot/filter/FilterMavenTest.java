@@ -15,12 +15,12 @@
  */
 package io.fabric8.updatebot.filter;
 
-import io.fabric8.updatebot.model.Dependencies;
-import io.fabric8.updatebot.model.GitRepositoryConfig;
-import io.fabric8.updatebot.model.MavenArtifactKey;
-import io.fabric8.updatebot.model.MavenDependencies;
-import io.fabric8.updatebot.model.MavenDependencyFilter;
-import io.fabric8.updatebot.model.RepositoryConfig;
+import io.jenkins.updatebot.model.Dependencies;
+import io.jenkins.updatebot.model.GitRepositoryConfig;
+import io.jenkins.updatebot.model.MavenArtifactKey;
+import io.jenkins.updatebot.model.MavenDependencies;
+import io.jenkins.updatebot.model.MavenDependencyFilter;
+import io.jenkins.updatebot.model.RepositoryConfig;
 import io.fabric8.updatebot.test.Tests;
 import io.fabric8.utils.Filter;
 import org.junit.Test;

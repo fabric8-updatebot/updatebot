@@ -15,13 +15,13 @@
  */
 package io.fabric8.updatebot.comments;
 
-import io.fabric8.updatebot.github.Issues;
-import io.fabric8.updatebot.kind.DependenciesCheck;
-import io.fabric8.updatebot.kind.Kind;
-import io.fabric8.updatebot.kind.KindDependenciesCheck;
-import io.fabric8.updatebot.kind.npm.dependency.DependencyCheck;
-import io.fabric8.updatebot.kind.npm.dependency.DependencyInfo;
-import io.fabric8.updatebot.model.DependencyVersionChange;
+import io.jenkins.updatebot.github.Issues;
+import io.jenkins.updatebot.kind.DependenciesCheck;
+import io.jenkins.updatebot.kind.Kind;
+import io.jenkins.updatebot.kind.KindDependenciesCheck;
+import io.jenkins.updatebot.kind.npm.dependency.DependencyCheck;
+import io.jenkins.updatebot.kind.npm.dependency.DependencyInfo;
+import io.jenkins.updatebot.model.DependencyVersionChange;
 import org.junit.Test;
 
 import java.util.ArrayList;
