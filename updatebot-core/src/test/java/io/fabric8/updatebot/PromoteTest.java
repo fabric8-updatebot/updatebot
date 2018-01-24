@@ -16,8 +16,9 @@
 package io.fabric8.updatebot;
 
 
-import io.fabric8.updatebot.commands.Promote;
-import io.fabric8.updatebot.repository.LocalRepository;
+import io.jenkins.updatebot.Configuration;
+import io.jenkins.updatebot.commands.Promote;
+import io.jenkins.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
 import org.junit.Test;

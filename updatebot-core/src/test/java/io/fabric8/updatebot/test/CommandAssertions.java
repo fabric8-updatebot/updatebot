@@ -15,12 +15,12 @@
  */
 package io.fabric8.updatebot.test;
 
-import io.fabric8.updatebot.Configuration;
-import io.fabric8.updatebot.UpdateBot;
-import io.fabric8.updatebot.commands.CommandSupport;
-import io.fabric8.updatebot.commands.CompositeCommand;
-import io.fabric8.updatebot.commands.PushVersionChanges;
-import io.fabric8.updatebot.kind.Kind;
+import io.jenkins.updatebot.Configuration;
+import io.jenkins.updatebot.UpdateBot;
+import io.jenkins.updatebot.commands.CommandSupport;
+import io.jenkins.updatebot.commands.CompositeCommand;
+import io.jenkins.updatebot.commands.PushVersionChanges;
+import io.jenkins.updatebot.kind.Kind;
 
 import java.util.Arrays;
 import java.util.List;
