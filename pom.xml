@@ -115,7 +115,7 @@
     </snapshotRepository>
   </distributionManagement>
 
-<!--  <repositories>
+  <repositories>
     <repository>
       <id>oss-sonatype-snapshots</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
@@ -131,8 +131,16 @@
       <id>jenkins</id>
       <url>http://repo.jenkins-ci.org/releases/</url>
     </repository>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
   </repositories>
   <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
     <pluginRepository>
       <id>oss-sonatype-snapshots</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
@@ -144,7 +152,7 @@
         <enabled>true</enabled>
       </snapshots>
     </pluginRepository>
-  </pluginRepositories>-->
+  </pluginRepositories>
 
   <dependencyManagement>
     <dependencies>
