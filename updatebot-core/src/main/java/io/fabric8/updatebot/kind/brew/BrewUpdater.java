@@ -17,8 +17,6 @@ package io.fabric8.updatebot.kind.brew;
 
 import io.fabric8.updatebot.commands.CommandContext;
 import io.fabric8.updatebot.commands.PushVersionChangesContext;
-import io.fabric8.updatebot.kind.KindDependenciesCheck;
-import io.fabric8.updatebot.kind.Updater;
 import io.fabric8.updatebot.kind.UpdaterSupport;
 import io.fabric8.updatebot.model.Dependencies;
 import io.fabric8.updatebot.model.DependencyVersionChange;
@@ -31,7 +29,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -96,6 +96,30 @@ public class BrewUpdater extends UpdaterSupport {
                 answer = true;
             }
             if (answer) {
+                Pattern re = Pattern.compile("\\s+url\\s+\"([^\"]+)\"");
+                String[] lines = text.split("\n");
+                boolean found = false;
+                for (String line : lines) {
+                    Matcher matcher = re.matcher(line);
+                    if (matcher.matches()) {
+                        found = true;
+                        String url = matcher.group(1);
+                        if (url != null) {
+                            url = url.replace("#{version}", value) + ".sha256";
+                            LOG.info("Loading the sha256 from " + url);
+                            try {
+                                String sha256 = IOHelpers.loadFully(new URL(url)).trim();
+                                // lets try replace the sha
+                                updatedText = updatedText.replaceAll("sha256\\s+\"([^\"]+)\"", "sha256 \"" + sha256 + "\"");
+                            } catch (IOException e) {
+                                LOG.warn("Failed to load the sha256 from URL " + url + ". " + e, e);
+                            }
+                        }
+                    }
+                }
+                if (!found) {
+                    LOG.warn("Could not find the url in the formula to update the sha256");
+                }
                 IOHelpers.writeFully(rb, updatedText);
             }
         }

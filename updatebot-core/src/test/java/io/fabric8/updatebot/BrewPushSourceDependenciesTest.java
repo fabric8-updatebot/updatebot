@@ -45,7 +45,7 @@ public class BrewPushSourceDependenciesTest {
 
     @Before
     public void init() throws IOException {
-        command = new PushVersionChanges(Kind.BREW, "jx", "1.9.20");
+        command = new PushVersionChanges(Kind.BREW, "jx", "1.0.13");
 
         String configFile = new File(Tests.getBasedir(), "src/test/resources/brew/source/updatebot.yml").getPath();
         String workDirPath = Tests.getCleanWorkDir(getClass());
