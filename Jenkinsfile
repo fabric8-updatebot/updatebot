@@ -17,14 +17,12 @@ pipeline {
         }
       }
     }
-  }
 
-  stage('Build and Push Release') {
-    when {
-      branch 'master'
-    }
-    steps {
-      dir('/home/jenkins/jenkins-x-platform') {
+    stage('Build and Push Release') {
+      when {
+        branch 'master'
+      }
+      steps {
         checkout scm
         container('maven') {
           // until kubernetes plugin supports init containers https://github.com/jenkinsci/kubernetes-plugin/pull/229/
