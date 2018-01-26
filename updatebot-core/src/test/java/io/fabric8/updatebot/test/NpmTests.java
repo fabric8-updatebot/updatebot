@@ -17,12 +17,12 @@ package io.fabric8.updatebot.test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.fabric8.updatebot.Configuration;
-import io.fabric8.updatebot.model.GitRepository;
-import io.fabric8.updatebot.model.GithubRepository;
-import io.fabric8.updatebot.repository.LocalRepository;
-import io.fabric8.updatebot.support.MarkupHelper;
-import io.fabric8.updatebot.support.ProcessHelper;
+import io.jenkins.updatebot.Configuration;
+import io.jenkins.updatebot.model.GitRepository;
+import io.jenkins.updatebot.model.GithubRepository;
+import io.jenkins.updatebot.repository.LocalRepository;
+import io.jenkins.updatebot.support.MarkupHelper;
+import io.jenkins.updatebot.support.ProcessHelper;
 import io.fabric8.utils.Files;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

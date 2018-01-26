@@ -15,7 +15,7 @@
  */
 package io.fabric8.updatebot.filter;
 
-import io.fabric8.updatebot.model.GithubOrganisation;
+import io.jenkins.updatebot.model.GithubOrganisation;
 import io.fabric8.utils.Filter;
 import org.junit.Test;
 

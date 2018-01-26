@@ -25,14 +25,14 @@
     <version>9</version>
   </parent>
 
-  <groupId>io.fabric8.updatebot</groupId>
+  <groupId>io.jenkins.updatebot</groupId>
   <artifactId>parent</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>updatebot</name>
 
-  <url>https://updatebot.fabric8.io/</url>
-  <inceptionYear>2076</inceptionYear>
+  <url>https://updatebot.jenkins.io/</url>
+  <inceptionYear>2017</inceptionYear>
 
   <organization>
     <name>Red Hat</name>
@@ -55,17 +55,17 @@
   <developers>
     <developer>
       <id>geeks</id>
-      <name>Fabric8 Development Team</name>
-      <email>fabric8@googlegroups.com</email>
-      <organization>fabric8</organization>
-      <organizationUrl>http://fabric8.io/</organizationUrl>
+      <name>UpdateBot Development Team</name>
+      <email>updatebot@googlegroups.com</email>
+      <organization>jenkins</organization>
+      <organizationUrl>http://jenkins.io/</organizationUrl>
     </developer>
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:updatebot/updatebot.git</connection>
-    <developerConnection>scm:git:git@github.com:updatebot/updatebot.git</developerConnection>
-    <url>http://github.com/updatebot/updatebot</url>
+    <connection>scm:git:git@github.com:jenkins-x/updatebot.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkins-x/updatebot.git</developerConnection>
+    <url>http://github.com/jenkins-x/updatebot</url>
     <tag>updatebot-1.0.1</tag>
   </scm>
 
@@ -131,8 +131,16 @@
       <id>jenkins</id>
       <url>http://repo.jenkins-ci.org/releases/</url>
     </repository>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
   </repositories>
   <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
     <pluginRepository>
       <id>oss-sonatype-snapshots</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>

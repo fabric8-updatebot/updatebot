@@ -15,9 +15,9 @@
  */
 package io.fabric8.updatebot.test;
 
-import io.fabric8.updatebot.github.GitHubHelpers;
-import io.fabric8.updatebot.github.Issues;
-import io.fabric8.updatebot.github.PullRequests;
+import io.jenkins.updatebot.github.GitHubHelpers;
+import io.jenkins.updatebot.github.Issues;
+import io.jenkins.updatebot.github.PullRequests;
 import org.kohsuke.github.GHIssue;
 import org.kohsuke.github.GHPullRequest;
 import org.kohsuke.github.GHRepository;

@@ -15,11 +15,12 @@
  */
 package io.fabric8.updatebot;
 
-import io.fabric8.updatebot.commands.PushVersionChanges;
+import io.jenkins.updatebot.CommandNames;
+import io.jenkins.updatebot.commands.PushVersionChanges;
 import io.fabric8.updatebot.test.CommandAssertions;
 import org.junit.Test;
 
-import static io.fabric8.updatebot.kind.Kind.NPM;
+import static io.jenkins.updatebot.kind.Kind.NPM;
 import static io.fabric8.updatebot.test.CommandAssertions.assertParseCommand;
 
 /**

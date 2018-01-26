@@ -15,13 +15,13 @@
  */
 package io.fabric8.updatebot.comments;
 
-import io.fabric8.updatebot.Configuration;
-import io.fabric8.updatebot.commands.CommandContext;
-import io.fabric8.updatebot.commands.CommandSupport;
-import io.fabric8.updatebot.commands.CompositeCommand;
-import io.fabric8.updatebot.commands.PushVersionChanges;
-import io.fabric8.updatebot.commands.UpdatePullRequests;
-import io.fabric8.updatebot.repository.LocalRepository;
+import io.jenkins.updatebot.Configuration;
+import io.jenkins.updatebot.commands.CommandContext;
+import io.jenkins.updatebot.commands.CommandSupport;
+import io.jenkins.updatebot.commands.CompositeCommand;
+import io.jenkins.updatebot.commands.PushVersionChanges;
+import io.jenkins.updatebot.commands.UpdatePullRequests;
+import io.jenkins.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.test.CommandAssertions;
 import io.fabric8.updatebot.test.Tests;
 import io.fabric8.utils.Strings;
@@ -30,11 +30,11 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static io.fabric8.updatebot.CommandNames.PUSH_VERSION;
-import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_INDENT;
-import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_PREFIX;
-import static io.fabric8.updatebot.github.PullRequests.COMMAND_COMMENT_PREFIX_SEPARATOR;
-import static io.fabric8.updatebot.kind.Kind.NPM;
+import static io.jenkins.updatebot.CommandNames.PUSH_VERSION;
+import static io.jenkins.updatebot.github.PullRequests.COMMAND_COMMENT_INDENT;
+import static io.jenkins.updatebot.github.PullRequests.COMMAND_COMMENT_PREFIX;
+import static io.jenkins.updatebot.github.PullRequests.COMMAND_COMMENT_PREFIX_SEPARATOR;
+import static io.jenkins.updatebot.kind.Kind.NPM;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**

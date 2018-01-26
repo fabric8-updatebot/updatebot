@@ -16,9 +16,10 @@
 package io.fabric8.updatebot;
 
 
-import io.fabric8.updatebot.commands.EnableFabric8;
-import io.fabric8.updatebot.github.GitHubHelpers;
-import io.fabric8.updatebot.repository.LocalRepository;
+import io.jenkins.updatebot.Configuration;
+import io.jenkins.updatebot.commands.EnableFabric8;
+import io.jenkins.updatebot.github.GitHubHelpers;
+import io.jenkins.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.test.Tests;
 import org.junit.Before;
 import org.junit.Test;

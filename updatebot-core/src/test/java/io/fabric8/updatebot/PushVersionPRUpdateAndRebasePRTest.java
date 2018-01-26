@@ -16,12 +16,13 @@
 package io.fabric8.updatebot;
 
 
-import io.fabric8.updatebot.commands.ParentContext;
-import io.fabric8.updatebot.commands.PushVersionChanges;
-import io.fabric8.updatebot.commands.UpdatePullRequests;
-import io.fabric8.updatebot.github.GitHubHelpers;
-import io.fabric8.updatebot.kind.Kind;
-import io.fabric8.updatebot.repository.LocalRepository;
+import io.jenkins.updatebot.Configuration;
+import io.jenkins.updatebot.commands.ParentContext;
+import io.jenkins.updatebot.commands.PushVersionChanges;
+import io.jenkins.updatebot.commands.UpdatePullRequests;
+import io.jenkins.updatebot.github.GitHubHelpers;
+import io.jenkins.updatebot.kind.Kind;
+import io.jenkins.updatebot.repository.LocalRepository;
 import io.fabric8.updatebot.test.GithubAssertions;
 import io.fabric8.updatebot.test.NpmTests;
 import io.fabric8.updatebot.test.Tests;
