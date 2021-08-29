@@ -8,7 +8,7 @@ A bot for updating dependencies on your projects automatically!
 
 ### Configuration
 
-UpdateBot takes a simple YAML file to define which git repositories and github organisations so search for repositories to update.
+UpdateBot takes a simple YAML file to define which git repositories and github organisations to search for repositories to update.
 
 See [an example UpdateBot YAML file](updatebot-core/src/test/resources/maven/updatebot.yml)
 
